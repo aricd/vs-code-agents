@@ -1,6 +1,6 @@
 # Flowbaby Memory Contract - Concrete Example
 
-This document provides a concrete example of how to add Flowbaby memory to your custom agents. All of the agents in this repo already use this feature, but this document specifically calls out this one aspect of the agent.md files for reference.
+This document provides a concrete example of how to add Flowbaby memory to your custom agents. All of the agents in this repo already use this feature, but this document specifically calls out this one aspect of the agent.md files for reference. You dont need to add it to these agents, but you may want to add it to your own, or modify it. 
 
 You can copy/paste the markdown block below directly into any custom agent file in VS Code. You will need to install the Flowbaby memory extension from the VS Code extension marketplace for your agent to make use of these instructions.
 

@@ -30,9 +30,10 @@ This repository provides **specialized AI agents** that each own a specific part
 | **DevOps** | Packaging and releases |
 | **Retrospective** | Lessons learned |
 | **ProcessImprovement** | Workflow evolution |
-| **Memory** | Cross-session context |
 
 Each agent has **clear constraints** (Planner can't write code, Implementer can't redesign) and produces **structured documents** that create an audit trail.
+
+You don't have to use them all. You don't have to use them in order. You can use some more than others. But, they are designed to know their role and the role of the other agents in this repo. 
 
 ## Quick Start
 
@@ -44,7 +45,7 @@ git clone https://github.com/yourusername/agents.git
 
 ### 2. Add to Your Project
 
-Copy agents to your workspace:
+Copy agents to your workspace (per-repo, recommended):
 ```text
 your-project/
 └── .github/
@@ -52,6 +53,21 @@ your-project/
         ├── planner.agent.md
         ├── implementer.agent.md
         └── ... (others you need)
+```
+
+Or install them at the **user level** so they are available across all VS Code workspaces (paths vary by OS):
+
+- **Linux**: `~/.config/github-copilot/agents/`
+- **macOS**: `~/Library/Application Support/github-copilot/agents/`
+- **Windows**: `%APPDATA%/github-copilot/agents/`
+
+Place your `.agent.md` files directly in that directory, for example on Linux:
+
+```text
+~/.config/github-copilot/agents/
+├── planner.agent.md
+├── implementer.agent.md
+└── ... (others you need)
 ```
 
 ### 3. Use in Copilot Chat
@@ -97,14 +113,14 @@ Roadmap → Planner → Analyst/Architect/Security/Critic → Implementer → QA
 ```
 
 1. **Roadmap** defines what to build and why
-2. **Planner** creates a structured plan
+2. **Planner** creates a structured plan at the feature level or smaller
 3. **Analyst** researches unknowns
-4. **Architect** ensures design fit
-5. **Security** audits for vulnerabilities
+4. **Architect** ensures design fit. Enforces best practices.
+5. **Security** audits for vulnerabilities. Recommends best practices.
 6. **Critic** reviews plan quality
 7. **Implementer** writes code
-8. **QA** verifies tests
-9. **UAT** confirms business value
+8. **QA** verifies tests. Ensures robust test coverage
+9. **UAT** confirms business value was delivered
 10. **DevOps** releases (with user approval)
 
 ---
@@ -120,7 +136,7 @@ Agents produce Markdown documents in `agent-output/`. Every decision is recorded
 ### 🔒 Quality Gates
 Critic reviews plans. Security audits code. QA verifies tests. Nothing ships without checks.
 
-### 🧠 Long-Term Memory
+### 🧠 Robust Memory
 With [Flowbaby](https://github.com/groupzer0/flowbaby), agents remember decisions across sessions.
 
 ### 🔄 Handoffs
@@ -178,7 +194,6 @@ agents/
     ├── critic.agent.md
     ├── devops.agent.md
     ├── implementer.agent.md
-    ├── memory.agent.md
     ├── pi.agent.md              # ProcessImprovement
     ├── planner.agent.md
     ├── qa.agent.md
@@ -186,7 +201,8 @@ agents/
     ├── roadmap.agent.md
     ├── security.agent.md
     ├── uat.agent.md
-    └── memory-contract-example.md
+    └── reference/
+        └── memory-contract-example.md
 ```
 
 ---
@@ -210,7 +226,7 @@ Most developers don't know how to conduct thorough security reviews. They miss:
 - Supply chain risks (abandoned packages, dependency confusion)
 - Compliance gaps (missing security headers, weak TLS)
 
-The Security Agent systematically checks all of these, producing actionable findings with severity ratings and remediation guidance.
+The Security Agent systematically checks all of these, producing actionable findings with severity ratings and remediation guidance.You can then hand this off to the Planner agent and the Implementer to address. 
 
 See [security.agent.md](vs-code-agents/security.agent.md) for the full specification.
 
@@ -234,6 +250,16 @@ Edit `.agent.md` files to adjust:
 4. Add to `.github/agents/` in your workspace
 
 ---
+
+## Recent Updates
+
+The last few commits introduced several improvements to how these agents integrate with VS Code and Flowbaby:
+
+- **Refined Flowbaby memory contract (88ae9ccd, 2025-12-16)**: All core agents now embed a unified Flowbaby memory contract and share a concrete example in [vs-code-agents/reference/memory-contract-example.md](vs-code-agents/reference/memory-contract-example.md), making memory usage mandatory and consistent.
+- **Aligned agent tool names with VS Code APIs (c47c1e2, 2025-12-16)**: Agent `tools` definitions now use the official VS Code agent tool identifiers (for example, `read/readFile`, `edit/editFiles`, `execute/runInTerminal`), improving reliability when running as VS Code agents.
+- **Added subagent usage patterns (d5be1cc, 2025-12-15)**: Planner, Implementer, QA, Analyst, and Security now document how to invoke each other as scoped subagents in VS Code 1.107, while preserving clear ownership of planning, implementation, QA, and security responsibilities.
+- **Background Implementer mode (5958e05, 2025-12-15)**: Planner and Implementer now explain that implementation can run either as a local chat session or as a background agent (for example, in a separate Git worktree), with the human user always choosing the mode.
+- **Repository cleanup and unified memory (dde6211, 2025-12-15)**: Removed the legacy `memory.agent.md` in favor of the shared memory contract embedded in each agent and cleaned up an unused Markdown lint configuration file.
 
 ## Contributing
 

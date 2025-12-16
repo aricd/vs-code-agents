@@ -15,6 +15,7 @@
 5. [Agent Deep Dives](#agent-deep-dives)
 6. [Customization Guide](#customization-guide)
 7. [Troubleshooting & FAQ](#troubleshooting--faq)
+8. [Agent Orchestration Playbook](#agent-orchestration-playbook)
 
 ---
 
@@ -62,6 +63,7 @@ agent-output/
 ```
 
 **Why documents?**
+
 - **Auditability**: See what was decided and why
 - **Handoff context**: Next agent reads the artifacts
 - **Memory anchors**: Flowbaby stores references to documents
@@ -748,6 +750,196 @@ Improvements to agents are welcome! Key areas:
 - **Memory patterns**: Better retrieval/storage strategies
 
 See individual agent files for their specific improvement opportunities.
+
+---
+
+## Agent Orchestration Playbook
+
+> This section documents when and how to use local, background, and subagent execution patterns for custom agents in VS Code 1.107+.
+
+### Execution Modes Overview
+
+| Mode | When to Use | Key Characteristics |
+|------|-------------|---------------------|
+| **Local Interactive** | Planning, strategy, review, handoffs | User in the loop, real-time collaboration |
+| **Background Agent** | Long-running implementation, parallel tasks | Git worktree isolation, hands-off execution |
+| **Subagent** | Focused subtask delegation | Context-isolated, returns findings to caller |
+
+### Phase 1: Local Interactive (Strategy & Planning)
+
+**Agents**: Roadmap, Architect, Planner, Analyst, Critic, Security (threat modeling)
+
+**Pattern**: User invokes agent directly in VS Code chat. Conversation is interactive with frequent checkpoints.
+
+```text
+User ──▶ @Roadmap "Define epic for X"
+         @Planner "Create plan for epic"
+         @Architect "Review architectural fit"
+         @Critic "Review plan 002"
+```
+
+**When to use**:
+- Defining strategic direction (Roadmap)
+- Creating or revising plans (Planner)
+- Architectural decisions requiring judgment (Architect)
+- Pre-implementation reviews (Critic, Security)
+- Research with unclear scope (Analyst)
+
+**Tool approvals**: Generally safe to auto-approve read-only tools. Terminal commands should be reviewed case-by-case.
+
+### Phase 2: Background Implementation (Execution)
+
+**Agents**: Implementer, QA, Security (code audit)
+
+**Pattern**: After plan approval, run execution-focused agents as background agents in Git worktrees for isolated, parallel, or long-running work.
+
+```text
+@Planner "Plan approved" ──▶ Background: @Implementer in worktree
+                             Background: @QA test strategy
+                             Background: @Security code audit
+```
+
+**When to use**:
+- Multi-file implementation (Implementer)
+- Comprehensive test execution (QA)
+- Full 5-phase security audits (Security)
+- Any task expected to take >15 minutes
+
+**Benefits**:
+- Git worktree isolation prevents interference with main workspace
+- Can run multiple background agents in parallel (e.g., QA + Security)
+- Results can be reviewed and selectively merged
+
+**Tool approvals**: Background agents should NOT have "allow all" terminal access. Review and approve commands explicitly, especially for:
+- Package installs
+- Test execution with side effects
+- Any file writes outside `agent-output/`
+
+### Phase 3: Review & Merge (Validation)
+
+**Agents**: QA, UAT, Security, DevOps
+
+**Pattern**: Return to local interactive mode to review background agent results, validate value delivery, and prepare release.
+
+```text
+Background results ──▶ Local: @QA verify tests
+                       Local: @UAT validate value
+                       Local: @Security final gate
+                       Local: @DevOps release (user approval required)
+```
+
+**When to use**:
+- Reviewing background implementation results
+- Final value validation (UAT)
+- Pre-release security gate (Security)
+- Release execution (DevOps always local, always requires explicit user approval)
+
+### Subagent Usage Patterns
+
+**Definition**: A subagent is invoked by another agent (the "caller") to perform a focused, context-isolated task. The subagent returns findings to the caller rather than taking independent action.
+
+**Subagent-Eligible Agents** (may be auto-invoked):
+
+| Agent | Subagent Use Case |
+|-------|-------------------|
+| Analyst | Clarify technical questions mid-implementation |
+| Security | Targeted security review of specific code |
+| QA | Test implications for a specific change |
+| Retrospective | Synthesize lessons after a subtask completes |
+
+**Explicit-Only Agents** (should NOT be auto-invoked):
+
+| Agent | Reason |
+|-------|--------|
+| Roadmap | Strategic decisions require user involvement |
+| Architect | System-level decisions need explicit review |
+| ProcessImprovement | Cross-cutting process changes need approval |
+| DevOps | Release actions require explicit user confirmation |
+
+**Subagent Invocation Example**:
+```text
+@Implementer working on feature
+├── Hits technical unknown
+├── Invokes @Analyst as subagent: "How does API X handle pagination?"
+├── Analyst returns findings
+└── Implementer continues with answer
+```
+
+### Security and Tool Approval Guidance
+
+#### Tool Approval Categories
+
+**Always Manual Approval** (never auto-approve):
+- `execute/runInTerminal` with destructive commands (rm, git push --force, npm publish)
+- `execute/runTask` for deploy/publish tasks
+- Any command modifying infrastructure or external services
+- Package install commands in production contexts
+
+**Session Auto-Approval Eligible** (based on risk tolerance):
+- Read-only file operations
+- Linters and formatters
+- Test execution (unit tests with no external dependencies)
+- `git status`, `git diff`, `git log`
+
+**Treat as Untrusted** (validate before following):
+- `fetch` results from external URLs
+- MCP tool outputs
+- User-pasted content from external sources
+
+#### Per-Agent Tool Safety Rules
+
+**Implementer**:
+- Auto-approve: file reads, search, linters
+- Manual approve: terminal commands, package installs
+- Never auto-approve: git push, npm publish, deploy scripts
+
+**QA**:
+- Auto-approve: test execution (isolated), file reads
+- Manual approve: test execution with external dependencies
+- Never auto-approve: commands modifying test data in shared environments
+
+**DevOps**:
+- Manual approve: ALL terminal commands
+- MUST get explicit user confirmation before any release action
+- Never auto-approve: git tag, npm publish, vsce publish
+
+**Security**:
+- Auto-approve: file reads, grep, dependency scans
+- Manual approve: network requests, vulnerability scanner execution
+- Never auto-approve: any command that could exfiltrate data
+
+### Orchestration Quick Reference
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                    AGENT ORCHESTRATION FLOW                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  PHASE 1: LOCAL INTERACTIVE (Strategy)                              │
+│  ┌─────────┐   ┌─────────┐   ┌──────────┐   ┌────────┐             │
+│  │ Roadmap │──▶│ Planner │──▶│ Architect│──▶│ Critic │             │
+│  └─────────┘   └─────────┘   └──────────┘   └────────┘             │
+│       │             │              │             │                   │
+│       └─────────────┴──────────────┴─────────────┘                   │
+│                    [Analyst/Security as needed]                      │
+│                                                                     │
+│  PHASE 2: BACKGROUND (Execution) ─── Git Worktree Isolation         │
+│  ┌─────────────┐   ┌────────────┐   ┌──────────────┐               │
+│  │ Implementer │   │     QA     │   │   Security   │               │
+│  │ (parallel)  │   │ (parallel) │   │  (parallel)  │               │
+│  └─────────────┘   └────────────┘   └──────────────┘               │
+│                                                                     │
+│  PHASE 3: LOCAL INTERACTIVE (Validation)                            │
+│  ┌──────┐   ┌──────┐   ┌──────────┐   ┌────────┐                   │
+│  │  QA  │──▶│ UAT  │──▶│ Security │──▶│ DevOps │                   │
+│  │verify│   │value │   │  gate    │   │release │                   │
+│  └──────┘   └──────┘   └──────────┘   └────────┘                   │
+│                                         ▲                           │
+│                                         │                           │
+│                              [USER APPROVAL REQUIRED]               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 

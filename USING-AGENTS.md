@@ -10,7 +10,7 @@ A typical high-level workflow looks like:
 
 Roadmap → Planner → (Analyst, Architect, Critic, Security) → Implementer → QA → UAT → DevOps → Retrospective → ProcessImprovement
 
-The Memory agent provides long-running context across sessions, and uses the VS code extension Flowbaby https://github.com/groupzer0/flowbaby which would need to be installed to make use of the memory functions in each agent. 
+The Memory agent provides long-running context across sessions, and uses the VS Code extension Flowbaby ([GitHub repo](https://github.com/groupzer0/flowbaby)) which would need to be installed to make use of the memory functions in each agent.
 
 ## Where to Put These Files
 
