@@ -1,7 +1,7 @@
 ---
 description: Product Owner conducting UAT to verify implementation delivers stated business value.
 name: UAT
-tools: ['edit', 'search', 'runCommands', 'problems', 'changes', 'testFailure', 'fetch', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['execute/testFailure', 'execute/getTerminalOutput', 'execute/runInTerminal', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: Claude Sonnet 4.5
 handoffs:
   - label: Report UAT Failure

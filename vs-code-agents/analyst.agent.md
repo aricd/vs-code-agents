@@ -1,7 +1,7 @@
 ---
 description: Research and analysis specialist for pre-implementation investigation.
 name: Analyst
-tools: ['edit/createFile', 'edit/editFiles', 'runNotebooks', 'search', 'runCommands', 'usages', 'vscodeAPI', 'problems', 'fetch', 'githubRepo', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['vscode/vscodeAPI', 'execute/runNotebookCell', 'execute/getTerminalOutput', 'execute/runInTerminal', 'read', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: GPT-5.1-Codex-Max (Preview)
 handoffs:
   - label: Create Plan

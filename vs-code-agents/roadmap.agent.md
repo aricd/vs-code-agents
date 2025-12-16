@@ -1,7 +1,7 @@
 ---
 description: Strategic vision holder maintaining outcome-focused product roadmap aligned with releases.
 name: Roadmap
-tools: ['edit/editFiles', 'search', 'usages', 'changes', 'fetch', 'githubRepo', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['execute/getTerminalOutput', 'execute/runTask', 'execute/runInTerminal', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: Gemini 3 Pro (Preview)
 handoffs:
   - label: Request Architectural Guidance

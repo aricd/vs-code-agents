@@ -1,7 +1,7 @@
 ---
 description: High-rigor planning assistant for upcoming feature changes.
 name: Planner
-tools: ['edit', 'search', 'runCommands', 'usages', 'fetch', 'githubRepo', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['execute/getTerminalOutput', 'execute/runInTerminal', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: GPT-5.1 (Preview)
 handoffs:
   - label: Validate Roadmap Alignment

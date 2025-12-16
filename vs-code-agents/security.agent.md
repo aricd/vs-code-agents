@@ -1,7 +1,7 @@
 ---
 description: Comprehensive security audit specialist - architecture, code, dependencies, and compliance.
 name: Security
-tools: ['edit/createFile', 'edit/editFiles', 'search', 'runCommands', 'usages', 'problems', 'fetch', 'githubRepo', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['execute/getTerminalOutput', 'execute/runTask', 'execute/getTaskOutput', 'execute/createAndRunTask', 'execute/runInTerminal', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: GPT-5.2 (Preview)
 handoffs:
   - label: Request Analysis

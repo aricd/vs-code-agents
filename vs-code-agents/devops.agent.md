@@ -1,7 +1,7 @@
 ---
 description: DevOps specialist responsible for packaging, versioning, deployment readiness, and release execution with user confirmation.
 name: DevOps
-tools: ['edit/createFile', 'edit/editFiles', 'search', 'runCommands', 'usages', 'problems', 'changes', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['execute/getTerminalOutput', 'execute/runInTerminal', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: GPT-5 mini
 handoffs:
   - label: Request Implementation Fixes

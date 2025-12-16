@@ -1,8 +1,8 @@
 ---
 description: Analyzes retrospectives and systematically improves agent workflows.
 name: ProcessImprovement
-tools: ['edit/createFile', 'edit/editFiles', 'runNotebooks', 'search', 'runCommands', 'usages', 'vscodeAPI', 'problems', 'fetch', 'githubRepo', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
-model: GPT-5.1-Codex (Preview)
+tools: ['vscode/vscodeAPI', 'execute/runNotebookCell', 'execute/getTerminalOutput', 'execute/runInTerminal', 'read', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
+model: GPT-5.1 (Preview)
 handoffs:
   - label: Start New Plan
     agent: Planner

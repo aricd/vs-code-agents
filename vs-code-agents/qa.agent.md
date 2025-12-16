@@ -1,7 +1,7 @@
 ---
 description: Dedicated QA specialist verifying test coverage and execution before implementation approval.
 name: QA
-tools: ['edit/createFile', 'edit/editNotebook', 'edit/newJupyterNotebook', 'edit/editFiles', 'search', 'runCommands', 'problems', 'changes', 'testFailure', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos', 'runTests']
+tools: ['execute/testFailure', 'execute/getTerminalOutput', 'execute/runInTerminal', 'execute/runTests', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'edit/editNotebook', 'search', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: GPT-5.1 (Preview)
 handoffs:
   - label: Request Testing Infrastructure

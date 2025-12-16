@@ -1,7 +1,7 @@
 ---
 description: Maintains architectural coherence across features and reviews technical debt accumulation.
 name: Architect
-tools: ['edit/createFile', 'edit/editFiles', 'search', 'runCommands', 'usages', 'problems', 'fetch', 'githubRepo', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todos']
+tools: ['execute/getTerminalOutput', 'execute/getTaskOutput', 'execute/createAndRunTask', 'execute/runInTerminal', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
 model: GPT-5.1 (Preview)
 handoffs:
   - label: Validate Roadmap Alignment
