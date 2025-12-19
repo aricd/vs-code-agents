@@ -4,7 +4,7 @@ name: Architect
 target: vscode
 argument-hint: Describe the feature, component, or system area requiring architectural review
 tools: ['execute/getTerminalOutput', 'execute/getTaskOutput', 'execute/createAndRunTask', 'execute/runInTerminal', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
-model: GPT-5.2 (Preview)
+model: GPT-5.2
 handoffs:
   - label: Validate Roadmap Alignment
     agent: Roadmap

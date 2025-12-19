@@ -18,22 +18,27 @@ Systematic approach to packaging and releasing software. Use this skill when:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Release Flow                                 │
+│                    Two-Stage Release Flow                       │
 ├─────────────────────────────────────────────────────────────────┤
-│  1. QA Complete → 2. UAT Approved → 3. DevOps Release          │
 │                                                                 │
-│  Pre-Flight Checks:                                             │
-│  ✓ Version consistency verified                                 │
-│  ✓ CHANGELOG updated                                            │
-│  ✓ Tests passing                                                │
-│  ✓ Workspace clean                                              │
-│  ✓ User confirmation received                                   │
+│  STAGE 1: Per-Plan (repeat for each plan in release)            │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │  1. QA Complete                                         │    │
+│  │  2. UAT Approved                                        │    │
+│  │  3. DevOps commits locally (NO PUSH)                    │    │
+│  │  4. Update plan status: "Committed for vX.Y.Z"          │    │
+│  │  5. Notify Roadmap of commit                            │    │
+│  └─────────────────────────────────────────────────────────┘    │
 │                                                                 │
-│  Release Execution:                                             │
-│  ✓ Git tag created and pushed                                   │
-│  ✓ Package published                                            │
-│  ✓ Publication verified                                         │
-│  ✓ Deployment documented                                        │
+│  STAGE 2: Per-Release (once all plans committed)                │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │  1. All plans for release committed                     │    │
+│  │  2. User approves release                               │    │
+│  │  3. Git tag, push, publish                              │    │
+│  │  4. Update all plan statuses: "Released"                │    │
+│  │  5. Hand off to Retrospective                           │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -232,12 +237,13 @@ git push origin v1.2.3
 
 ## Agent Responsibilities
 
-### DevOps Agent
-- Verify all prerequisites (QA Complete, UAT Approved)
-- Check version consistency across all files
-- Execute release ONLY after user confirmation
+### DevOps Agent (Two-Stage Release)
+- **Stage 1 (Per-Plan)**: After UAT approval, commit changes locally with detailed message. Do NOT push.
+- **Stage 2 (Per-Release)**: After all plans committed and user approves release, push and publish.
+- Track which plans are committed for current release
+- Coordinate with Roadmap agent to maintain release→plan mappings
+- Never push without explicit release approval
 - Document in `agent-output/deployment/`
-- Never release without explicit "yes"
 
 ### Implementer Agent
 - Update `package.json` version during milestones
@@ -246,9 +252,16 @@ git push origin v1.2.3
 - Follow plan's specified version bump
 
 ### Planner Agent
-- Specify version bump in plan (MAJOR/MINOR/PATCH)
-- Justify version bump in plan rationale
-- Include version update in plan milestones
+- Specify target release version in plan header
+- Multiple plans may share the same target release
+- Coordinate with Roadmap agent for release assignments
+- Include version update in final milestone
+
+### Roadmap Agent
+- Maintain Active Release Tracker section
+- Track current working release version
+- Monitor plan→release mappings
+- Notify when all plans for a release are committed
 
 ---
 

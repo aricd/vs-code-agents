@@ -18,6 +18,10 @@ handoffs:
     agent: Planner
     prompt: Please review and potentially revise the plan based on the updated roadmap.
     send: false
+  - label: Receive Plan Commit Notification
+    agent: DevOps
+    prompt: Plan committed locally, updating release tracker with current status.
+    send: false
 ---
 Purpose:
 
@@ -40,6 +44,10 @@ Core Responsibilities:
 13. Use Flowbaby memory for continuity
 14. Review agent outputs to ensure roadmap reflects completed/deployed/planned work
 15. **Status tracking**: Keep epic Status fields current (Planned, In Progress, Delivered, Deferred). Other agents and users rely on accurate status at a glance.
+16. **Track current working release**: Maintain which release version is currently in-progress (e.g., "Working on v0.6.2"). Update when release is published or new release cycle begins.
+17. **Maintain release→plan mappings**: Track which plans are targeted for which release. Update as plans are created, modified, or re-targeted.
+18. **Track release status by plan**: For each release, track: plans targeted, plans UAT-approved, plans committed locally, release approval status.
+19. **Coordinate release timing**: When all plans for a release are committed locally, notify DevOps and user that release is ready for approval.
 
 Constraints:
 
@@ -119,6 +127,25 @@ So that [business value/benefit].
 
 ## Backlog / Future Consideration
 [Epics not yet assigned to releases, in priority order]
+
+---
+
+## Active Release Tracker
+
+**Current Working Release**: v0.X.X
+
+| Plan ID | Title | UAT Status | Committed |
+|---------|-------|------------|----------|
+| [ID] | [Plan title] | [Approved/Pending/In QA] | ✓/✗ |
+
+**Release Status**: [N] of [M] plans committed
+**Ready for Release**: Yes/No
+**Blocking Items**: [List any plans not yet committed]
+
+### Previous Releases
+| Version | Date | Plans Included | Status |
+|---------|------|----------------|--------|
+| v0.X.X | YYYY-MM-DD | [Plan IDs] | Released |
 
 # Memory Contract
 

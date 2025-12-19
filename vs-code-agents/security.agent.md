@@ -4,7 +4,7 @@ name: Security
 target: vscode
 argument-hint: Describe the code, component, or PR to security-review
 tools: ['execute/getTerminalOutput', 'execute/runTask', 'execute/getTaskOutput', 'execute/createAndRunTask', 'execute/runInTerminal', 'read/problems', 'read/readFile', 'read/terminalSelection', 'read/terminalLastCommand', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
-model: GPT-5.2 (Preview)
+model: Claude Opus 4.5
 handoffs:
   - label: Request Analysis
     agent: Analyst
