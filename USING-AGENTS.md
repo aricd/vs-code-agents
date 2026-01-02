@@ -19,12 +19,18 @@ There are two simple ways to make these agents available to VS Code:
 1. **Per-workspace (recommended for a single project)**  
   Place the `.agent.md` files under `.github/agents/` in your repository. They will only apply to that workspace.
 
-2. **Global (available in every workspace)**  
-  Place the `.agent.md` files in your VS Code user directory (for example, under an `agents/` folder inside your Code `User` settings directory). They will then be available in all workspaces.
+2. **User-level (available in every workspace)**  
+  Place the `.agent.md` files in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles). Paths by OS:
+   - **Linux**: `~/.config/Code/User/`
+   - **macOS**: `~/Library/Application Support/Code/User/`
+   - **Windows**: `%APPDATA%\Code\User\`
 
-In this repo, the source copies live under `vs-code-agents/`; you can copy or sync from there into `.github/agents/` or your user-level agents folder.
+> [!TIP]
+> The easiest way to create a user-level agent is via the Command Palette: **Chat: New Custom Agent** → select **User profile**. VS Code will place it in the correct location automatically.
 
-For more guidance on GitHub Copilot agents in VS Code, see the official documentation: https://code.visualstudio.com/docs/copilot/copilot-agents
+In this repo, the source copies live under `vs-code-agents/`; you can copy or sync from there into `.github/agents/` or your user-level folder.
+
+For more guidance on GitHub Copilot agents in VS Code, see the official documentation: https://code.visualstudio.com/docs/copilot/customization/custom-agents
 
 ## Using with GitHub Copilot CLI
 

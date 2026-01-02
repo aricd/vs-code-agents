@@ -1,5 +1,5 @@
 .flowbaby/
-.github/
+#.github/
 agent-output/
 *.env
 *.local 

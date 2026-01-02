@@ -33,7 +33,7 @@ This repository provides **specialized AI agents** that each own a specific part
 
 Each agent has **clear constraints** (Planner can't write code, Implementer can't redesign) and produces **structured documents** that create an audit trail.
 
-You don't have to use them all. You don't have to use them in order. You can use some more than others. But, they are designed to know their role and the role of the other agents in this repo. 
+Use as many or as few as you need, in any order. They are designed to know their own role and work together with other agents in this repo. They are designed to work together to create a structured and auditable development process. They are also designed to challenge each other to ensure the best possible outcome.
 
 ## Quick Start
 
@@ -55,27 +55,26 @@ your-project/
         └── ... (others you need)
 ```
 
-Or install them at the **user level** so they are available across all VS Code workspaces (paths vary by OS):
+Or install them at the **user level** so they are available across all VS Code workspaces. User-level agents are stored in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles):
 
-- **Linux**: `~/.config/github-copilot/agents/`
-- **macOS**: `~/Library/Application Support/github-copilot/agents/`
-- **Windows**: `%APPDATA%/github-copilot/agents/`
+- **Linux**: `~/.config/Code/User/`
+- **macOS**: `~/Library/Application Support/Code/User/`
+- **Windows**: `%APPDATA%\Code\User\`
 
-Place your `.agent.md` files directly in that directory, for example on Linux:
+> [!TIP]
+> The easiest way to create a user-level agent is via the Command Palette: **Chat: New Custom Agent** → select **User profile**. VS Code will place it in the correct location automatically.
 
-```text
-~/.config/github-copilot/agents/
-├── planner.agent.md
-├── implementer.agent.md
-└── ... (others you need)
-```
 
 ### 3. Use in Copilot Chat
 
+In VS Code, select your agent from the **agents dropdown** at the top of the Chat panel, then type your prompt:
+
 ```text
-@Planner Create a plan for adding user authentication
-@Implementer Implement the approved plan at agent-output/planning/001-auth-plan.md
+Create a plan for adding user authentication
 ```
+
+> [!NOTE]
+> Unlike built-in participants (e.g., `@workspace`), custom agents are **not** invoked with the `@` symbol. You must select them from the dropdown or use the Command Palette.
 
 ### 4. (Recommended) Enable Memory
 

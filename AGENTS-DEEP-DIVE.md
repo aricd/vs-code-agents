@@ -805,7 +805,7 @@ You can have project-specific agent variants:
 ### Agent Issues
 
 **Q: Agent not appearing in Copilot**
-- Check file location: `.github/agents/` for workspace, VS Code user folder for global
+- Check file location: `.github/agents/` for workspace, [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles) for user-level
 - Verify file extension is `.agent.md`
 - Reload VS Code
 
@@ -908,14 +908,17 @@ See individual agent files for their specific improvement opportunities.
 
 **Agents**: Roadmap, Architect, Planner, Analyst, Critic, Security (threat modeling)
 
-**Pattern**: User invokes agent directly in VS Code chat. Conversation is interactive with frequent checkpoints.
+**Pattern**: User selects agent from dropdown in VS Code chat. Conversation is interactive with frequent checkpoints.
 
 ```text
-User ──▶ @Roadmap "Define epic for X"
-         @Planner "Create plan for epic"
-         @Architect "Review architectural fit"
-         @Critic "Review plan 002"
+User selects Roadmap agent → "Define epic for X"
+     selects Planner agent → "Create plan for epic"
+     selects Architect agent → "Review architectural fit"
+     selects Critic agent → "Review plan 002"
 ```
+
+> [!NOTE]
+> Custom agents are selected from the agents dropdown—not invoked with `@` syntax. The `@` symbol is for built-in participants like `@workspace`.
 
 **When to use**:
 - Defining strategic direction (Roadmap)
@@ -933,9 +936,9 @@ User ──▶ @Roadmap "Define epic for X"
 **Pattern**: After plan approval, run execution-focused agents as background agents in Git worktrees for isolated, parallel, or long-running work.
 
 ```text
-@Planner "Plan approved" ──▶ Background: @Implementer in worktree
-                             Background: @QA test strategy
-                             Background: @Security code audit
+Planner (plan approved) ──▶ Background: Implementer in worktree
+                            Background: QA test strategy
+                            Background: Security code audit
 ```
 
 **When to use**:
@@ -997,9 +1000,9 @@ Background results ──▶ Local: @QA verify tests
 
 **Subagent Invocation Example**:
 ```text
-@Implementer working on feature
+Implementer working on feature
 ├── Hits technical unknown
-├── Invokes @Analyst as subagent: "How does API X handle pagination?"
+├── Invokes Analyst as subagent: "How does API X handle pagination?"
 ├── Analyst returns findings
 └── Implementer continues with answer
 ```
