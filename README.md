@@ -1,14 +1,14 @@
-# Flowbaby Agent Team
+# VS Code Agents
 
-> A multi-agent workflow system for GitHub Copilot in VS Code that brings structure, quality gates, and long-term memory to AI-assisted development.
+> A multi-agent workflow system for GitHub Copilot in VS Code that brings structure and quality gates to AI-assisted development.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What This Is
 
-The Flowbaby Agent Team is the **reference implementation** for Flowbaby’s persistent memory system.
+This repository provides a set of **custom agent definitions** for GitHub Copilot in VS Code.
 
-These agents are intentionally designed to take advantage of long-term, workspace-scoped memory. They demonstrate what agent workflows look like when memory is treated as infrastructure rather than chat history.
+The agents are intentionally specialized to support a structured workflow (planning, review, security, testing, release) with clear handoffs and constraints.
 
 ## The Problem
 
@@ -83,21 +83,7 @@ Create a plan for adding user authentication
 > [!NOTE]
 > Unlike built-in participants (e.g., `@workspace`), custom agents are **not** invoked with the `@` symbol. You must select them from the dropdown or use the Command Palette.
 
-### 4. Flowbaby Requirement
-
-These agents require Flowbaby to function correctly.
-
-Flowbaby provides the persistent memory layer that allows agents to remember decisions, constraints, and prior work across sessions. Without Flowbaby, the agents fall back to stateless behavior and lose most of their intended value.
-
-Install [Flowbaby](https://marketplace.visualstudio.com/items?itemName=flowbaby.flowbaby) for cross-session memory:
-
-1. VS Code Extensions → Search "Flowbaby" → Install
-2. Command Palette → "Flowbaby: Initialize Workspace"
-3. Command Palette → "Flowbaby: Set API Key"
-
-Flowbaby governs memory usage and evaluation limits for these agents.
-
-### 5. (Optional) Use with GitHub Copilot CLI
+### 4. (Optional) Use with GitHub Copilot CLI
 
 You can also use these agents with the GitHub Copilot CLI by placing your `.agent.md` files under `.github/agents/` in each repository where you run the CLI, then invoking them with commands like:
 
@@ -115,7 +101,6 @@ copilot --agent planner --prompt "Create a plan for adding user authentication"
 | [USING-AGENTS.md](USING-AGENTS.md) | Quick start guide (5 min read) |
 | [AGENTS-DEEP-DIVE.md](AGENTS-DEEP-DIVE.md) | Comprehensive documentation |
 | [CHANGELOG.md](CHANGELOG.md) | Notable repository changes |
-| [memory-contract-example.md](vs-code-agents/memory-contract-example.md) | Memory usage patterns |
 
 ---
 
@@ -150,25 +135,8 @@ Agents produce Markdown documents in `agent-output/`. Every decision is recorded
 ### 🔒 Quality Gates
 Critic reviews plans. Security audits code. QA verifies tests. Nothing ships without checks.
 
-### 🧠 Robust Memory
-With [Flowbaby](https://github.com/groupzer0/flowbaby), agents remember decisions across sessions.
-
 ### 🔄 Handoffs
 Agents hand off to each other with context. No lost information between phases.
-
----
-
-## Flowbaby Memory Integration
-
-[Flowbaby](https://github.com/groupzer0/flowbaby) is a VS Code extension that solves a specific problem: Copilot forgets what you've discussed. Across sessions, developers repeatedly re-explain context, architecture decisions, and constraints. Flowbaby captures, summarizes, and resurfaces relevant prior work automatically—bridging context between sessions and maintaining continuity within long-running conversations.
-
-The persistent memory layer that powers the Flowbaby Agent Team.
-
-### Links
-
-- **GitHub**: https://github.com/groupzer0/flowbaby
-- **VS Code Marketplace**: https://marketplace.visualstudio.com/items?itemName=flowbaby.flowbaby
-- **Documentation**: See the GitHub README for full setup guide
 
 ---
 
@@ -196,7 +164,8 @@ agents/
     ├── security.agent.md
     ├── uat.agent.md
     └── reference/
-        └── memory-contract-example.md
+        ├── uncertainty-review-template.md
+        └── security-language-vuln-reference.md
 ```
 
 ---
@@ -240,8 +209,7 @@ Edit `.agent.md` files to adjust:
 
 1. Create `your-agent.agent.md` following the existing format
 2. Define purpose, responsibilities, constraints
-3. Include the Memory Contract section
-4. Add to `.github/agents/` in your workspace
+3. Add to `.github/agents/` in your workspace
 
 ---
 
@@ -264,7 +232,6 @@ Agents now use **Claude Skills**—modular, reusable instruction sets that load 
 
 | Skill | Purpose |
 |-------|---------|
-| `memory-contract` | Unified Flowbaby memory retrieval/storage contract |
 | `analysis-methodology` | Confidence levels, gap tracking, investigation techniques |
 | `architecture-patterns` | ADR templates, patterns, anti-pattern detection |
 | `code-review-checklist` | Pre/post-implementation review criteria |
@@ -289,7 +256,6 @@ Agents now use **Claude Skills**—modular, reusable instruction sets that load 
 - **Two-stage release**: DevOps commits locally first; pushes only on explicit release approval
 - **Document status tracking**: All agents update Status fields in planning docs ("Draft", "In Progress", "Released")
 - **Open Question Gate**: Implementer halts if plans have unresolved questions; requires explicit user acknowledgment to proceed
-- **Memory as skill**: Memory contract moved from inline in each agent to a loadable `memory-contract` skill
 - **Slimmed Security agent**: Reduced by 46% using skill references instead of inline content
 
 ### Cross-Repository Contract Skill (2025-12-26)
@@ -314,8 +280,6 @@ New `document-lifecycle` skill implementing:
 This keeps active plans visible while archiving completed work for traceability.
 
 ### Previous Updates
-
-- **Refined Flowbaby memory contract (2025-12-16)**: All core agents share a unified memory contract. Agents function without Flowbaby but greatly benefit from its use.
 - **Aligned agent tool names with VS Code APIs (2025-12-16)**: Agent `tools` definitions now use official VS Code agent tool identifiers.
 - **Added subagent usage patterns (2025-12-15)**: Planner, Implementer, QA, Analyst, and Security document how to invoke each other as scoped subagents.
 - **Background Implementer mode (2025-12-15)**: Implementation can run as local chat or background agent in isolated Git worktree.
@@ -326,7 +290,6 @@ Contributions welcome! Areas of interest:
 
 - **Agent refinements**: Better constraints, clearer responsibilities
 - **New agents**: For specialized workflows (e.g., Documentation, Performance)
-- **Memory patterns**: Better retrieval/storage strategies
 - **Documentation**: Examples, tutorials, troubleshooting
 
 This repository also runs an automatic **Markdown lint** check in GitHub Actions on pushes and pull requests that touch `.md` files. The workflow uses `markdownlint-cli2` with a shared configuration, and helps catch issues like missing fenced code block languages (MD040) early in review. This lint workflow was proposed based on feedback and review from @rjmurillo.
@@ -336,7 +299,6 @@ This repository also runs an automatic **Markdown lint** check in GitHub Actions
 ## Requirements
 
 - VS Code with GitHub Copilot
-- For memory: [Flowbaby extension](https://marketplace.visualstudio.com/items?itemName=flowbaby.flowbaby) + Python 3.10+
 
 ---
 
@@ -349,6 +311,5 @@ MIT License - see [LICENSE](LICENSE)
 ## Related Resources
 
 - [GitHub Copilot Agents Documentation](https://code.visualstudio.com/docs/copilot/copilot-agents)
-- [Flowbaby Extension](https://github.com/groupzer0/flowbaby)
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/)

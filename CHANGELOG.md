@@ -4,6 +4,13 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-01-29
+
+### Removed
+
+- Persistent-memory integration references across agent definitions (tool IDs, instructions, and the dedicated persistence guidance section).
+- Persistent-memory skill and the accompanying example reference doc.
+
 ## 2026-01-18
 
 ### Added

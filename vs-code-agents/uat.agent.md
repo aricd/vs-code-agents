@@ -3,7 +3,7 @@ description: Product Owner conducting UAT to verify implementation delivers stat
 name: UAT
 target: vscode
 argument-hint: Reference the implementation or plan to validate (e.g., plan 002)
-tools: ['read/problems', 'read/readFile', 'search', 'flowbaby.flowbaby/flowbabyStoreSummary', 'flowbaby.flowbaby/flowbabyRetrieveMemory', 'todo']
+tools: ['read/problems', 'read/readFile', 'search', 'todo']
 model: Claude Sonnet 4.5
 handoffs:
   - label: Report UAT Failure
@@ -47,8 +47,7 @@ Core Responsibilities:
 7. Mark "UAT Complete" or "UAT Failed" with rationale based on doc evidence
 8. Synthesize final release decision: "APPROVED FOR RELEASE" or "NOT APPROVED"
 9. Recommend versioning and release notes
-10. Use Flowbaby memory for continuity
-11. **Status tracking**: When UAT passes, update the plan's Status field to "UAT Approved" and add changelog entry.
+10. **Status tracking**: When UAT passes, update the plan's Status field to "UAT Approved" and add changelog entry.
 
 Constraints:
 
@@ -195,21 +194,4 @@ Status: Active
 **Self-check on start**: Before starting work, scan `agent-output/uat/` for docs with terminal Status (Committed, Released, Abandoned, Deferred, Superseded) outside `closed/`. Move them to `closed/` first.
 
 **Closure**: DevOps closes your UAT doc after successful commit.
-
----
-
-# Memory Contract
-
-**MANDATORY**: Load `memory-contract` skill at session start. Memory is core to your reasoning.
-
-**Key behaviors:**
-- Retrieve at decision points (2–5 times per task)
-- Store at value boundaries (decisions, findings, constraints)
-- If tools fail, announce no-memory mode immediately
-
-**Quick reference:**
-- Retrieve: `#flowbabyRetrieveMemory { "query": "specific question", "maxResults": 3 }`
-- Store: `#flowbabyStoreSummary { "topic": "3-7 words", "context": "what/why", "decisions": [...] }`
-
-Full contract details: `memory-contract` skill
 

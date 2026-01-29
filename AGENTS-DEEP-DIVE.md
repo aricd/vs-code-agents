@@ -1,6 +1,6 @@
 # VS Code Agents - Deep Dive Documentation
 
-> This comprehensive guide covers advanced usage patterns, agent collaboration, memory systems, and the design philosophy behind this multi-agent workflow.
+> This comprehensive guide covers advanced usage patterns, agent collaboration, and the design philosophy behind this multi-agent workflow.
 >
 > **New users**: Start with [USING-AGENTS.md](USING-AGENTS.md) for quick setup.
 
@@ -11,11 +11,10 @@
 1. [Design Philosophy](#design-philosophy)
 2. [Agent Collaboration Patterns](#agent-collaboration-patterns)
 3. [The Document-Driven Workflow](#the-document-driven-workflow)
-4. [Flowbaby Memory Integration](#flowbaby-memory-integration)
-5. [Agent Deep Dives](#agent-deep-dives)
-6. [Customization Guide](#customization-guide)
-7. [Troubleshooting & FAQ](#troubleshooting--faq)
-8. [Agent Orchestration Playbook](#agent-orchestration-playbook)
+4. [Agent Deep Dives](#agent-deep-dives)
+5. [Customization Guide](#customization-guide)
+6. [Troubleshooting & FAQ](#troubleshooting--faq)
+7. [Agent Orchestration Playbook](#agent-orchestration-playbook)
 
 ---
 
@@ -67,7 +66,7 @@ agent-output/
 
 - **Auditability**: See what was decided and why
 - **Handoff context**: Next agent reads the artifacts
-- **Memory anchors**: Flowbaby stores references to documents
+- **Context anchors**: Documents provide stable references across sessions
 - **Version control**: Track evolution of decisions
 
 ---
@@ -296,140 +295,6 @@ When handing off between agents:
 
 **Recommended Action**: [What the next agent should do]
 ```
-
----
-
-## Flowbaby Memory Integration
-
-### What is Flowbaby?
-
-[Flowbaby](https://github.com/groupzer0/flowbaby) is a VS Code extension that provides **workspace-scoped long-term memory** for GitHub Copilot. Unlike chat history (which is lost between sessions), Flowbaby stores memories in a local knowledge graph that persists across sessions.
-
-**Key Features**:
-- **Hybrid Graph-Vector Search**: Combines knowledge graph structure with vector similarity
-- **Workspace Isolation**: Each workspace has separate memory
-- **Privacy-First**: All data stays local; no cloud services
-- **Agent Tools**: Exposes `#flowbabyStoreSummary` and `#flowbabyRetrieveMemory` for agents
-
-### Why Flowbaby is Unique
-
-Most "memory" solutions for AI agents fall into traps:
-
-| Approach | Problem |
-|----------|---------|
-| Chat history | Lost between sessions, grows unbounded |
-| Vector DB only | No structure, poor at relationships |
-| Manual notes | Requires human effort, inconsistent |
-| RAG on files | Noisy, retrieves irrelevant context |
-
-**Flowbaby's approach**:
-- **Structured summaries**: Agents store decisions, not raw logs
-- **Knowledge graph**: Captures relationships between concepts
-- **Semantic search**: Finds relevant context even with different wording
-- **Automatic + Manual**: Can store automatically or on demand
-
-### Installation
-
-1. **Install from VS Code Marketplace**:
-   - Open Extensions (`Ctrl+Shift+X`)
-   - Search "Flowbaby"
-   - Click Install
-
-  Or install via command line:
-  ```bash
-  ext install flowbaby.flowbaby
-  ```
-
-2. **Initialize Workspace**:
-   - Command Palette (`Ctrl+Shift+P`)
-   - Run "Flowbaby: Initialize Workspace"
-
-3. **Set API Key**:
-   - Command Palette
-   - Run "Flowbaby: Set API Key"
-   - Enter your OpenAI/Anthropic key (used for local summarization)
-
-**Links**:
-- GitHub: https://github.com/groupzer0/flowbaby
-- Marketplace: https://marketplace.visualstudio.com/items?itemName=flowbaby.flowbaby
-
-### Memory Contract for Agents
-
-All agents load the **`memory-contract` skill** which defines when and how to use Flowbaby memory. Agents function without Flowbaby but greatly benefit from its cross-session context.
-
-> [!TIP]
-> The full memory contract is in `vs-code-agents/skills/memory-contract/SKILL.md`. See [memory-contract-example.md](vs-code-agents/memory-contract-example.md) for usage examples.
-
-**Core principles**:
-
-1. **Retrieve at decision points**: Before making assumptions or choosing between options
-2. **Store at value boundaries**: After decisions, completions, or discoveries
-3. **Specific queries**: Ask hypothesis-driven questions, not vague category requests
-4. **Acknowledge memory**: When retrieved memory influences response, say so
-
-### Retrieval Patterns
-
-**Good retrieval queries** are specific and contextual:
-
-```json
-#flowbabyRetrieveMemory {
-  "query": "Previous decisions about authentication flow and security requirements for user login",
-  "maxResults": 3
-}
-```
-
-**Bad queries** are vague:
-```json
-#flowbabyRetrieveMemory {
-  "query": "auth stuff",
-  "maxResults": 3
-}
-```
-
-### Storage Patterns
-
-**Store when**:
-- Completing a task or phase
-- Making a significant decision
-- Discovering a constraint or dead end
-- Every 5 turns (even without milestone)
-
-**Include**:
-- Goal: What you were trying to do
-- Outcome: What happened
-- Decisions: What was decided
-- Rationale: Why
-- Artifacts: File paths to detailed docs
-
-```json
-#flowbabyStoreSummary {
-  "topic": "Auth plan review complete",
-  "context": "Completed critique of Plan 001 (user authentication). Found 2 critical issues: missing rate limiting and no threat model for password reset. Plan BLOCKED until addressed. See agent-output/critiques/001-auth-critique.md.",
-  "decisions": [
-    "Rate limiting required on all auth endpoints",
-    "Threat model needed for password reset flow"
-  ],
-  "rationale": [
-    "Without rate limiting, credential stuffing attacks are trivial",
-    "Password reset is a common attack vector requiring explicit analysis"
-  ],
-  "metadata": {
-    "status": "Active",
-    "artifact": "agent-output/critiques/001-auth-critique.md"
-  }
-}
-```
-
-### Memory Enables Agent Collaboration
-
-Without memory, each agent session starts fresh. With memory:
-
-1. **Analyst** stores research findings
-2. **Planner** retrieves findings when creating plan
-3. **Security** retrieves prior threat models when auditing
-4. **Implementer** retrieves constraints discovered during planning
-
-Memory is the connective tissue that makes multi-agent workflows coherent.
 
 ---
 
@@ -745,7 +610,6 @@ This means agents can have access to many skills without consuming context until
 
 | Skill | Purpose | Key Content |
 |-------|---------|-------------|
-| `memory-contract` | Unified Flowbaby memory contract | When/how to retrieve and store, anti-patterns |
 | `analysis-methodology` | Investigation techniques | Confidence levels, gap tracking, POC guidance |
 | `architecture-patterns` | ADR templates, patterns, anti-patterns | Layered architecture, repository pattern, STRIDE |
 | `code-review-checklist` | Pre/post-implementation review criteria | Value statement assessment, security checklist |
@@ -822,8 +686,7 @@ Detailed instructions, tables, code examples...
    ---
    ```
 3. Define Purpose, Responsibilities, Constraints
-4. Include the Memory Contract section
-5. Copy to `.github/agents/` in your workspace
+4. Copy to `.github/agents/` in your workspace
 
 ### Modifying Existing Agents
 
@@ -868,24 +731,6 @@ You can have project-specific agent variants:
 - Use explicit handoff: "Hand off to [Agent] for [task]"
 - Reference the agent's constraints
 
-### Memory Issues
-
-**Q: Memory not working**
-- Is Flowbaby installed? Check Extensions
-- Is workspace initialized? Run "Flowbaby: Initialize Workspace"
-- Is API key set? Run "Flowbaby: Set API Key"
-- Check Output panel for Flowbaby errors
-
-**Q: Retrievals return nothing**
-- Broadens query: be less specific
-- Check if any memory has been stored yet
-- Each workspace has separate memory
-
-**Q: Retrievals return irrelevant results**
-- Make query more specific
-- Include context about what you're looking for
-- Reduce `maxResults` to prioritize relevance
-
 ### Workflow Issues
 
 **Q: Plans have too much implementation detail**
@@ -898,17 +743,14 @@ You can have project-specific agent variants:
 - Provide specific files/endpoints to review
 
 **Q: Too many handoffs, losing context**
-- Use Memory agent to maintain context
 - Reference artifact paths explicitly
 - Include key context in handoff prompts
+- Prefer short written summaries at handoff boundaries
 
 ### General FAQ
 
 **Q: Do I need all 13 agents?**
 No. Start with Planner + Implementer. Add others as needed.
-
-**Q: Can I use this without Flowbaby?**
-Yes, but agents won't remember across sessions. Each conversation starts fresh.
 
 **Q: Why separate QA and UAT?**
 - QA = Technical quality (tests pass, coverage adequate)

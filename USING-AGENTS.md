@@ -1,6 +1,6 @@
 # Using the Agents
 
-This file contains a high-level overview of these agents and how to get started using them quickly. However, you may find you want or need more guidance. In that case, see the AGENTS-DEEP-DEIVE.md file.
+This file contains a high-level overview of these agents and how to get started using them quickly. However, you may find you want or need more guidance. In that case, see the AGENTS-DEEP-DIVE.md file.
 
 ## Overview
 
@@ -9,8 +9,6 @@ This repo defines a set of `.agent.md` files that configure specialized AI perso
 A typical high-level workflow looks like:
 
 Roadmap → Planner → (Analyst, Architect, Critic, Security) → Implementer → Code Reviewer → QA → UAT → DevOps → Retrospective → ProcessImprovement
-
-**All agents use Flowbaby memory** via the `memory-contract` skill to provide long-running context across sessions. Agents function without Flowbaby but greatly benefit from its cross-session context. Install the [Flowbaby VS Code extension](https://github.com/groupzer0/flowbaby) to enable memory functions. 
 
 ## Where to Put These Files
 
@@ -87,7 +85,6 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 
 | Skill | Purpose |
 |-------|---------|  
-| `memory-contract` | Unified Flowbaby memory retrieval/storage contract |
 | `analysis-methodology` | Confidence levels, gap tracking, investigation techniques |
 | `architecture-patterns` | ADR templates, patterns, anti-pattern detection |
 | `code-review-checklist` | Pre/post-implementation review criteria |
@@ -393,4 +390,4 @@ That's it! The agents handle the rest automatically.
 - Use **Architect / Analyst / Security / Critic** to refine and de‑risk the plan and architecture.
 - Hand off to **Implementer** for code and tests, then **QA** for technical quality, **UAT** for value, **DevOps** for release.
 - Afterward, let **Retrospective** and **ProcessImprovement** update how you work next time.
-- **All agents use Flowbaby memory** via the `memory-contract` skill. Agents function without Flowbaby but greatly benefit from its cross-session context.
+
