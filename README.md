@@ -138,6 +138,11 @@ Critic reviews plans. Security audits code. QA verifies tests. Nothing ships wit
 ### 🔄 Handoffs
 Agents hand off to each other with context. No lost information between phases.
 
+### 📌 Execution Orchestration (Optional)
+For larger changes, you can use the execution orchestration skills to coordinate subagent work with strict quality gates and a single authoritative execution-state file:
+- Skills: `execution-orchestration`, `planner-execution-orchestration`
+- State file location: `agent-output/planning/<ID>-execution-state.yaml`
+
 ---
 
 ## Repository Structure

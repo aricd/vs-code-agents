@@ -4,6 +4,19 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-02-01
+
+### Added
+
+- **execution-orchestration skill**: Role-agnostic orchestration contract with strict gating (`COMPLETE` vs `HARD BLOCK`), reject/redirect rules, and execution-state guidance.
+- **planner-execution-orchestration skill**: Planner-specific preset/template for using orchestration without assuming skill-to-skill imports.
+- **Execution-state schema reference**: YAML-first, JSON-compatible schema doc for the authoritative state file.
+
+### Changed
+
+- **Planner guidance**: Added orchestration-mode guidance (post-Critic approval only) and standardized the authoritative execution-state file location under `agent-output/planning/`.
+- **Docs**: Updated entry points to mention the new skills and the state file convention.
+
 ## 2026-01-29
 
 ### Removed

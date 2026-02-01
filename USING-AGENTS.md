@@ -92,9 +92,19 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 | `cross-repo-contract` | Multi-repo API type safety and contract coordination |
 | `document-lifecycle` | Unified numbering, automated closure, orphan detection |
 | `engineering-standards` | SOLID, DRY, YAGNI, KISS with detection patterns |
+| `execution-orchestration` | Owner-agent orchestration contract: strict gating, reject/redirect rules, and execution-state tracking |
+| `planner-execution-orchestration` | Planner preset/template for using `execution-orchestration` without assuming skill-to-skill imports |
 | `release-procedures` | Two-stage release workflow, semver, platform constraints |
 | `security-patterns` | OWASP Top 10, language-specific vulnerabilities |
 | `testing-patterns` | TDD workflow, test pyramid, coverage strategies |
+
+### Execution State (Orchestration)
+
+If you use execution orchestration, keep a **single authoritative execution-state file** under:
+- `agent-output/planning/` (recommended: `agent-output/planning/<ID>-execution-state.yaml`)
+
+Schema reference:
+- `vs-code-agents/skills/execution-orchestration/references/execution-state.schema.md`
 
 ### Skill Placement
 

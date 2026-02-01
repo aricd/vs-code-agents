@@ -788,6 +788,13 @@ See individual agent files for their specific improvement opportunities.
 
 > This section documents when and how to use local, background, and subagent execution patterns for custom agents in VS Code 1.107+.
 
+For strict, auditable delegation (`COMPLETE` vs `HARD BLOCK`) with a single progress tracker, see:
+- `vs-code-agents/skills/execution-orchestration/SKILL.md`
+- `vs-code-agents/skills/planner-execution-orchestration/SKILL.md`
+
+Execution-state file convention:
+- `agent-output/planning/<ID>-execution-state.yaml`
+
 ### Execution Modes Overview
 
 | Mode | When to Use | Key Characteristics |

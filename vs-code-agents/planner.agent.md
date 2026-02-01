@@ -98,6 +98,24 @@ Prefer small, focused scopes delivering value quickly.
 10. Verify all work delivers on value statement. Don't defer core value to future phases.
 11. **BEFORE HANDOFF**: Scan plan for any `OPEN QUESTION` items not marked as resolved/closed. If any exist, prominently list them and ask user: "The following open questions remain unresolved. Do you want to proceed to Critic/Implementer with these unresolved, or should we address them first?"
 
+### Execution Orchestration (Post-Critic Approval Only)
+
+Planner may optionally run an execution-orchestration mode to coordinate downstream work and keep progress auditable.
+
+Rules:
+- **Do not bypass Critic**: Orchestration MUST NOT begin until the plan has passed Critic review.
+- Maintain a **single authoritative execution-state file** for the work chain under `agent-output/planning/`.
+  - Recommended filename: `agent-output/planning/<ID>-execution-state.yaml`
+- Use these skills as guidance:
+  - `vs-code-agents/skills/execution-orchestration/SKILL.md`
+  - `vs-code-agents/skills/planner-execution-orchestration/SKILL.md` (preset/template; copy/paste parameters)
+  - State schema reference: `vs-code-agents/skills/execution-orchestration/references/execution-state.schema.md`
+
+When orchestrating, Planner MUST:
+- Enforce workflow order: `Planner -> Critic -> Implementer -> Code Reviewer -> QA -> UAT -> DevOps`
+- Use strict response gating for subagent returns (`COMPLETE` vs `HARD BLOCK`) per the skill contract
+- Update the execution-state file after each handoff and each subagent return
+
 ## Response Style
 
 - **Plan header with changelog**: Plan ID, **Target Release** (e.g., v0.6.2—multiple plans may share this), Epic Alignment, Status. Document when target release changes in changelog.
