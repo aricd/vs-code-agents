@@ -26,6 +26,11 @@ handoffs:
     agent: Implementer
     prompt: Plan has been approved. Proceed with implementation; the user will decide whether to run Implementer locally or as a background agent.
     send: false
+  - label: Consolidate Plans
+    agent: Planner
+    prompt: Group all outstanding planning work into a new plan, add the work below to that plan, and close the prior plans.
+    send: false
+    
 ---
 
 ## Purpose
