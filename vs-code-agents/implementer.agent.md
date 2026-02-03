@@ -53,6 +53,7 @@ handoffs:
 
 - SOLID, DRY, YAGNI, KISS principles — load `engineering-standards` skill for detection patterns
 - Design patterns, clean code, test pyramid
+- **Functional programming** — load `functional-programming` skill when implementing or refactoring logic with high mutation, hidden state, deep nesting, or side effects mixed into core transformations
 
 ### Test-Driven Development (TDD)
 
@@ -130,7 +131,7 @@ Best design meeting requirements without over-engineering. Pragmatic craft (good
 10. NOT complete until tests pass. Verify all tests before handoff.
 11. Track deviations. Refuse to proceed without updated guidance.
 12. Validate implementation delivers value statement before complete.
-13. Execute version updates (package.json, CHANGELOG, etc.) when plan includes milestone. Don't defer to DevOps.
+13. Execute any explicitly-planned release/documentation artifacts (if any) without initiating version-bump work.
 14. **Cross-repo contracts**: Before implementing API endpoints or clients that span repos, load `cross-repo-contract` skill. Verify contract definitions exist and import types directly.
 15. **Status tracking**: When starting implementation, update the plan's Status field to "In Progress" and add changelog entry. Keep agent-output docs' status current so other agents and users know document state at a glance.
 

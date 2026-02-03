@@ -43,7 +43,7 @@ Constraints:
 
 Process:
 
-1. Acknowledge handoff: Plan ID, version, deployment outcome, scope
+1. Acknowledge handoff: Plan ID, deployment outcome, scope
 2. Read all artifacts: planning, analysis, critique, implementation, architecture, QA, UAT, deployment, escalations
 3. Analyze changelog patterns: handoffs, requests, changes, gaps, excessive back-and-forth
 4. Review issues/blockers: Open Questions, Blockers, resolution status, escalation appropriateness, patterns

@@ -43,7 +43,7 @@ Core Responsibilities:
 12. Guide the user: challenge misaligned features; suggest better approaches
 13. Review agent outputs to ensure roadmap reflects completed/deployed/planned work
 14. **Status tracking**: Keep epic Status fields current (Planned, In Progress, Delivered, Deferred). Other agents and users rely on accurate status at a glance.
-15. **Track current working release**: Maintain which release version is currently in-progress (e.g., "Working on v0.6.2"). Update when release is published or new release cycle begins.
+15. **Track active delivery cycle**: Maintain which delivery cycle/batch is currently in-progress (e.g., "February 2026 cycle"). Update when a cycle is published or a new cycle begins.
 16. **Maintain release→plan mappings**: Track which plans are targeted for which release. Update as plans are created, modified, or re-targeted.
 17. **Track release status by plan**: For each release, track: plans targeted, plans UAT-approved, plans committed locally, release approval status.
 18. **Coordinate release timing**: When all plans for a release are committed locally, notify DevOps and user that release is ready for approval.
@@ -80,7 +80,7 @@ Single file at `agent-output/roadmap/product-roadmap.md`:
 
 ---
 
-## Release v0.X.X - [Release Theme]
+## Release - [Release Theme]
 **Target Date**: YYYY-MM-DD
 **Strategic Goal**: [What overall value does this release deliver?]
 
@@ -119,7 +119,7 @@ So that [business value/benefit].
 
 ---
 
-## Release v0.X.X - [Next Release Theme]
+## Release - [Next Release Theme]
 [Repeat structure]
 
 ---
@@ -131,7 +131,7 @@ So that [business value/benefit].
 
 ## Active Release Tracker
 
-**Current Working Release**: v0.X.X
+**Active Delivery Cycle**: [label]
 
 | Plan ID | Title | UAT Status | Committed |
 |---------|-------|------------|----------|
@@ -142,9 +142,9 @@ So that [business value/benefit].
 **Blocking Items**: [List any plans not yet committed]
 
 ### Previous Releases
-| Version | Date | Plans Included | Status |
+| Release | Date | Plans Included | Status |
 |---------|------|----------------|--------|
-| v0.X.X | YYYY-MM-DD | [Plan IDs] | Released |
+| [label] | YYYY-MM-DD | [Plan IDs] | Released |
 
 ---
 

@@ -142,7 +142,7 @@ Process:
 3. Identify code changes; inventory test coverage
 4. Map code changes to test cases; identify gaps
 5. Execute test suites (unit, integration, e2e); run `testing-patterns` skill scripts (`run-tests.sh`, `check-coverage.sh`) and capture outputs
-6. Validate version artifacts: `package.json`, `CHANGELOG.md`, `README.md`
+6. Validate any release/documentation artifacts explicitly required by the plan (if any)
 7. Validate optional milestone deferrals if applicable
 8. Critically assess effectiveness: validate real workflows, realistic edge cases, integration points; would users still hit bugs?
 9. Manual validation if tests seem superficial

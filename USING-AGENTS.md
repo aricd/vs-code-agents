@@ -92,6 +92,8 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 | `cross-repo-contract` | Multi-repo API type safety and contract coordination |
 | `document-lifecycle` | Unified numbering, automated closure, orphan detection |
 | `engineering-standards` | SOLID, DRY, YAGNI, KISS with detection patterns |
+| `functional-programming` | Pure functions, immutability, composition, and side-effect isolation for testable, predictable code |
+| `implementation-principles` | Tie-breaker guidance for implementers: DRY, YAGNI, Rule of Three, composition, SoC, POLA, Boy Scout Rule, defensive programming, and appropriate exception use. |
 | `execution-orchestration` | Owner-agent orchestration contract: strict gating, reject/redirect rules, and execution-state tracking |
 | `planner-execution-orchestration` | Planner preset/template for using `execution-orchestration` without assuming skill-to-skill imports |
 | `release-procedures` | Two-stage release workflow, semver, platform constraints |

@@ -116,7 +116,7 @@ Before I begin, I need to confirm the review mode and scope.
 
 **Please reply with a number (1-4) or describe your intent**, and provide any relevant scope details:
 - For Targeted: which files, endpoints, or PR?
-- For Pre-Prod: which release/commit/environment?
+- For Pre-Prod: what change set (PR/diff/commit range/artifact) and which environment?
 ```
 
 **When you infer a mode** (because intent is clear):
@@ -132,7 +132,7 @@ Before proceeding with any mode, ensure you have the minimum required scope info
 | **Full 5-Phase Audit** | System/feature name; optionally entry points or data flows | Ask: "What system or feature should I audit?" |
 | **Targeted Code Review** | At least ONE of: file paths, PR link/number, diff text, endpoint list, module name | Ask: "Which files, PR, or endpoints should I focus on?" |
 | **Dependency-Only Review** | Package manager context (e.g., npm, pip, cargo) or manifest file location | Can often be inferred from repo; if unclear, ask |
-| **Pre-Production Gate** | Release identifier (version, tag, SHA) AND target environment | Ask: "Which release (version/tag/SHA) and environment?" |
+| **Pre-Production Gate** | Change set (PR/diff/commit range/artifact) AND target environment | Ask: "What change set are we gating and which environment?" |
 
 **Do not proceed** until minimum scope is satisfied. One clarifying question is acceptable; if still ambiguous after that, list what's missing and pause.
 
@@ -204,7 +204,7 @@ Load `security-patterns` skill for detailed methodology. Quick reference:
 **When**: Before deployment to production
 
 0. **Confirm review mode & scope**:
-   - If the user did not clearly indicate this is a pre-production gate (or which release/commit), ask and pause.
+   - If the user did not clearly indicate this is a pre-production gate (or what change set is in scope), ask and pause.
    - If clear, state “Assumed mode: Pre-Production Gate; Scope: …” and continue.
 1. Verify all prior security findings are addressed
 2. Conduct final vulnerability scan

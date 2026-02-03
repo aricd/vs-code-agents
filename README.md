@@ -83,6 +83,50 @@ Create a plan for adding user authentication
 > [!NOTE]
 > Unlike built-in participants (e.g., `@workspace`), custom agents are **not** invoked with the `@` symbol. You must select them from the dropdown or use the Command Palette.
 
+### VS Code Settings (Recommended)
+
+> [!NOTE]
+> Review the `chat.tools.*.autoApprove` entries below before enabling. These settings allow certain actions to proceed without per-action confirmation.
+
+```json
+{
+    "accessibility.hideAccessibleView": true,
+    "chat.agent.maxRequests": 256,
+    "chat.checkpoints.showFileChanges": true,
+    "chat.customAgentInSubagent.enabled": true,
+    "chat.instructionsFilesLocations": {
+        ".github/instructions": true
+    },
+    "chat.mcp.autostart": "newAndOutdated",
+    "chat.mcp.gallery.enabled": true,
+    "chat.tools.terminal.autoApprove": {
+        "cd": true,
+        "git": true,
+        "npm": true,
+        "python": true
+    },
+    "chat.tools.urls.autoApprove": {
+        "https://duckduckgo.com": {
+            "approveRequest": false,
+            "approveResponse": true
+        },
+        "https://github.com": {
+            "approveRequest": false,
+            "approveResponse": true
+        },
+        "https://vtk.org": true,
+        "https://www.google.com": {
+            "approveRequest": false,
+            "approveResponse": true
+        }
+    },
+    "chat.useAgentSkills": true,
+    "editor.accessibilitySupport": "off",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "terminal.integrated.accessibleViewFocusOnCommandExecution": false
+}
+```
+
 ### 4. (Optional) Use with GitHub Copilot CLI
 
 You can also use these agents with the GitHub Copilot CLI by placing your `.agent.md` files under `.github/agents/` in each repository where you run the CLI, then invoking them with commands like:

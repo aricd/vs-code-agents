@@ -46,7 +46,7 @@ Core Responsibilities:
 6. Create UAT document in `agent-output/uat/` matching plan name
 7. Mark "UAT Complete" or "UAT Failed" with rationale based on doc evidence
 8. Synthesize final release decision: "APPROVED FOR RELEASE" or "NOT APPROVED"
-9. Recommend versioning and release notes
+9. Recommend release notes (what changed) and rollout notes (how to announce/verify)
 10. **Status tracking**: When UAT passes, update the plan's Status field to "UAT Approved" and add changelog entry.
 
 Constraints:
@@ -137,7 +137,6 @@ Create markdown in `agent-output/uat/` matching plan name:
 ## Release Decision
 **Final Status**: APPROVED FOR RELEASE / NOT APPROVED
 **Rationale**: [Synthesize QA + UAT findings into go/no-go decision]
-**Recommended Version**: [patch/minor/major bump with justification]
 **Key Changes for Changelog**:
 - [Change 1]
 - [Change 2]

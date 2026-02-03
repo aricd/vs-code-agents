@@ -4,6 +4,17 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-02-03
+
+### Added
+
+- **functional-programming skill**: Integrated into the skills library with MIT license and metadata. Guides pure functions, immutability, composition, and side-effect isolation; referenced in Implementer agent and Available Skills table.
+- **implementation-principles skill**: Tie-breaker guidance for implementers covering DRY (with AHA nuance), YAGNI, Rule of Three, composition over inheritance, separation of concerns, POLA, Boy Scout Rule, defensive programming, and appropriate exception use.
+
+### Changed
+
+- Agent definitions no longer proactively ask for application/release version identifiers, recommend version bumps, or mandate version consistency management.
+
 ## 2026-02-01
 
 ### Added
