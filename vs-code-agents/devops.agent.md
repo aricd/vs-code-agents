@@ -65,7 +65,7 @@ Deployment Workflow:
 2. Confirm UAT "APPROVED FOR RELEASE", QA "QA Complete" for this plan.
 3. Read roadmap. Verify plan is in the intended release batch/cycle (if tracked).
 4. Review .gitignore: Run `git status`, analyze untracked, propose changes if needed.
-5. **Commit locally** with detailed message:
+5. **Commit locally** — load `git-commit-message` skill and craft a detailed message:
    ```
    Plan [ID]: [summary]
    

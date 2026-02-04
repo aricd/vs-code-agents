@@ -93,9 +93,11 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 | `document-lifecycle` | Unified numbering, automated closure, orphan detection |
 | `engineering-standards` | SOLID, DRY, YAGNI, KISS with detection patterns |
 | `functional-programming` | Pure functions, immutability, composition, and side-effect isolation for testable, predictable code |
+| `git-commit-message` | Craft best-practice git commit messages; supports Conventional Commits when explicitly requested |
 | `implementation-principles` | Tie-breaker guidance for implementers: DRY, YAGNI, Rule of Three, composition, SoC, POLA, Boy Scout Rule, defensive programming, and appropriate exception use. |
 | `execution-orchestration` | Owner-agent orchestration contract: strict gating, reject/redirect rules, and execution-state tracking |
 | `planner-execution-orchestration` | Planner preset/template for using `execution-orchestration` without assuming skill-to-skill imports |
+| `plan-status-reporting` | Deterministic, evidence-based plan status reporting in strict plain-text format |
 | `release-procedures` | Two-stage release workflow, semver, platform constraints |
 | `security-patterns` | OWASP Top 10, language-specific vulnerabilities |
 | `testing-patterns` | TDD workflow, test pyramid, coverage strategies |

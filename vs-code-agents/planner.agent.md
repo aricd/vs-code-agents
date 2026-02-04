@@ -26,9 +26,17 @@ handoffs:
     agent: Implementer
     prompt: Plan has been approved. Proceed with implementation; the user will decide whether to run Implementer locally or as a background agent.
     send: false
-  - label: Consolidate Plans
+  - label: Current Plan Status
+    agent: Planner
+    prompt: Please provide the current plan status
+    send: false
+  - label: Plan summary
     agent: Planner
     prompt: Group all outstanding planning work into a new plan, add the work below to that plan, and close the prior plans.
+    send: false
+  - label: Create Git Commit Message
+    agent: Planner
+    prompt: Please provide the current plan status
     send: false
     
 ---
@@ -56,6 +64,7 @@ Produce implementation-ready plans translating roadmap epics into actionable, ve
 13. If the plan explicitly requires release/documentation artifacts (e.g., changelog entry), include that as a milestone with clear acceptance criteria.
 14. **Status tracking**: When incorporating analysis into a plan, update the analysis doc's Status field to "Planned" and add changelog entry. Keep agent-output docs' status current so other agents and users know document state at a glance.
 15. Coordinate with Roadmap on sequencing and grouping when multiple plans are related.
+16. **Status reporting**: When asked for current plan status or progress overview, load `plan-status-reporting` skill and emit a strict plain-text report following that skill's format and evidence rules.
 
 ## Constraints
 

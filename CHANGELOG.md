@@ -4,6 +4,14 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-02-04
+
+### Added
+
+- **git-commit-message skill**: Craft best-practice git commit messages with subject/body formatting rules, imperative mood, and 50/72 character guidelines. Supports Conventional Commits (with Type selection guidance and breaking change handling) when explicitly requested. DevOps loads this skill when crafting commit messages.
+
+- **plan-status-reporting skill**: Evidence-based plan status reporting in strict plain-text format. Includes output template, evidence hierarchy rules, and worked example. Planner agent loads this skill when asked for current plan status.
+
 ## 2026-02-03
 
 ### Added

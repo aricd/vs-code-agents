@@ -54,6 +54,7 @@ handoffs:
 - SOLID, DRY, YAGNI, KISS principles — load `engineering-standards` skill for detection patterns
 - Design patterns, clean code, test pyramid
 - **Functional programming** — load `functional-programming` skill when implementing or refactoring logic with high mutation, hidden state, deep nesting, or side effects mixed into core transformations
+- **Commit messages** — load `git-commit-message` skill when crafting commit messages
 
 ### Test-Driven Development (TDD)
 
