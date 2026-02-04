@@ -186,7 +186,7 @@ Closes #789
 
 **Output:**
 ```text
-feat(api)!: Change response format from XML to JSON
+feat(api)!: Switch responses from XML to JSON
 
 Replace XML response serialization with JSON across all API
 endpoints. JSON provides better tooling support and smaller
