@@ -1,93 +1,364 @@
-# Vs Code Agents
+# VS Code Agents
 
+> A multi-agent workflow system for GitHub Copilot in VS Code that brings structure and quality gates to AI-assisted development.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Getting started
+## What This Is
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This repository provides a set of **custom agent definitions** for GitHub Copilot in VS Code.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+The agents are intentionally specialized to support a structured workflow (planning, review, security, testing, release) with clear handoffs and constraints.
 
-## Add your files
+## The Problem
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+AI coding assistants are powerful but chaotic:
+- They forget context between sessions
+- They try to do everything at once (plan, code, test, review)
+- They skip quality gates and security reviews
+- They lose track of decisions made earlier
 
+## The Solution
+
+This repository provides **specialized AI agents** that each own a specific part of your development workflow:
+
+| Agent | Role |
+|-------|------|
+| **Roadmap** | Product vision and epics |
+| **Planner** | Implementation-ready plans (WHAT, not HOW) |
+| **Analyst** | Deep technical research |
+| **Architect** | System design and patterns |
+| **Critic** | Plan quality review |
+| **Security** | Comprehensive security assessment |
+| **Implementer** | Code and tests |
+| **Code Reviewer** | Code quality gate before QA |
+| **QA** | Test strategy and verification |
+| **UAT** | Business value validation |
+| **DevOps** | Packaging and releases |
+| **Retrospective** | Lessons learned |
+| **ProcessImprovement** | Workflow evolution |
+
+Each agent has **clear constraints** (Planner can't write code, Implementer can't redesign) and produces **structured documents** that create an audit trail.
+
+Use as many or as few as you need, in any order. They are designed to know their own role and work together with other agents in this repo. They are designed to work together to create a structured and auditable development process. They are also designed to challenge each other to ensure the best possible outcome.
+
+## Quick Start
+
+### 1. Get the Agents
+
+```bash
+git clone https://github.com/groupzer0/agents.git
 ```
-cd existing_repo
-git remote add origin https://code.medtronic.com/dorsca1/vs-code-agents.git
-git branch -M main
-git push -uf origin main
+
+### 2. Add to Your Project
+
+Copy agents to your workspace (per-repo, recommended):
+```text
+your-project/
+└── .github/
+    └── agents/
+        ├── planner.agent.md
+        ├── implementer.agent.md
+        └── ... (others you need)
 ```
 
-## Integrate with your tools
+Or install them at the **user level** so they are available across all VS Code workspaces. User-level agents are stored in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles):
 
-- [ ] [Set up project integrations](https://code.medtronic.com/dorsca1/vs-code-agents/-/settings/integrations)
+- **Linux**: `~/.config/Code/User/`
+- **macOS**: `~/Library/Application Support/Code/User/`
+- **Windows**: `%APPDATA%\Code\User\`
 
-## Collaborate with your team
+> [!TIP]
+> The easiest way to create a user-level agent is via the Command Palette: **Chat: New Custom Agent** → select **User profile**. VS Code will place it in the correct location automatically.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
 
-## Test and Deploy
+### 3. Use in Copilot Chat
 
-Use the built-in continuous integration in GitLab.
+In VS Code, select your agent from the **agents dropdown** at the top of the Chat panel, then type your prompt:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```text
+Create a plan for adding user authentication
+```
 
-***
+> [!NOTE]
+> Unlike built-in participants (e.g., `@workspace`), custom agents are **not** invoked with the `@` symbol. You must select them from the dropdown or use the Command Palette.
 
-# Editing this README
+### VS Code Settings (Recommended)
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+> [!NOTE]
+> Review the `chat.tools.*.autoApprove` entries below before enabling. These settings allow certain actions to proceed without per-action confirmation.
 
-## Suggestions for a good README
+```json
+{
+    "accessibility.hideAccessibleView": true,
+    "chat.agent.maxRequests": 256,
+    "chat.checkpoints.showFileChanges": true,
+    "chat.customAgentInSubagent.enabled": true,
+    "chat.instructionsFilesLocations": {
+        ".github/instructions": true
+    },
+    "chat.mcp.autostart": "newAndOutdated",
+    "chat.mcp.gallery.enabled": true,
+    "chat.tools.terminal.autoApprove": {
+        "cd": true,
+        "git": true,
+        "npm": true,
+        "python": true
+    },
+    "chat.tools.urls.autoApprove": {
+        "https://duckduckgo.com": {
+            "approveRequest": false,
+            "approveResponse": true
+        },
+        "https://github.com": {
+            "approveRequest": false,
+            "approveResponse": true
+        },
+        "https://vtk.org": true,
+        "https://www.google.com": {
+            "approveRequest": false,
+            "approveResponse": true
+        }
+    },
+    "chat.useAgentSkills": true,
+    "editor.accessibilitySupport": "off",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "terminal.integrated.accessibleViewFocusOnCommandExecution": false
+}
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 4. (Optional) Use with GitHub Copilot CLI
 
-## Name
-Choose a self-explaining name for your project.
+You can also use these agents with the GitHub Copilot CLI by placing your `.agent.md` files under `.github/agents/` in each repository where you run the CLI, then invoking them with commands like:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+copilot --agent planner --prompt "Create a plan for adding user authentication"
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+**Known limitation (user-level agents):** The Copilot CLI currently has an upstream bug where user-level agents in `~/.copilot/agents/` are not loaded, even though they are documented ([github/copilot-cli#452](https://github.com/github/copilot-cli/issues/452)). This behavior and the recommended per-repository workaround were identified and documented by @rjmurillo. Until the bug is fixed, prefer `.github/agents/` in each repo.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Documentation
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+| Document | Purpose |
+|----------|---------|
+| [USING-AGENTS.md](USING-AGENTS.md) | Quick start guide (5 min read) |
+| [AGENTS-DEEP-DIVE.md](AGENTS-DEEP-DIVE.md) | Comprehensive documentation |
+| [CHANGELOG.md](CHANGELOG.md) | Notable repository changes |
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+---
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Typical Workflow
+
+```text
+Roadmap → Planner → Analyst/Architect/Security/Critic → Implementer → Code Reviewer → QA → UAT → DevOps
+```
+
+1. **Roadmap** defines what to build and why
+2. **Planner** creates a structured plan at the feature level or smaller
+3. **Analyst** researches unknowns
+4. **Architect** ensures design fit. Enforces best practices.
+5. **Security** audits for vulnerabilities. Recommends best practices.
+6. **Critic** reviews plan quality
+7. **Implementer** writes code
+8. **Code Reviewer** verifies code quality
+9. **QA** verifies tests. Ensures robust test coverage
+10. **UAT** confirms business value was delivered
+11. **DevOps** releases (with user approval)
+
+---
+
+## Key Features
+
+### 🎯 Separation of Concerns
+Each agent has one job. Planner plans. Implementer implements. No scope creep.
+
+### 📝 Document-Driven
+Agents produce Markdown documents in `agent-output/`. Every decision is recorded.
+
+### 🔒 Quality Gates
+Critic reviews plans. Security audits code. QA verifies tests. Nothing ships without checks.
+
+### 🔄 Handoffs
+Agents hand off to each other with context. No lost information between phases.
+
+### 📌 Execution Orchestration (Optional)
+For larger changes, you can use the execution orchestration skills to coordinate subagent work with strict quality gates and a single authoritative execution-state file:
+- Skills: `execution-orchestration`, `planner-execution-orchestration`
+- State file location: `agent-output/planning/<ID>-execution-state.yaml`
+
+---
+
+## Repository Structure
+
+```text
+agents/
+├── CHANGELOG.md                 # Notable changes
+├── README.md                    # This file
+├── USING-AGENTS.md              # Quick start guide
+├── AGENTS-DEEP-DIVE.md          # Comprehensive documentation
+├── LICENSE                      # MIT License
+└── vs-code-agents/              # Agent definitions
+    ├── analyst.agent.md
+    ├── architect.agent.md
+    ├── critic.agent.md
+    ├── devops.agent.md
+    ├── implementer.agent.md
+    ├── pi.agent.md              # ProcessImprovement
+    ├── planner.agent.md
+    ├── qa.agent.md
+    ├── code-reviewer.agent.md
+    ├── retrospective.agent.md
+    ├── roadmap.agent.md
+    ├── security.agent.md
+    ├── uat.agent.md
+    └── reference/
+        ├── uncertainty-review-template.md
+        └── security-language-vuln-reference.md
+```
+
+---
+
+## Security Agent Highlight
+
+The **Security Agent** has been enhanced to provide truly comprehensive security reviews:
+
+### Five-Phase Framework
+1. **Architectural Security**: Trust boundaries, STRIDE threat modeling, attack surface mapping
+2. **Code Security**: OWASP Top 10, language-specific vulnerability patterns
+3. **Dependency Security**: CVE scanning, supply chain risk assessment
+4. **Infrastructure Security**: Headers, TLS, container security
+5. **Compliance**: OWASP ASVS, NIST, industry standards
+
+### Why This Matters
+
+Most developers don't know how to conduct thorough security reviews. They miss:
+- Architectural weaknesses (implicit trust, flat networks)
+- Language-specific vulnerabilities (prototype pollution, pickle deserialization)
+- Supply chain risks (abandoned packages, dependency confusion)
+- Compliance gaps (missing security headers, weak TLS)
+
+The Security Agent systematically checks all of these, producing actionable findings with severity ratings and remediation guidance.You can then hand this off to the Planner agent and the Implementer to address. 
+
+See [security.agent.md](vs-code-agents/security.agent.md) for the full specification.
+
+---
+
+## Customization
+
+### Modify Existing Agents
+
+Edit `.agent.md` files to adjust:
+- `description`: What shows in Copilot
+- `tools`: Which VS Code tools the agent can use
+- `handoffs`: Other agents it can hand off to
+- Responsibilities and constraints
+
+### Create New Agents
+
+1. Create `your-agent.agent.md` following the existing format
+2. Define purpose, responsibilities, constraints
+3. Add to `.github/agents/` in your workspace
+
+---
+
+## Recent Updates
+
+Recent commits introduced significant improvements to agent workflow and capabilities:
+
+### Uncertainty-Aware Issue Analysis (2026-01-15)
+
+Agents now explicitly avoid forced root-cause narratives when evidence is missing.
+
+- **Analyst**: Uses an objective hard pivot trigger (timebox/evidence gate) to switch from RCA attempts to system hardening + telemetry requirements.
+- **Architect**: Treats insufficient observability as an architectural risk; defines normal vs debug logging guidance and a minimum viable incident telemetry baseline.
+- **QA**: Validates diagnosability improvements; prefers asserting structured telemetry fields/events over brittle log string matching.
+- **Template**: `vs-code-agents/reference/uncertainty-review-template.md` provides a repeatable output format.
+
+### Skills System (2025-12-19)
+
+Agents now use **Claude Skills**—modular, reusable instruction sets that load on-demand:
+
+| Skill | Purpose |
+|-------|---------|
+| `analysis-methodology` | Confidence levels, gap tracking, investigation techniques |
+| `architecture-patterns` | ADR templates, patterns, anti-pattern detection |
+| `code-review-checklist` | Pre/post-implementation review criteria |
+| `code-review-standards` | Code review checklist, severity definitions, document templates |
+| `cross-repo-contract` | Multi-repo API type safety and contract coordination |
+| `document-lifecycle` | Unified numbering, automated closure, orphan detection |
+| `engineering-standards` | SOLID, DRY, YAGNI, KISS with detection patterns |
+| `release-procedures` | Two-stage release workflow, semver, platform constraints |
+| `security-patterns` | OWASP Top 10, language-specific vulnerabilities |
+| `testing-patterns` | TDD workflow, test pyramid, coverage strategies |
+
+**Skill Placement:**
+- **VS Code Stable (1.107.1)**: Place in `.claude/skills/`
+- **VS Code Insiders**: Place in `.github/skills/`
+
+> [!NOTE]
+> These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. See the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
+
+### Key Agent Flow Improvements
+
+- **TDD mandatory**: Implementer and QA now require Test-Driven Development for new feature code
+- **Two-stage release**: DevOps commits locally first; pushes only on explicit release approval
+- **Document status tracking**: All agents update Status fields in planning docs ("Draft", "In Progress", "Released")
+- **Open Question Gate**: Implementer halts if plans have unresolved questions; requires explicit user acknowledgment to proceed
+- **Slimmed Security agent**: Reduced by 46% using skill references instead of inline content
+
+### Cross-Repository Contract Skill (2025-12-26)
+
+New `cross-repo-contract` skill for projects with runtime + backend repos that need to stay aligned:
+
+- **Contract discovery**: Agents check `api-contract/` or `.contracts/` for type definitions
+- **Type safety enforcement**: Implementer verifies contract definitions before coding API endpoints/clients
+- **Breaking change coordination**: Plans must document contract changes and sync dependencies
+- **Quality gate**: Critic verifies multi-repo plans address contract adherence
+
+Integrated into Architect, Planner, Implementer, and Critic agents.
+
+### Document Lifecycle System (2025-12-24)
+
+New `document-lifecycle` skill implementing:
+
+- **Unified numbering**: All documents in a work chain share the same ID (analysis 080 → plan 080 → qa 080 → uat 080)
+- **Automated closure**: Documents move to `closed/` subfolders after commit
+- **Orphan detection**: Agents self-check + Roadmap periodic sweep
+
+This keeps active plans visible while archiving completed work for traceability.
+
+### Previous Updates
+- **Aligned agent tool names with VS Code APIs (2025-12-16)**: Agent `tools` definitions now use official VS Code agent tool identifiers.
+- **Added subagent usage patterns (2025-12-15)**: Planner, Implementer, QA, Analyst, and Security document how to invoke each other as scoped subagents.
+- **Background Implementer mode (2025-12-15)**: Implementation can run as local chat or background agent in isolated Git worktree.
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Contributions welcome! Areas of interest:
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+- **Agent refinements**: Better constraints, clearer responsibilities
+- **New agents**: For specialized workflows (e.g., Documentation, Performance)
+- **Documentation**: Examples, tutorials, troubleshooting
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+This repository also runs an automatic **Markdown lint** check in GitHub Actions on pushes and pull requests that touch `.md` files. The workflow uses `markdownlint-cli2` with a shared configuration, and helps catch issues like missing fenced code block languages (MD040) early in review. This lint workflow was proposed based on feedback and review from @rjmurillo.
+
+---
+
+## Requirements
+
+- VS Code with GitHub Copilot
+
+---
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+MIT License - see [LICENSE](LICENSE)
+
+---
+
+## Related Resources
+
+- [GitHub Copilot Agents Documentation](https://code.visualstudio.com/docs/copilot/copilot-agents)
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/)

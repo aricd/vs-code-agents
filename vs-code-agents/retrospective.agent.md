@@ -41,8 +41,6 @@ Constraints:
 - Edit tool ONLY for creating docs in `agent-output/retrospectives/`
 - Be constructive; balance positive and negative feedback
 
-Structured Labeling: Load `structured-labeling` skill. Reference TASK-*, GOAL-*, and finding labels from plan/implementation artifacts when analyzing patterns. Use consistent status values in retrospective documents.
-
 Process:
 
 1. Acknowledge handoff: Plan ID, deployment outcome, scope
@@ -74,6 +72,17 @@ Create markdown in `agent-output/retrospectives/`:
 **Implementation Duration**: [time from plan approval to UAT complete]
 **Overall Assessment**: [brief summary]
 **Focus**: Emphasizes repeatable process improvements over one-off technical details
+
+## Timeline Analysis
+| Phase | Planned Duration | Actual Duration | Variance | Notes |
+|-------|-----------------|-----------------|----------|-------|
+| Planning | [estimate] | [actual] | [difference] | [why variance?] |
+| Analysis | [estimate] | [actual] | [difference] | [why variance?] |
+| Critique | [estimate] | [actual] | [difference] | [why variance?] |
+| Implementation | [estimate] | [actual] | [difference] | [why variance?] |
+| QA | [estimate] | [actual] | [difference] | [why variance?] |
+| UAT | [estimate] | [actual] | [difference] | [why variance?] |
+| **Total** | [sum] | [sum] | [difference] | |
 
 ## What Went Well (Process Focus)
 ### Workflow and Communication
