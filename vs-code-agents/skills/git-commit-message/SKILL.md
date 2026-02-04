@@ -3,7 +3,7 @@ name: git-commit-message
 description: Craft best-practice git commit messages. Supports standard format by default and Conventional Commits when explicitly requested. Load when crafting commit messages for staged changes.
 license: MIT
 metadata:
-  author: groupzer0
+  author: aricd
   version: "1.0"
 ---
 

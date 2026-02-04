@@ -3,7 +3,7 @@ name: plan-status-reporting
 description: Deterministic, evidence-based plan status reporting in strict plain-text format. Load when asked for current plan status or progress overview across active plans.
 license: MIT
 metadata:
-  author: groupzer0
+  author: aricd
   version: "1.0"
 ---
 
@@ -22,7 +22,7 @@ Load this skill when:
 
 When reporting status, emit **raw plain text only**. No Markdown headings and do not wrap the report in a Markdown code fence. Use exactly this structure (including the leading `-` lines in the Evidence section):
 
-```
+```text
 -=Current Plan Status=-
 Generated: <ISO-8601 timestamp>
 Repo: <repo name>  Branch: <branch>  HEAD: <short sha>
@@ -40,9 +40,18 @@ Evidence (must be non-comment-based):
 - Implementation present: <yes/no/partial/unknown>
 - Tests/linters: <pass/fail/not run/unknown> (<source>)
 - Notes: <only if blocked/ambiguous>
+
+Suggested Next 5 Steps (ordered):
+1. <next action> — Agent: <planner|implementer|qa|code-reviewer|uat|devops|security|analyst|architect|critic|pi|roadmap|retrospective>
+2. <next action> — Agent: <...>
+3. <next action> — Agent: <...>
+4. <next action> — Agent: <...>
+5. <next action> — Agent: <...>
 ```
 
 Repeat the per-plan block for every active plan. Do NOT include closed plans.
+
+After the final plan block, you MUST end the report with exactly one `Suggested Next 5 Steps (ordered):` section.
 
 ### Milestone Status Values
 
@@ -114,13 +123,33 @@ You may ONLY claim `Implemented (verified)` when you can point to at least ONE o
 
 If verification is not possible, set status to `Unknown` with a short note.
 
+### F) Generating the "Suggested Next 5 Steps" Section
+
+The final section must be actionable and consistent with the reported statuses.
+
+Rules:
+1. Provide **exactly five** steps, numbered 1–5.
+2. Each step MUST include both:
+   - the task/action (reference plan ID and/or milestone when applicable)
+   - the responsible agent name (lowercase, chosen from the allowed list in the output format)
+3. Order steps by dependency:
+   - unblock / gather evidence first
+   - then implement missing work
+   - then run tests/linters
+   - then code review
+   - then QA/UAT/release steps
+4. Steps MUST be evidence-based:
+   - If a plan is `Blocked` or has `Unknown` milestones due to missing traceability/evidence, include an early step to resolve that (e.g., add traceability map, locate files, run safe checks) before suggesting implementation.
+   - Do not propose steps that assume unverified implementation is complete.
+5. If there are fewer than five meaningful actions, fill remaining slots with explicit admin/coordination actions (e.g., "Confirm priorities with user", "Await user approval") rather than inventing technical work.
+
 ---
 
 ## Traceability Map (Recommended)
 
 For easier verification, plans SHOULD include a traceability map linking milestones to expected file paths or symbols:
 
-```
+```text
 ## Traceability Map
 | Milestone | Expected Files/Globs |
 |-----------|---------------------|
@@ -136,7 +165,7 @@ If a plan lacks a traceability map, do NOT guess file locations. Report `Unknown
 
 The following demonstrates the exact output format (values are illustrative):
 
-```
+```text
 -=Current Plan Status=-
 Generated: 2026-02-04T15:21:33Z
 Repo: vs-code-agents  Branch: main  HEAD: a1b2c3d
@@ -156,6 +185,13 @@ Evidence (must be non-comment-based):
 - Implementation present: partial
 - Tests/linters: not run (no captured outputs found)
 - Notes: Plan is drafted; no repo changes applied yet
+
+Suggested Next 5 Steps (ordered):
+1. Verify active plans and current git state (collect branch/sha/dirty) — Agent: analyst
+2. Implement Milestone 2 for Plan 008 (integrate skill into planner agent) — Agent: implementer
+3. Run the project’s standard tests/linters and capture outputs — Agent: qa
+4. Perform code review against Plan 008 acceptance criteria — Agent: code-reviewer
+5. Update docs/CHANGELOG for Plan 008 and request user confirmation — Agent: planner
 ```
 
 ---
@@ -183,6 +219,7 @@ When evidence is incomplete or unavailable:
    d. Verify milestone status against repo evidence
 3. Run `git status` and `git rev-parse --short HEAD` for workspace info
 4. Output in strict plain-text format (no Markdown)
+5. End with `Suggested Next 5 Steps (ordered):` containing exactly five agent-owned actions
 
 ### Evidence Checklist
 

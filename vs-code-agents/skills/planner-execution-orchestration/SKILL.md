@@ -3,7 +3,7 @@ name: planner-execution-orchestration
 description: Planner-specific execution orchestration preset (copy/paste template). Provides recommended runtime parameters and workflow gating, without assuming skill-to-skill imports are supported.
 license: MIT
 metadata:
-  author: groupzer0
+  author: aricd
   version: "1.0"
 ---
 

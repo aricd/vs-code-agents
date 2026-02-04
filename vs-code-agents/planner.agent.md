@@ -28,15 +28,15 @@ handoffs:
     send: false
   - label: Current Plan Status
     agent: Planner
-    prompt: Please provide the current plan status
+    prompt: Plan status (skill): produce the strict plain-text report format with evidence links
     send: false
-  - label: Plan summary
+  - label: Consolidate Plan
     agent: Planner
     prompt: Group all outstanding planning work into a new plan, add the work below to that plan, and close the prior plans.
     send: false
   - label: Create Git Commit Message
     agent: Planner
-    prompt: Please provide the current plan status
+    prompt: Create a git commit message (skill) for the current staged changes
     send: false
     
 ---

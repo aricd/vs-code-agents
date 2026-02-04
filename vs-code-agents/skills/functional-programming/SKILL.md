@@ -4,7 +4,7 @@ name: functional-programming
 description: Guides implementers to apply functional programming best practices—prioritizing pure functions, immutability, total functions, and composable transformations. Use when creating new code, or when existing code shows significant complexity, mutation, hidden state, or imperative control flow (loops + reassignment, side effects in core logic). Use judgment to balance immutability with performance (copying vs references).
 compatibility: General-purpose. Works across languages; map Option/Result patterns to native equivalents (e.g., Maybe/Either, Optional/Try, Result types).
 metadata:
-  author: groupzer0
+  author: aricd
   version: "1.0"
   category: coding-best-practices
   tags:
