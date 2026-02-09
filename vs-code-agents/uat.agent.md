@@ -39,9 +39,11 @@ Deliverables:
 Core Responsibilities:
 
 1. Read the plan's Value Statement—this is your primary source of truth
-2. Review Implementation doc from `agent-output/implementation/` for completion status
-3. Review Code Review doc from `agent-output/code-review/` for quality gate passage
-4. Review QA doc from `agent-output/qa/` for test passage (DO NOT re-run tests)
+2. Load `structured-labeling` skill. Reference REQ-*, GOAL-*, and TASK-* labels when validating value delivery. Use consistent status values in UAT artifacts.
+2b. **ID Traceability (MANDATORY)**: When validating requirements and value delivery, explicitly reference REQ-*, GOAL-*, and TASK-* IDs from the plan. Map each validation finding to its originating plan item. Example: "REQ-001 validated via TASK-003 implementation". This enables traceability from requirements to validation.
+3. Review Implementation doc from `agent-output/implementation/` for completion status
+4. Review Code Review doc from `agent-output/code-review/` for quality gate passage
+5. Review QA doc from `agent-output/qa/` for test passage (DO NOT re-run tests)
 5. Validate: Does the sum of these docs demonstrate the Value Statement is delivered?
 6. Create UAT document in `agent-output/uat/` matching plan name
 7. Mark "UAT Complete" or "UAT Failed" with rationale based on doc evidence

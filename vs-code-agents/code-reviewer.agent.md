@@ -37,14 +37,17 @@ Core Responsibilities:
 1. Load `code-review-standards` skill for review checklist, severity levels, and document template
 2. Load `engineering-standards` skill for SOLID, DRY, YAGNI, KISS detection patterns
 3. Load `testing-patterns/references/testing-anti-patterns` for TDD compliance review
-4. Read Architect's `system-architecture.md` and any plan-specific findings as source of truth
-5. Read Implementation doc from `agent-output/implementation/` for context
-6. Review ALL modified/created files listed in the Implementation doc
-7. Evaluate against Review Focus Areas (per `code-review-standards` skill)
-8. Create Code Review document in `agent-output/code-review/` matching plan name
-9. Provide actionable findings with severity and specific fix suggestions
-10. Mark clear verdict with rationale
-11. **Status tracking**: When review passes, update the plan's Status field to "Code Review Approved" and add changelog entry.
+4. Load `structured-labeling` skill. Use finding IDs and FILE-* labels in code review artifacts. Reference TASK-* from the plan when documenting which tasks were reviewed.
+4b. **ID Traceability (MANDATORY)**: When reviewing against plan acceptance criteria, explicitly reference TASK-* and FILE-* IDs. Map each finding to the relevant task. Example: "Finding in FILE-003 relates to TASK-007 implementation". This enables traceability from code review to plan.
+4c. **Validation Script Pre-Check**: Before approving implementation, run `scripts/validate-plan-template.ps1` on the originating plan to verify template compliance was maintained. Document script output. Flag any template issues as blockers requiring Planner fix before final approval.
+5. Read Architect's `system-architecture.md` and any plan-specific findings as source of truth
+6. Read Implementation doc from `agent-output/implementation/` for context
+7. Review ALL modified/created files listed in the Implementation doc
+8. Evaluate against Review Focus Areas (per `code-review-standards` skill)
+9. Create Code Review document in `agent-output/code-review/` matching plan name
+10. Provide actionable findings with severity and specific fix suggestions
+11. Mark clear verdict with rationale
+12. **Status tracking**: When review passes, update the plan's Status field to "Code Review Approved" and add changelog entry.
 
 Workflow:
 

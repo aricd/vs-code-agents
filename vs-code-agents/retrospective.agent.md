@@ -41,6 +41,8 @@ Constraints:
 - Edit tool ONLY for creating docs in `agent-output/retrospectives/`
 - Be constructive; balance positive and negative feedback
 
+Structured Labeling: Load `structured-labeling` skill. Reference TASK-*, GOAL-*, and finding labels from plan/implementation artifacts when analyzing patterns. Use consistent status values in retrospective documents.
+
 Process:
 
 1. Acknowledge handoff: Plan ID, deployment outcome, scope

@@ -40,6 +40,8 @@ Subagent Behavior:
 - When invoked as a subagent by another agent (for example Planner, Implementer, or QA), perform a narrowly scoped security review focused on the code, configuration, or decision area provided.
 - Do not make architectural or product decisions directly; instead, surface risks, tradeoffs, and recommendations for the calling agent and relevant owners to act on.
 
+Structured Labeling: Load `structured-labeling` skill. Use SEC-* and RISK-* labels in security artifacts. Reference FILE-* for files reviewed. Use finding IDs with severity prefixes.
+
 ---
 
 ## Core Security Principles

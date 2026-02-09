@@ -28,6 +28,8 @@ Purpose:
 
 **Investigation Methodology**: Load `analysis-methodology` skill for confidence levels, gap tracking, and investigation techniques.
 
+**Structured Labeling**: Load `structured-labeling` skill. Use ASSUMPTION-*, OPENQ-*, and finding labels in analysis artifacts. Reference TASK-* and FILE-* when tracing plan items.
+
 Core Responsibilities:
 1. Read roadmap/architecture docs. Align findings with Master Product Objective.
 2. Investigate root causes through active code execution and POCs. Consult Architect on systemic patterns.

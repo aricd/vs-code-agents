@@ -28,6 +28,8 @@ Purpose:
 
 Engineering Standards: Security (no credentials), performance (size), maintainability (release hygiene), clean packaging (no bloat, clear deps, proper .ignore).
 
+Structured Labeling: Load `structured-labeling` skill. Reference plan TASK-* IDs in deployment artifacts. Use consistent status values (not-started, in-progress, complete, blocked, deferred). Track approval status per the skill's frontmatter schema.
+
 Core Responsibilities:
 1. Read roadmap BEFORE deployment. Confirm release aligns with milestones/epic targets.
 2. Read UAT BEFORE deployment. Verify "APPROVED FOR RELEASE".

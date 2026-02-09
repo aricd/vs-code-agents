@@ -55,6 +55,8 @@ handoffs:
 - Design patterns, clean code, test pyramid
 - **Functional programming** — load `functional-programming` skill when implementing or refactoring logic with high mutation, hidden state, deep nesting, or side effects mixed into core transformations
 - **Commit messages** — load `git-commit-message` skill when crafting commit messages
+- **Structured labeling** — load `structured-labeling` skill. Reference TASK-*, FILE-*, and TEST-* labels from the plan in implementation artifacts. Use consistent status values (not-started, in-progress, complete, blocked, deferred).
+- **ID Traceability (MANDATORY)**: When updating implementation docs or execution-state files, reference specific TASK-* IDs being worked on. Example: "Implementing TASK-011: Update Critic template validation". This enables downstream agents and status reporting to trace work to plan items.
 
 ### Test-Driven Development (TDD)
 

@@ -21,6 +21,21 @@ Documents in terminal status belong in `closed/` subfolders. Active work stays v
 
 ---
 
+## Template/Labels Compliance (MANDATORY)
+
+All documents in `agent-output/` MUST follow the structured labeling conventions defined in the `structured-labeling` skill:
+
+1. **Label Usage**: Use applicable label prefixes (REQ-*, TASK-*, FILE-*, etc.) per the skill's domain mapping
+2. **Status Values**: Use only the canonical status enum (not-started, in-progress, complete, blocked, deferred)
+3. **Section Ordering**: Plans MUST follow the rigid 16-section template; other artifacts follow their domain-specific templates
+4. **Consistency**: Labels and statuses must be consistent across related documents in a work chain
+
+Load `structured-labeling` skill for complete prefix definitions, numbering rules, and agent-to-label mappings.
+
+This compliance requirement does NOT change the ID/Origin/UUID/Status protocol—those remain as documented below.
+
+---
+
 ## Terminal Statuses
 
 These statuses trigger document closure (move to `closed/`):

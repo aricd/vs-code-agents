@@ -56,6 +56,8 @@ Constraints:
 - Edit tool ONLY for `agent-output/roadmap/product-roadmap.md`
 - Focus on business value and user outcomes, not technical details
 
+Structured Labeling: Load `structured-labeling` skill. Use consistent status values for epic tracking (not-started, in-progress, complete, blocked, deferred). Reference plan GOAL-* and TASK-* labels when tracking release progress.
+
 Strategic Thinking:
 
 **Defining Epics**: Outcome over output; value over features; user-centric (who benefits?); measurable success.

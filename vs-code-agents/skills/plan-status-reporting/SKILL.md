@@ -30,6 +30,7 @@ Workspace State: <clean|dirty>
 
 [Plan <ID>] <Plan Title>
 Plan Approval: Critic=<Approved|Changes Required|Unknown>  User=<Approved|Pending|Unknown>
+Approval Tracking: User=<true|false|unknown>  Critic=<true|false|unknown>  UAT=<true|false|unknown>
 Plan Status: <Not Started|In Progress|Blocked|UAT Approved|Committed|Released>
 
 Milestones:
@@ -97,6 +98,8 @@ If a plan file does not exist, do not invent it.
 3. **Plan document itself** (lowest priority):
    - Frontmatter Status field
    - Milestone checklists (only if other evidence unavailable)
+   - Approval tracking frontmatter (`User_Approved`, `Critic_Approved`, `UAT_Approved`, etc.) when present
+   - Traceability Map if present in plan for faster file/glob verification
 
 ### C) FORBIDDEN Evidence Sources
 
@@ -120,6 +123,8 @@ You may ONLY claim `Implemented (verified)` when you can point to at least ONE o
 - Expected files/paths exist and are relevant to the milestone
 - A `git diff` / `git log` trail shows modifications consistent with the milestone
 - A plan-provided traceability map exists and matches repo state
+
+If a Traceability Map is present in the plan, prefer using it to identify expected files/globs rather than guessing file locations.
 
 If verification is not possible, set status to `Unknown` with a short note.
 
@@ -156,6 +161,8 @@ For easier verification, plans SHOULD include a traceability map linking milesto
 | 1. Create service | `src/services/auth/*.ts` |
 | 2. Add tests | `tests/auth/*.test.ts` |
 ```
+
+When present, the traceability map accelerates evidence-based status checks by providing expected file paths per milestone. Use it to quickly verify implementation status without scanning the entire repository.
 
 If a plan lacks a traceability map, do NOT guess file locations. Report `Unknown` if verification is impossible.
 
