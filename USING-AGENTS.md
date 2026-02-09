@@ -155,6 +155,42 @@ That's it! The agents handle the rest automatically.
 
 ---
 
+## Plan Validation Scripts
+
+Two platform-specific validators are provided to check plan templates for compliance with the structured-labeling requirements before handoff to Critic or QA.
+
+### Windows (PowerShell Core 7+)
+
+```powershell
+pwsh .\scripts\validate-plan-template.ps1 -FilePath "agent-output/planning/your-plan.md"
+```
+
+### Ubuntu 22.04 / Linux (Bash)
+
+```bash
+./scripts/validate-plan-template.sh -FilePath "agent-output/planning/your-plan.md"
+```
+
+### What the Validators Check
+
+- YAML frontmatter with required fields (ID, Origin, UUID, Status)
+- Value Statement in user story format ("As a [user], I want...")
+- Required sections present in correct order
+- Label prefixes used correctly (REQ-*, TASK-*, GOAL-*, etc.)
+- No unresolved OPENQ-* in CONTRACT/BACKCOMPAT sections (hard gate)
+- Standard status values (not-started, in-progress, complete, blocked, deferred)
+
+### Exit Codes
+
+- `0` = PASS (warnings allowed)
+- `1` = FAIL
+
+### Parity
+
+Both validators enforce the same rules. See [docs/VALIDATOR-PARITY-CHECKLIST.md](docs/VALIDATOR-PARITY-CHECKLIST.md) for details.
+
+---
+
 ## Agent-by-Agent Guide
 
 ### Roadmap – Product Vision & Epics

@@ -39,7 +39,9 @@ Core Responsibilities:
 3. Load `testing-patterns/references/testing-anti-patterns` for TDD compliance review
 4. Load `structured-labeling` skill. Use finding IDs and FILE-* labels in code review artifacts. Reference TASK-* from the plan when documenting which tasks were reviewed.
 4b. **ID Traceability (MANDATORY)**: When reviewing against plan acceptance criteria, explicitly reference TASK-* and FILE-* IDs. Map each finding to the relevant task. Example: "Finding in FILE-003 relates to TASK-007 implementation". This enables traceability from code review to plan.
-4c. **Validation Script Pre-Check**: Before approving implementation, run `scripts/validate-plan-template.ps1` on the originating plan to verify template compliance was maintained. Document script output. Flag any template issues as blockers requiring Planner fix before final approval.
+4c. **Validation Script Pre-Check**: Before approving implementation, run the plan validator on the originating plan to verify template compliance was maintained. Document script output. Flag any template issues as blockers requiring Planner fix before final approval.
+    - **Windows (PowerShell 7+)**: `pwsh scripts/validate-plan-template.ps1 -FilePath <plan-path>`
+    - **Linux/Ubuntu (bash)**: `./scripts/validate-plan-template.sh -FilePath <plan-path>`
 5. Read Architect's `system-architecture.md` and any plan-specific findings as source of truth
 6. Read Implementation doc from `agent-output/implementation/` for context
 7. Review ALL modified/created files listed in the Implementation doc

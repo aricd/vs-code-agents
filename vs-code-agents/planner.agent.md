@@ -150,7 +150,9 @@ Prefer small, focused scopes delivering value quickly.
     - [ ] TEST-SCOPE defined
     If any items fail, fix before handoff.
     
-    **Automated validation available**: Run `scripts/validate-plan-template.ps1 -FilePath <plan-path>` as a self-check before Critic handoff. The script validates frontmatter, section ordering, label usage, OPENQ resolution, and status values. Fix any failures before handoff.
+    **Automated validation available**: Run the plan validator as a self-check before Critic handoff. The script validates frontmatter, section ordering, label usage, OPENQ resolution, and status values. Fix any failures before handoff.
+    - **Windows (PowerShell 7+)**: `pwsh scripts/validate-plan-template.ps1 -FilePath <plan-path>`
+    - **Linux/Ubuntu (bash)**: `./scripts/validate-plan-template.sh -FilePath <plan-path>`
 
 ### Execution Orchestration (Post-Critic Approval Only)
 

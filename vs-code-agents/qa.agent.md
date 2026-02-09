@@ -36,7 +36,9 @@ Core Responsibilities:
 1. Read roadmap and architecture docs BEFORE designing test strategy
 2. Load `structured-labeling` skill. Use TEST-* and TEST-SCOPE-* labels in QA artifacts. Reference TASK-* from the plan when mapping tests to tasks. Use consistent status values.
 2b. **ID Traceability (MANDATORY)**: When creating test plans or reports, explicitly reference TEST-* and TEST-SCOPE-* IDs from the plan. Map each test to its originating TASK-* ID. Example: "TEST-001 validates TASK-005 implementation". This enables traceability from plan to tests.
-2c. **Validation Script Pre-Check**: Before marking QA Complete, run `scripts/validate-plan-template.ps1` on the plan being tested to verify template compliance. Document script output in QA report. Flag any template issues as blockers requiring Planner fix.
+2c. **Validation Script Pre-Check**: Before marking QA Complete, run the plan validator on the plan being tested to verify template compliance. Document script output in QA report. Flag any template issues as blockers requiring Planner fix.
+    - **Windows (PowerShell 7+)**: `pwsh scripts/validate-plan-template.ps1 -FilePath <plan-path>`
+    - **Linux/Ubuntu (bash)**: `./scripts/validate-plan-template.sh -FilePath <plan-path>`
 3. Design tests from user perspective: "What could break for users?"
 4. Verify plan ↔ implementation alignment, flag overreach/gaps
 4. Audit implementer tests skeptically; quantify adequacy
