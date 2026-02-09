@@ -4,7 +4,7 @@
 ID: 3
 Origin: 3
 UUID: 9c3a7b1e
-Status: Approved
+Status: Committed
 ---
 
 **Plan Reference**: [agent-output/planning/003-unified-labeled-planning-and-approval.md](../planning/003-unified-labeled-planning-and-approval.md)

@@ -2,7 +2,7 @@
 ID: 3
 Origin: 3
 UUID: 9c3a7b1e
-Status: ADDRESSED
+Status: Committed
 ---
 
 # Critique: Plan 003 — Unified Labeled Planning + No-Silent-Assumptions + Executive Summary + Approval Workflow
