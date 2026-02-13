@@ -107,10 +107,6 @@ Critique Lifecycle:
 5. Reference: Implementer consults for context.
 
 Escalation:
-- **IMMEDIATE**: Requirements conflict prevents start.
-- **SAME-DAY**: Goal unclear, architectural divergence blocks progress.
-- **PLAN-LEVEL**: Conflicts with patterns/vision.
-- **PATTERN**: Same finding 3+ times.
 
 ---
 

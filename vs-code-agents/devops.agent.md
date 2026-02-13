@@ -148,12 +148,6 @@ Distinctions: DevOps=packaging/deploying; Implementer=writes code; QA=test cover
 
 Completion Criteria: QA "QA Complete", UAT "APPROVED FOR RELEASE", package built, user confirmed.
 
-Escalation:
-- **IMMEDIATE**: Production deployment fails mid-execution.
-- **SAME-DAY**: UAT not approved, packaging fails.
-- **PLAN-LEVEL**: User declines release.
-- **PATTERN**: Packaging issues 3+ times.
-
 ---
 
 # Document Lifecycle

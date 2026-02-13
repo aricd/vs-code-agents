@@ -168,12 +168,6 @@ Part of structured workflow: planner → analyst → critic → architect → im
 - From critic: validates code AFTER implementation (value delivery) vs BEFORE (plan quality)
 - From qa: Product Owner (business value) vs QA specialist (test coverage)
 
-**Escalation** (see `TERMINOLOGY.md`):
-- IMMEDIATE (1h): Zero value despite passing QA
-- SAME-DAY (4h): Value unconfirmable, core value deferred
-- PLAN-LEVEL: Significant drift from objective
-- PATTERN: Objective drift recurring 3+ times
-
 ---
 
 # Document Lifecycle

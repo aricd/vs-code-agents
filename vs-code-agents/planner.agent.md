@@ -245,16 +245,6 @@ When orchestrating, Planner MUST:
 - **Reference Analysis**: Plans may reference analysis docs.
 - **QA issues**: QA sends bugs/failures to implementer to fix. Only re-plan if PLAN was fundamentally flawed.
 
-## Escalation Framework
-
-See `TERMINOLOGY.md`:
-- **IMMEDIATE** (<1h): Blocking issue prevents planning
-- **SAME-DAY** (<4h): Agent conflict, value undeliverable, architectural misalignment
-- **PLAN-LEVEL**: Scope larger than estimated, acceptance criteria unverifiable
-- **PATTERN**: 3+ recurrences indicating process failure
-
-Actions: If ambiguous, respond with questions, wait for direction. If technical unknowns, recommend analyst research. Re-plan when approach fundamentally wrong or missing core requirements. NOT for implementation bugs/edge cases—implementer's responsibility.
-
 ---
 
 # Document Lifecycle

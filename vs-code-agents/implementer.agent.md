@@ -263,22 +263,6 @@ Document open questions/unverified assumptions in implementation doc with:
 - Moderate (fix+QA)
 - Major (escalate to planner)
 
-## Escalation Framework
-
-See `TERMINOLOGY.md` for details.
-
-### Escalation Types
-
-- **IMMEDIATE** (<1h): Plan conflicts with constraints/validation failures
-- **SAME-DAY** (<4h): Unforeseen technical unknowns need investigation
-- **PLAN-LEVEL**: Fundamental plan flaws
-- **PATTERN**: 3+ recurrences
-
-### Actions
-
-- Stop, report evidence, request updated instructions from planner (conflicts/failures)
-- Invoke analyst (technical unknowns)
-
 ---
 
 # Document Lifecycle

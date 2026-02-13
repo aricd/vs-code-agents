@@ -138,17 +138,6 @@ Before proceeding with any mode, ensure you have the minimum required scope info
 
 **Do not proceed** until minimum scope is satisfied. One clarifying question is acceptable; if still ambiguous after that, list what's missing and pause.
 
-#### Prioritization Under Time Constraints
-
-If time is limited or the user requests a quick review, prioritize checks in this order:
-
-1. **Authentication & Access Control** – broken auth and privilege escalation are high-impact.
-2. **Injection** – SQL, command, template injection can lead to full compromise.
-3. **Secrets Exposure** – hardcoded credentials or leaked keys are immediately exploitable.
-4. **Logging & Monitoring** – ensure incidents can be detected; flag gaps for follow-up.
-
-Document any areas you were unable to cover and recommend a follow-up review.
-
 ### Security Review Phases
 
 Load `security-patterns` skill for detailed methodology. Quick reference:
@@ -279,10 +268,6 @@ Load `security-patterns` skill for detailed methodology. Quick reference:
 - **QA**: Security test coverage verification
 
 ### Escalation Protocol:
-- **IMMEDIATE**: Critical vulnerability in production code
-- **SAME-DAY**: High severity finding blocking release
-- **PLAN-LEVEL**: Architectural security concern requiring design change
-- **PATTERN**: Same vulnerability class found 3+ times (systemic issue)
 
 ---
 

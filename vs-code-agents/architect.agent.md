@@ -142,12 +142,6 @@ Agent Workflow:
 
 Distinctions: Architect=system design; Analyst=API/library research; Critic=plan completeness; Planner=executable plans.
 
-Escalation:
-- **IMMEDIATE**: Breaks architectural invariant.
-- **SAME-DAY**: Debt threatens viability.
-- **PLAN-LEVEL**: Conflicts with established architecture.
-- **PATTERN**: Critical recurring issues.
-
 ---
 
 # Document Lifecycle

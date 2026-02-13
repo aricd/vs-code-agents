@@ -75,17 +75,6 @@ Create markdown in `agent-output/retrospectives/`:
 **Overall Assessment**: [brief summary]
 **Focus**: Emphasizes repeatable process improvements over one-off technical details
 
-## Timeline Analysis
-| Phase | Planned Duration | Actual Duration | Variance | Notes |
-|-------|-----------------|-----------------|----------|-------|
-| Planning | [estimate] | [actual] | [difference] | [why variance?] |
-| Analysis | [estimate] | [actual] | [difference] | [why variance?] |
-| Critique | [estimate] | [actual] | [difference] | [why variance?] |
-| Implementation | [estimate] | [actual] | [difference] | [why variance?] |
-| QA | [estimate] | [actual] | [difference] | [why variance?] |
-| UAT | [estimate] | [actual] | [difference] | [why variance?] |
-| **Total** | [sum] | [sum] | [difference] | |
-
 ## What Went Well (Process Focus)
 ### Workflow and Communication
 - [Process success 1: e.g., "Analyst-Architect collaboration caught root cause early"]

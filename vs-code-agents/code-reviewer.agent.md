@@ -102,12 +102,6 @@ Part of structured workflow: planner → analyst → critic → architect → im
 - From UAT: focus on implementation quality vs business value delivery
 - From Architect: reviews specific implementation vs system-level design
 
-**Escalation** (see `TERMINOLOGY.md`):
-- IMMEDIATE (<1h): Security vulnerability discovered
-- SAME-DAY (<4h): Significant architectural deviation
-- PLAN-LEVEL: Pattern of quality issues suggesting plan gaps
-- PATTERN: Recurring anti-patterns across multiple reviews
-
 ---
 
 # Document Lifecycle
