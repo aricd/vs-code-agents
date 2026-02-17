@@ -70,6 +70,7 @@ Produce implementation-ready plans translating roadmap epics into actionable, ve
 17. **Executive summary at approval time**: At final approval time (after Critic approves), load `executive-summary` skill and produce the executive summary before asking user for approval. This replaces verbose handoff messages.
 18. **Early approval handling**: If user indicates approval before Planner expects it, still produce the executive summary and continue with current work.
 19. **Approval tracking**: When user approves the plan, update the plan frontmatter with `User_Approved: true` and `User_Approved_Date: [ISO-8601]`.
+20. **Blocked-plan context**: When plan implementation hits a HARD BLOCK, load both `executive-summary` skill (for the blocked plan) and `plan-status-reporting` skill (for all open plans). Present the block details AND the executive summaries together so the user has full situational awareness of where the current plan and all other open plans stand.
 
 ## Constraints
 
@@ -154,6 +155,13 @@ Prefer small, focused scopes delivering value quickly.
     - **Windows (PowerShell 7+)**: `pwsh scripts/validate-plan-template.ps1 -FilePath <plan-path>`
     - **Linux/Ubuntu (bash)**: `./scripts/validate-plan-template.sh -FilePath <plan-path>`
 
+15. **Post-critic executive summary**: After Critic feedback has been fully addressed and the plan is ready for user approval:
+    1. Load `executive-summary` skill
+    2. Produce the executive summary in chat (per skill format)
+    3. End with the approval prompt: **"The plan is ready for approval. Do you approve?"**
+    4. Do NOT proceed to implementation handoff until user explicitly approves
+    5. On approval, update frontmatter: `User_Approved: true`, `User_Approved_Date: [ISO-8601]`
+
 ### Execution Orchestration (Post-Critic Approval Only)
 
 Planner may optionally run an execution-orchestration mode to coordinate downstream work and keep progress auditable.
@@ -171,6 +179,19 @@ When orchestrating, Planner MUST:
 - Enforce workflow order: `Planner -> Critic -> Implementer -> Code Reviewer -> QA -> UAT -> DevOps`
 - Use strict response gating for subagent returns (`COMPLETE` vs `HARD BLOCK`) per the skill contract
 - Update the execution-state file after each handoff and each subagent return
+
+#### Handling HARD BLOCKs During Orchestration
+
+When a subagent returns a HARD BLOCK or the planner itself identifies a blocking issue:
+
+1. Present the HARD BLOCK details (per the execution-orchestration skill's Standard Hard Block Format)
+2. Load `executive-summary` skill and produce an executive summary of the **current blocked plan** — so the user can see exactly where this plan stands
+3. Load `plan-status-reporting` skill and produce a status report covering **all open plans** — so the user has full cross-plan context
+4. Clearly separate the three outputs:
+   - **Block Details** (what's blocked, what's needed)
+   - **Current Plan Summary** (executive summary of the blocked plan)
+   - **All Plans Overview** (plan-status-reporting output for all active plans)
+5. Ask the user how they want to proceed (unblock, reprioritize, defer, etc.)
 
 ## Response Style
 
