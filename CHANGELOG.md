@@ -4,6 +4,27 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-03-20
+
+### Added
+
+- **Plugin packaging**: Repository restructured as a VS Code Agent Plugin. Install via `Chat: Install Plugin From Source` with the Git URL — all 13 agents and 19 skills are immediately available.
+- **`plugin.json` manifest**: Plugin metadata at repo root (name: "Multi-Disciplinary Team Agents Plugin", version 1.0.0).
+- **`agents/` directory**: Plugin-discoverable copies of all 13 `.agent.md` files at repo root.
+- **`skills/` directory**: Plugin-discoverable copies of all 19 skill directories and reference docs at repo root.
+- **`hooks/hooks.json`**: Plugin hooks for plan validation (PostToolUse) and active orchestration context injection (UserPromptSubmit).
+- **`hooks/user-prompt-submit.sh`**: Bash hook that reads `.agent-output/planning/*-execution-state.yaml` and injects `[MDT Active Orchestrations]` context into every agent prompt.
+- **`hooks/user-prompt-submit.ps1`**: PowerShell equivalent of the UserPromptSubmit hook with identical output per CONTRACT-003.
+- **`scripts/sync-plugin.sh`**: Script to sync plugin directories (`agents/`, `skills/`) from canonical source (`vs-code-agents/`).
+- **Migration documentation**: README guidance for detecting and removing workspace-level agent duplicates after plugin installation.
+- **Planner as Orchestrator**: README and USING-AGENTS documentation explaining Planner's role as the primary multi-plan orchestrator.
+
+### Changed
+
+- **Renamed `agent-output/` to `.agent-output/`**: All agent, skill, script, and documentation references updated. The dot-prefix aligns with conventions (`.github/`, `.vscode/`) and simplifies `.gitignore` management. Users with existing `agent-output/` directories should rename: `mv agent-output .agent-output`.
+- **README header**: Updated from "VS Code Agents" to "Multi-Disciplinary Team Agents Plugin" with new intro paragraph.
+- **Repository structure**: Updated to show plugin layout (`plugin.json`, `agents/`, `skills/`, `hooks/`, `scripts/`).
+
 ## 2026-02-04
 
 ### Added
@@ -33,7 +54,7 @@ The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/
 
 ### Changed
 
-- **Planner guidance**: Added orchestration-mode guidance (post-Critic approval only) and standardized the authoritative execution-state file location under `agent-output/planning/`.
+- **Planner guidance**: Added orchestration-mode guidance (post-Critic approval only) and standardized the authoritative execution-state file location under `.agent-output/planning/`.
 - **Docs**: Updated entry points to mention the new skills and the state file convention.
 
 ## 2026-01-29

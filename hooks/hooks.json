@@ -1,0 +1,35 @@
+{
+  "hooks": [
+    {
+      "event": "PostToolUse",
+      "description": "Validate plan template after plan file edits",
+      "disabled": true,
+      "matcher": {
+        "toolName": "edit_file|create_file|replace_string_in_file",
+        "filePath": "\\.agent-output/planning/.*\\.md$"
+      },
+      "steps": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/validate-plan-template.sh -FilePath \"$FILEPATH\" || true",
+          "platformCommand": {
+            "windows": "pwsh -File \"${CLAUDE_PLUGIN_ROOT}/scripts/validate-plan-template.ps1\" -FilePath \"$FILEPATH\"; exit 0"
+          }
+        }
+      ]
+    },
+    {
+      "event": "UserPromptSubmit",
+      "description": "Inject active orchestration context from execution-state YAML files",
+      "steps": [
+        {
+          "type": "command",
+          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.sh\" || echo '{}'",
+          "platformCommand": {
+            "windows": "pwsh -File \"${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.ps1\" 2>$null; if ($LASTEXITCODE -ne 0) { Write-Output '{}' }"
+          }
+        }
+      ]
+    }
+  ]
+}

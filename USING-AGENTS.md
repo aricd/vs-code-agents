@@ -12,13 +12,26 @@ Roadmap → Planner → (Analyst, Architect, Critic, Security) → Implementer �
 
 ## Where to Put These Files
 
-There are two simple ways to make these agents available to VS Code:
+There are three ways to make these agents available to VS Code:
 
-1. **Per-workspace (recommended for a single project)**  
-  Place the `.agent.md` files under `.github/agents/` in your repository. They will only apply to that workspace.
+### Option 1: Install as a Plugin (Recommended)
 
-2. **User-level (available in every workspace)**  
-  Place the `.agent.md` files in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles). Paths by OS:
+1. Ensure `chat.plugins.enabled` is set to `true` in your VS Code settings
+2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+3. Run **Chat: Install Plugin From Source**
+4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
+5. All 13 agents and 19 skills become immediately available in Copilot Chat
+
+> [!NOTE]
+> Agent Plugins are currently a Preview feature in VS Code. The plugin will be listed under **Extensions > Agent Plugins** in VS Code settings once installed. You can enable/disable it per workspace.
+
+### Option 2: Per-workspace (recommended for a single project)
+
+Place the `.agent.md` files under `.github/agents/` in your repository. They will only apply to that workspace.
+
+### Option 3: User-level (available in every workspace)
+
+Place the `.agent.md` files in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles). Paths by OS:
    - **Linux**: `~/.config/Code/User/`
    - **macOS**: `~/Library/Application Support/Code/User/`
    - **Windows**: `%APPDATA%\Code\User\`
@@ -105,10 +118,24 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 ### Execution State (Orchestration)
 
 If you use execution orchestration, keep a **single authoritative execution-state file** under:
-- `agent-output/planning/` (recommended: `agent-output/planning/<ID>-execution-state.yaml`)
+- `.agent-output/planning/` (recommended: `.agent-output/planning/<ID>-execution-state.yaml`)
 
 Schema reference:
 - `vs-code-agents/skills/execution-orchestration/references/execution-state.schema.md`
+
+### Planner as Orchestrator
+
+The **Planner** agent is the primary orchestrator for structured multi-agent delivery. This is the recommended workflow for any multi-step effort:
+
+1. **Create and approve plans**: Ask the Planner to create one or more plans. Each plan goes through Critic review and user approval.
+2. **Delegate execution**: Once approved, the Planner delegates tasks to specialized agents (Implementer, Code Reviewer, QA, etc.) as subagents.
+3. **Coordinate concurrently**: The Planner can manage multiple approved plans simultaneously, tracking each through its own execution-state YAML file.
+4. **Enforce workflow gates**: Plans progress through the defined sequence — Critic → Implementer → Code Reviewer → QA → UAT → DevOps — with the Planner ensuring gate compliance.
+5. **Monitor progress**: The Planner reads execution-state files to surface blockers, completion percentages, and current gate status.
+
+Skills used: `execution-orchestration`, `planner-execution-orchestration`
+
+See the [README](README.md#-planner-as-orchestrator) for an overview.
 
 ### Skill Placement
 
@@ -124,6 +151,26 @@ Skills are placed in different directories depending on your VS Code version:
 
 ---
 
+## The `.agent-output/` Directory
+
+All agents produce their documents (plans, critiques, QA reports, implementation docs, etc.) into a `.agent-output/` directory at the root of your workspace.
+
+> [!IMPORTANT]
+> **Renamed from `agent-output/` to `.agent-output/`**: The leading dot makes it a hidden directory, aligning with conventions like `.github/` and `.vscode/`, and simplifying `.gitignore` management.
+>
+> If you have an existing `agent-output/` directory, rename it:
+> ```bash
+> mv agent-output .agent-output
+> ```
+
+The directory is a **workspace runtime artifact** — it is NOT part of the plugin and is typically `.gitignore`'d. Add this to your `.gitignore`:
+
+```gitignore
+.agent-output/
+```
+
+---
+
 ## Document Lifecycle Setup
 
 Agents use a **unified numbering system** to track work across the entire pipeline. All documents in a work chain share the same ID for easy traceability.
@@ -133,7 +180,7 @@ Agents use a **unified numbering system** to track work across the entire pipeli
 Create a simple counter file to enable unified numbering:
 
 ```bash
-echo "1" > agent-output/.next-id
+echo "1" > .agent-output/.next-id
 ```
 
 **What it does:**
@@ -143,7 +190,7 @@ echo "1" > agent-output/.next-id
 
 **If you have existing plans:** Start with your highest plan number + 1:
 ```bash
-echo "75" > agent-output/.next-id  # If your highest plan is 074
+echo "75" > .agent-output/.next-id  # If your highest plan is 074
 ```
 
 **How it works:**
@@ -162,13 +209,13 @@ Two platform-specific validators are provided to check plan templates for compli
 ### Windows (PowerShell Core 7+)
 
 ```powershell
-pwsh .\scripts\validate-plan-template.ps1 -FilePath "agent-output/planning/your-plan.md"
+pwsh .\scripts\validate-plan-template.ps1 -FilePath ".agent-output/planning/your-plan.md"
 ```
 
 ### Ubuntu 22.04 / Linux (Bash)
 
 ```bash
-./scripts/validate-plan-template.sh -FilePath "agent-output/planning/your-plan.md"
+./scripts/validate-plan-template.sh -FilePath ".agent-output/planning/your-plan.md"
 ```
 
 ### What the Validators Check

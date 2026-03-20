@@ -1,0 +1,7 @@
+{
+  "name": "Multi-Disciplinary Team Agents Plugin",
+  "description": "13 specialized AI agents and 19 skills for structured, auditable software delivery in VS Code",
+  "version": "1.0.0",
+  "author": "groupzer0",
+  "license": "MIT"
+}

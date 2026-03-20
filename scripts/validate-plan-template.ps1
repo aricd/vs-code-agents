@@ -20,7 +20,7 @@
     Exit code 0 = pass, 1 = fail.
 
 .EXAMPLE
-    ./validate-plan-template.ps1 -FilePath "agent-output/planning/003-feature-plan.md"
+    ./validate-plan-template.ps1 -FilePath ".agent-output/planning/003-feature-plan.md"
 #>
 
 param(
@@ -174,10 +174,16 @@ function Test-LabelUsage {
     param([string]$Content)
 
     # Check if TASK IDs are global (not restarting per phase)
-    $taskMatches = [regex]::Matches($Content, 'TASK-(\d+)')
+    # Only extract the FIRST TASK ID per table row (the definitional ID in column 1)
+    # This excludes cross-references to other TASKs in the description column
+    $taskTableLines = ($Content -split "`n") | Where-Object { $_ -match '^\|\s*TASK-\d+' }
+    $taskMatches = $taskTableLines | ForEach-Object {
+        if ($_ -match '^\|\s*(TASK-\d+)') { $Matches[1] }
+    }
     if ($taskMatches.Count -gt 0) {
-        $taskNumbers = $taskMatches | ForEach-Object { [int]$_.Groups[1].Value }
-        $sortedTasks = $taskNumbers | Sort-Object
+        $taskNumbers = $taskMatches | ForEach-Object {
+            if ($_ -match 'TASK-(\d+)') { [int]$Matches[1] }
+        }
         
         # Check for duplicate TASK numbers (would indicate restart per phase)
         $duplicates = $taskNumbers | Group-Object | Where-Object { $_.Count -gt 1 }

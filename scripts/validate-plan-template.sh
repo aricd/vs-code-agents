@@ -203,8 +203,10 @@ test_section_order() {
 # Test 4: Label usage validation
 test_label_usage() {
     # Check for duplicate TASK IDs (would indicate restart per phase)
+    # Only count the FIRST TASK ID per table row (the definitional ID in column 1)
+    # This excludes cross-references to other TASKs in the description column
     local task_ids
-    task_ids=$(echo "$FILE_CONTENT" | grep -oE 'TASK-[0-9]+' 2>/dev/null | sort | uniq -d || true)
+    task_ids=$(echo "$FILE_CONTENT" | grep -E '^\|[[:space:]]*TASK-[0-9]+' 2>/dev/null | awk -F'|' '{for(i=1;i<=NF;i++){gsub(/^[ \t]+|[ \t]+$/,"",$i); if($i ~ /^TASK-[0-9]+$/){print $i; break}}}' 2>/dev/null | sort | uniq -d || true)
     if [[ -n "$task_ids" ]]; then
         add_issue "Duplicate TASK IDs detected (TASK numbering should be global across phases): $task_ids"
     fi

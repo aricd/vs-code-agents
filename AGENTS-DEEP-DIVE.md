@@ -47,10 +47,10 @@ A single general-purpose AI tries to do everything—plan, code, test, review—
 
 ### Document-First Development
 
-Every agent produces **Markdown documents** in `agent-output/`:
+Every agent produces **Markdown documents** in `.agent-output/`:
 
 ```text
-agent-output/
+.agent-output/
 ├── planning/           # Plans with WHAT/WHY
 ├── analysis/           # Research findings
 ├── architecture/       # ADRs and design decisions
@@ -92,11 +92,11 @@ agent-output/
 
 **Example flow**:
 1. Select **Roadmap** → Define epic: "User authentication system"
-2. Select **Planner** → Create plan from epic → `agent-output/planning/001-auth-plan.md`
-3. Select **Analyst** → Research OAuth providers → `agent-output/analysis/001-auth-analysis.md`
+2. Select **Planner** → Create plan from epic → `.agent-output/planning/001-auth-plan.md`
+3. Select **Analyst** → Research OAuth providers → `.agent-output/analysis/001-auth-analysis.md`
 4. Select **Architect** → Review design fit → updates plan or creates ADR
-5. Select **Security** → Threat model → `agent-output/security/001-auth-security.md`
-6. Select **Critic** → Final review → `agent-output/critiques/001-auth-plan-critique.md`
+5. Select **Security** → Threat model → `.agent-output/security/001-auth-security.md`
+6. Select **Critic** → Final review → `.agent-output/critiques/001-auth-plan-critique.md`
 7. Select **Implementer** → Code when approved
 
 ### Pattern 2: The Implementation Loop
@@ -115,11 +115,11 @@ agent-output/
 
 **Example flow**:
 1. Select **Implementer** → Implement plan → code changes + tests
-2. Select **Code Reviewer** → Verify code quality → `agent-output/code-review/001-auth-code-review.md`
+2. Select **Code Reviewer** → Verify code quality → `.agent-output/code-review/001-auth-code-review.md`
 3. If quality issues: back to Implementer
-4. Select **QA** → Verify coverage → `agent-output/qa/001-auth-qa.md`
+4. Select **QA** → Verify coverage → `.agent-output/qa/001-auth-qa.md`
 5. If gaps: back to Implementer
-6. Select **UAT** → Validate value → `agent-output/uat/001-auth-uat.md`
+6. Select **UAT** → Validate value → `.agent-output/uat/001-auth-uat.md`
 7. If gaps: back to Implementer
 8. Select **DevOps** → Release → requires user approval
 
@@ -136,7 +136,7 @@ agent-output/
 
 **Example flow**:
 1. With **Planner** selected, planning auth but unsure about JWT vs session tokens
-2. Select **Analyst** → investigates → `agent-output/analysis/002-jwt-vs-sessions.md`
+2. Select **Analyst** → investigates → `.agent-output/analysis/002-jwt-vs-sessions.md`
 3. Findings go back to Planner to inform the plan
 
 **Incident/bug variant (when evidence is incomplete)**:
@@ -227,7 +227,7 @@ Agents update status when:
 Completed documents move to `closed/` subfolders to keep active work visible:
 
 ```text
-agent-output/
+.agent-output/
 ├── planning/
 │   ├── 085-active-feature.md      ← currently active
 │   └── closed/
@@ -243,7 +243,7 @@ agent-output/
 | Concept | Description |
 |---------|-------------|
 | **Unified numbering** | All documents in a work chain share the same ID (analysis 080 → plan 080 → qa 080) |
-| **`.next-id` file** | Global counter at `agent-output/.next-id`, incremented by originating agents |
+| **`.next-id` file** | Global counter at `.agent-output/.next-id`, incremented by originating agents |
 | **Terminal statuses** | `Committed`, `Released`, `Abandoned`, `Deferred`, `Superseded` trigger closure |
 | **Closure trigger** | DevOps moves docs to `closed/` after successful commit |
 | **Orphan detection** | Agents self-check on start; Roadmap runs periodic sweep |
@@ -286,7 +286,7 @@ When handing off between agents:
 ## Handoff to [Next Agent]
 
 **From**: [Current Agent]
-**Artifact**: agent-output/[type]/NNN-feature-type.md
+**Artifact**: .agent-output/[type]/NNN-feature-type.md
 **Status**: [Ready for review / Blocked on X / Approved]
 **Key Context**:
 - [Important decision 1]
@@ -346,7 +346,7 @@ Plans do NOT contain:
 - Technical architecture (that's Architect's job)
 
 **Outputs**:
-- Plans in `agent-output/planning/NNN-feature-plan.md`
+- Plans in `.agent-output/planning/NNN-feature-plan.md`
 
 ---
 
@@ -378,7 +378,7 @@ Plans do NOT contain:
 - Root cause investigation
 
 **Outputs**:
-- Analysis docs in `agent-output/analysis/NNN-topic-analysis.md`
+- Analysis docs in `.agent-output/analysis/NNN-topic-analysis.md`
 
 ---
 
@@ -399,7 +399,7 @@ Plans do NOT contain:
 **Key Constraint**: **Defines WHERE things live, not exact implementation**.
 
 **Outputs**:
-- ADRs in `agent-output/architecture/`
+- ADRs in `.agent-output/architecture/`
 - Design guidance to Planner/Implementer
 
 ---
@@ -428,7 +428,7 @@ Plans do NOT contain:
 - Clean → Approve for implementation
 
 **Outputs**:
-- Critiques in `agent-output/critiques/NNN-plan-critique.md`
+- Critiques in `.agent-output/critiques/NNN-plan-critique.md`
 
 ---
 
@@ -454,7 +454,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 - `REJECTED`: Fundamental design flaw
 
 **Outputs**:
-- Security findings in `agent-output/security/`
+- Security findings in `.agent-output/security/`
 
 ---
 
@@ -494,7 +494,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Authority**: CAN REJECT implementation before QA invests testing time.
 
 **Outputs**:
-- Code review docs in `agent-output/code-review/`
+- Code review docs in `.agent-output/code-review/`
 
 **Verdicts**:
 - `APPROVED`: Code quality acceptable, proceed to QA
@@ -520,7 +520,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Key Constraint**: **Technical quality, not business value** (that's UAT).
 
 **Outputs**:
-- Test strategies in `agent-output/qa/`
+- Test strategies in `.agent-output/qa/`
 - Test execution results
 
 ---
@@ -543,7 +543,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 - `NOT APPROVED`: Gaps in value delivery
 
 **Outputs**:
-- UAT results in `agent-output/uat/`
+- UAT results in `.agent-output/uat/`
 
 ---
 
@@ -559,7 +559,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Critical Constraint**: **Must ask user before releasing**. Never auto-releases.
 
 **Outputs**:
-- Release docs in `agent-output/releases/`
+- Release docs in `.agent-output/releases/`
 
 ---
 
@@ -574,7 +574,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 - Feed into ProcessImprovement
 
 **Outputs**:
-- Retrospectives in `agent-output/retrospectives/`
+- Retrospectives in `.agent-output/retrospectives/`
 
 ---
 
@@ -793,7 +793,7 @@ For strict, auditable delegation (`COMPLETE` vs `HARD BLOCK`) with a single prog
 - `vs-code-agents/skills/planner-execution-orchestration/SKILL.md`
 
 Execution-state file convention:
-- `agent-output/planning/<ID>-execution-state.yaml`
+- `.agent-output/planning/<ID>-execution-state.yaml`
 
 ### Execution Modes Overview
 
@@ -854,7 +854,7 @@ Planner (plan approved) ──▶ Background: Implementer in worktree
 **Tool approvals**: Background agents should NOT have "allow all" terminal access. Review and approve commands explicitly, especially for:
 - Package installs
 - Test execution with side effects
-- Any file writes outside `agent-output/`
+- Any file writes outside `.agent-output/`
 
 ### Phase 3: Review & Merge (Validation)
 
