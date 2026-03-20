@@ -1,9 +1,6 @@
 #.github/
-agent-output/
+.agent-output/
 *.env
 *.local 
 .DS_Store
 **.mardownlint.json
-
-
-agent-output/

@@ -1,14 +1,14 @@
-# VS Code Agents
+# Multi-Disciplinary Team Agents Plugin
 
-> A multi-agent workflow system for GitHub Copilot in VS Code that brings structure and quality gates to AI-assisted development.
+> 13 specialized AI agents and 19 skills for structured, auditable software delivery in VS Code — installable as a single VS Code Agent Plugin.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What This Is
 
-This repository provides a set of **custom agent definitions** for GitHub Copilot in VS Code.
+The **Multi-Disciplinary Team Agents Plugin** provides a complete set of **custom agent definitions** and **skills** for GitHub Copilot in VS Code.
 
-The agents are intentionally specialized to support a structured workflow (planning, review, security, testing, release) with clear handoffs and constraints.
+The agents are intentionally specialized to support a structured workflow (planning, review, security, testing, release) with clear handoffs and constraints. Install as a VS Code Agent Plugin for one-action setup, or copy individual files for per-workspace customization.
 
 ## The Problem
 
@@ -43,6 +43,19 @@ Each agent has **clear constraints** (Planner can't write code, Implementer can'
 Use as many or as few as you need, in any order. They are designed to know their own role and work together with other agents in this repo. They are designed to work together to create a structured and auditable development process. They are also designed to challenge each other to ensure the best possible outcome.
 
 ## Quick Start
+
+### Option A: Install as a Plugin (Recommended)
+
+1. Open VS Code and ensure `chat.plugins.enabled` is `true` in your settings
+2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+3. Run **Chat: Install Plugin From Source**
+4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
+5. All 13 agents and 19 skills are immediately available in Copilot Chat
+
+> [!NOTE]
+> Agent Plugins are currently a Preview feature. You must enable `chat.plugins.enabled` in VS Code settings.
+
+### Option B: Copy to Your Project (Per-Workspace)
 
 ### 1. Get the Agents
 
@@ -174,7 +187,7 @@ Roadmap → Planner → Analyst/Architect/Security/Critic → Implementer → Co
 Each agent has one job. Planner plans. Implementer implements. No scope creep.
 
 ### 📝 Document-Driven
-Agents produce Markdown documents in `agent-output/`. Every decision is recorded.
+Agents produce Markdown documents in `.agent-output/`. Every decision is recorded.
 
 ### 🔒 Quality Gates
 Critic reviews plans. Security audits code. QA verifies tests. Nothing ships without checks.
@@ -185,36 +198,74 @@ Agents hand off to each other with context. No lost information between phases.
 ### 📌 Execution Orchestration (Optional)
 For larger changes, you can use the execution orchestration skills to coordinate subagent work with strict quality gates and a single authoritative execution-state file:
 - Skills: `execution-orchestration`, `planner-execution-orchestration`
-- State file location: `agent-output/planning/<ID>-execution-state.yaml`
+- State file location: `.agent-output/planning/<ID>-execution-state.yaml`
+
+### 🎛️ Planner as Orchestrator
+
+The **Planner** agent serves as the primary orchestrator for structured multi-agent delivery. Once one or more plans are user-approved, the Planner can:
+
+- **Delegate execution** to any other agent (Implementer, Critic, QA, etc.) as subagents
+- **Coordinate multiple plans concurrently**, tracking each through its own execution-state file
+- **Enforce workflow gates** — ensuring plans progress through the correct sequence (Critic → Implementer → Code Reviewer → QA → UAT → DevOps)
+- **Monitor progress** via the execution-state YAML, surfacing blockers and completion status
+
+This is the recommended workflow for any structured, multi-step delivery effort. See the `planner-execution-orchestration` skill and [USING-AGENTS.md](USING-AGENTS.md#planner-as-orchestrator) for details.
+
+---
+
+## Migrating from Workspace-Level Agents to Plugin
+
+If you previously copied agent files into `.github/agents/` or `~/.config/Code/User/`, you may see duplicate agents after installing the plugin. To resolve:
+
+1. **Check for duplicates**: Open Copilot Chat and look for agents with the same name but different sources (plugin vs. workspace)
+2. **Remove workspace copies**: Delete the manually-copied `.agent.md` files from your `.github/agents/` directory
+3. **Remove workspace skills**: Delete any manually-copied skill directories from `.github/skills/` or `.claude/skills/`
+4. **Verify**: Confirm only the plugin-provided agents appear in the agents dropdown
+
+```bash
+# Quick cleanup — remove workspace-level copies if using the plugin
+rm -f .github/agents/*.agent.md
+rm -rf .github/skills/analysis-methodology .github/skills/architecture-patterns  # etc.
+```
+
+> [!NOTE]
+> The `.agent-output/` directory (renamed from `agent-output/`) is a workspace runtime artifact and is NOT part of the plugin. If you have an existing `agent-output/` directory, rename it:
+> ```bash
+> mv agent-output .agent-output
+> ```
 
 ---
 
 ## Repository Structure
 
 ```text
-agents/
-├── CHANGELOG.md                 # Notable changes
-├── README.md                    # This file
-├── USING-AGENTS.md              # Quick start guide
-├── AGENTS-DEEP-DIVE.md          # Comprehensive documentation
-├── LICENSE                      # MIT License
-└── vs-code-agents/              # Agent definitions
-    ├── analyst.agent.md
-    ├── architect.agent.md
-    ├── critic.agent.md
-    ├── devops.agent.md
-    ├── implementer.agent.md
-    ├── pi.agent.md              # ProcessImprovement
-    ├── planner.agent.md
-    ├── qa.agent.md
-    ├── code-reviewer.agent.md
-    ├── retrospective.agent.md
-    ├── roadmap.agent.md
-    ├── security.agent.md
-    ├── uat.agent.md
-    └── reference/
-        ├── uncertainty-review-template.md
-        └── security-language-vuln-reference.md
+├── plugin.json                  # Plugin manifest
+├── agents/                      # Plugin-discoverable agents (13 files)
+│   ├── planner.agent.md
+│   ├── implementer.agent.md
+│   └── ... (11 more)
+├── skills/                      # Plugin-discoverable skills (19 directories)
+│   ├── execution-orchestration/
+│   ├── testing-patterns/
+│   ├── reference/               # Shared reference docs
+│   └── ... (16 more)
+├── hooks/                       # Plugin hooks
+│   ├── hooks.json
+│   ├── user-prompt-submit.sh
+│   └── user-prompt-submit.ps1
+├── scripts/                     # Validation and sync scripts
+│   ├── validate-plan-template.sh
+│   ├── validate-plan-template.ps1
+│   └── sync-plugin.sh
+├── vs-code-agents/              # Canonical source (agents + skills)
+│   ├── *.agent.md
+│   ├── skills/
+│   └── reference/
+├── README.md
+├── USING-AGENTS.md
+├── AGENTS-DEEP-DIVE.md
+├── CHANGELOG.md
+└── LICENSE
 ```
 
 ---
