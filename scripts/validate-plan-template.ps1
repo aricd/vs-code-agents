@@ -283,6 +283,103 @@ function Test-StatusValues {
     return $true
 }
 
+function Test-TraceabilityMap {
+    param([string]$Content)
+    
+    # Extract Traceability Map section (must be ## Traceability Map specifically)
+    $tracemapMatch = [regex]::Match($Content, '(?sm)(^##\s*Traceability Map.*?)(?=^##\s*[^#]|$)')
+    if (-not $tracemapMatch.Success) {
+        # Section is now required, but other validators check for section presence
+        return $true
+    }
+    $tracemapSection = $tracemapMatch.Groups[1].Value
+    
+    # Detect format by checking header row
+    # NEW format: "| Requirement | Tasks | Tests | Risk | Failure Mode |"
+    # OLD format: "| Phase | ..." or "| Milestone | ..." or "| Task | ..."
+    $isNewFormat = $tracemapSection -match '\|\s*Requirement\s*\|'
+    
+    # For OLD format, skip new validation checks (backwards compatibility)
+    if (-not $isNewFormat) {
+        return $true
+    }
+    
+    # === NEW FORMAT VALIDATION ===
+    
+    # Extract all REQ-* from Requirements section (plan body, not traceability map)
+    $reqSectionMatch = [regex]::Match($Content, '(?s)(#+\s*Requirements.*?)(?=#+\s*[^#]|$)')
+    $allReqs = @()
+    if ($reqSectionMatch.Success) {
+        $reqMatches = [regex]::Matches($reqSectionMatch.Groups[1].Value, 'REQ-\d+')
+        $allReqs = $reqMatches | ForEach-Object { $_.Value } | Sort-Object -Unique
+    }
+    
+    # Extract REQ entries from Traceability Map first column
+    $mapReqMatches = [regex]::Matches($tracemapSection, '(?m)^\|\s*(REQ-\d+)')
+    $mapReqs = $mapReqMatches | ForEach-Object { $_.Groups[1].Value } | Sort-Object -Unique
+    
+    # Check that all REQ-* from Requirements section appear in map
+    foreach ($req in $allReqs) {
+        if ($req -notin $mapReqs) {
+            Add-Issue "Traceability Map missing requirement: $req"
+        }
+    }
+    
+    # Extract all cross-references from the map (TASK-*, TEST-*, RISK-*, FM-*)
+    # Skip header row
+    $mapDataSection = $tracemapSection -replace '(?m)^\|[^|]*Requirement[^|]*\|.*$', ''
+    $mapRefs = [regex]::Matches($mapDataSection, '(TASK|TEST|RISK|FM)-\d+') | 
+               ForEach-Object { $_.Value } | Sort-Object -Unique
+    
+    # Get plan body before traceability map (use ## Traceability Map specifically)
+    $planBody = $Content -replace '(?sm)^##\s*Traceability Map.*$', ''
+    
+    # Verify each reference exists in the plan body
+    foreach ($ref in $mapRefs) {
+        if ($planBody -notmatch "(?<![A-Z])$ref(?!\d)") {
+            Add-Issue "Traceability Map references non-existent label: $ref"
+        }
+    }
+    
+    # WARN on REQ rows with "—" or empty in both Tasks and Tests columns
+    $dataRows = $tracemapSection -split "`n" | Where-Object { $_ -match '^\|\s*REQ-\d+' }
+    
+    foreach ($row in $dataRows) {
+        # Extract the REQ identifier
+        if ($row -match '(REQ-\d+)') {
+            $reqId = $Matches[1]
+        } else {
+            continue
+        }
+        
+        # Split by | and get columns (1=Requirement, 2=Tasks, 3=Tests, 4=Risk, 5=Failure Mode)
+        $cols = $row -split '\|' | ForEach-Object { $_.Trim() }
+        # cols[0] is empty (before first |), cols[1] is Requirement, cols[2] is Tasks, etc.
+        $tasksCol = if ($cols.Count -gt 2) { $cols[2] } else { '' }
+        $testsCol = if ($cols.Count -gt 3) { $cols[3] } else { '' }
+        $riskCol = if ($cols.Count -gt 4) { $cols[4] } else { '' }
+        $fmCol = if ($cols.Count -gt 5) { $cols[5] } else { '' }
+        
+        # Check for empty/dash in both Tasks and Tests
+        $tasksEmpty = [string]::IsNullOrWhiteSpace($tasksCol) -or $tasksCol -eq '—' -or $tasksCol -eq '-'
+        $testsEmpty = [string]::IsNullOrWhiteSpace($testsCol) -or $testsCol -eq '—' -or $testsCol -eq '-'
+        
+        if ($tasksEmpty -and $testsEmpty) {
+            Add-Warning "Traceability Map: $reqId has no TASK or TEST entries (uncovered requirement)"
+        }
+        
+        # Check for empty/dash in both Risk and Failure Mode
+        $riskEmpty = [string]::IsNullOrWhiteSpace($riskCol) -or $riskCol -eq '—' -or $riskCol -eq '-'
+        $fmEmpty = [string]::IsNullOrWhiteSpace($fmCol) -or $fmCol -eq '—' -or $fmCol -eq '-'
+        
+        if ($riskEmpty -and $fmEmpty) {
+            Add-Warning "Traceability Map: $reqId has no RISK or FM entries (no risk analysis)"
+        }
+    }
+    
+    return $true
+}
+
 # Main validation logic
 function Invoke-Validation {
     param([string]$FilePath)
@@ -305,6 +402,7 @@ function Invoke-Validation {
     Test-LabelUsage -Content $content | Out-Null
     Test-OpenQuestions -Content $content | Out-Null
     Test-StatusValues -Content $content | Out-Null
+    Test-TraceabilityMap -Content $content | Out-Null
 
     # Output results
     Write-Host ""

@@ -283,6 +283,122 @@ test_status_values() {
     return 0
 }
 
+# Test 7: Traceability Map validation
+test_traceability_map() {
+    # Extract Traceability Map section (from header to end of file, excluding subsequent section headers)
+    local tracemap_section
+    tracemap_section=$(echo "$FILE_CONTENT" | sed -n '/^##[[:space:]]*Traceability Map/,$ p' 2>/dev/null | grep -v '^#' || true)
+    
+    # If no Traceability Map section found
+    if [[ -z "$tracemap_section" ]]; then
+        # Section is now required, but other validators check for section presence
+        return 0
+    fi
+    
+    # Detect format by checking header row
+    # NEW format: "| Requirement | Tasks | Tests | Risk | Failure Mode |"
+    # OLD format: "| Phase | ..." or "| Milestone | ..." or "| Task | ..."
+    local is_new_format=false
+    if echo "$tracemap_section" | grep -qiE '\|[[:space:]]*Requirement[[:space:]]*\|'; then
+        is_new_format=true
+    fi
+    
+    # For OLD format, skip new validation checks (backwards compatibility)
+    if [[ "$is_new_format" != "true" ]]; then
+        return 0
+    fi
+    
+    # === NEW FORMAT VALIDATION ===
+    
+    # Extract all REQ-* from Requirements section (plan body, not traceability map)
+    local requirements_section
+    requirements_section=$(echo "$FILE_CONTENT" | sed -n '/^#.*Requirements/I,/^#[^#]/p' 2>/dev/null | head -n -1 || true)
+    local all_reqs
+    all_reqs=$(echo "$requirements_section" | grep -oE 'REQ-[0-9]+' 2>/dev/null | sort -u || true)
+    
+    # Extract REQ entries from Traceability Map first column
+    local map_reqs
+    map_reqs=$(echo "$tracemap_section" | grep -E '^\|[[:space:]]*REQ-[0-9]+' 2>/dev/null | sed 's/|.*//' | grep -oE 'REQ-[0-9]+' | sort -u || true)
+    
+    # Also extract REQ from cells that have REQ-NNN (description) format
+    local map_reqs_with_desc
+    map_reqs_with_desc=$(echo "$tracemap_section" | grep -oE '\|[[:space:]]*REQ-[0-9]+[[:space:]]*([(][^)]*[)])?' 2>/dev/null | grep -oE 'REQ-[0-9]+' | sort -u || true)
+    map_reqs=$(echo -e "$map_reqs\n$map_reqs_with_desc" | sort -u | grep -v '^$' || true)
+    
+    # Check that all REQ-* from Requirements section appear in map
+    if [[ -n "$all_reqs" ]]; then
+        for req in $all_reqs; do
+            if ! echo "$map_reqs" | grep -q "^${req}$"; then
+                add_issue "Traceability Map missing requirement: $req"
+            fi
+        done
+    fi
+    
+    # Extract all cross-references from the map (TASK-*, TEST-*, RISK-*, FM-*)
+    local map_refs
+    map_refs=$(echo "$tracemap_section" | grep -v '^|[[:space:]]*Requirement' | grep -oE '(TASK|TEST|RISK|FM)-[0-9]+' 2>/dev/null | sort -u || true)
+    
+    # Verify each reference exists in the plan body (outside the traceability map)
+    local plan_body
+    plan_body=$(echo "$FILE_CONTENT" | sed '/^##[[:space:]]*Traceability Map/,$d' || true)
+    
+    for ref in $map_refs; do
+        if ! echo "$plan_body" | grep -qE "(^|[^A-Z])${ref}([^0-9]|$)"; then
+            add_issue "Traceability Map references non-existent label: $ref"
+        fi
+    done
+    
+    # WARN on REQ rows with "—" or empty in both Tasks and Tests columns
+    # Parse each data row (skip header)
+    local data_rows
+    data_rows=$(echo "$tracemap_section" | grep -E '^\|[[:space:]]*REQ-[0-9]+' 2>/dev/null || true)
+    
+    while IFS= read -r row; do
+        [[ -z "$row" ]] && continue
+        
+        # Extract the REQ identifier
+        local req_id
+        req_id=$(echo "$row" | grep -oE 'REQ-[0-9]+' | head -1 || true)
+        [[ -z "$req_id" ]] && continue
+        
+        # Split by | and get columns (1=Requirement, 2=Tasks, 3=Tests, 4=Risk, 5=Failure Mode)
+        local tasks_col tests_col risk_col fm_col
+        tasks_col=$(echo "$row" | awk -F'|' '{print $3}' | xargs 2>/dev/null || true)
+        tests_col=$(echo "$row" | awk -F'|' '{print $4}' | xargs 2>/dev/null || true)
+        risk_col=$(echo "$row" | awk -F'|' '{print $5}' | xargs 2>/dev/null || true)
+        fm_col=$(echo "$row" | awk -F'|' '{print $6}' | xargs 2>/dev/null || true)
+        
+        # Check for empty/dash in both Tasks and Tests
+        local tasks_empty=false tests_empty=false
+        if [[ -z "$tasks_col" || "$tasks_col" == "—" || "$tasks_col" == "-" ]]; then
+            tasks_empty=true
+        fi
+        if [[ -z "$tests_col" || "$tests_col" == "—" || "$tests_col" == "-" ]]; then
+            tests_empty=true
+        fi
+        
+        if [[ "$tasks_empty" == "true" && "$tests_empty" == "true" ]]; then
+            add_warning "Traceability Map: $req_id has no TASK or TEST entries (uncovered requirement)"
+        fi
+        
+        # Check for empty/dash in both Risk and Failure Mode
+        local risk_empty=false fm_empty=false
+        if [[ -z "$risk_col" || "$risk_col" == "—" || "$risk_col" == "-" ]]; then
+            risk_empty=true
+        fi
+        if [[ -z "$fm_col" || "$fm_col" == "—" || "$fm_col" == "-" ]]; then
+            fm_empty=true
+        fi
+        
+        if [[ "$risk_empty" == "true" && "$fm_empty" == "true" ]]; then
+            add_warning "Traceability Map: $req_id has no RISK or FM entries (no risk analysis)"
+        fi
+        
+    done <<< "$data_rows"
+    
+    return 0
+}
+
 # Main validation - run all tests (use || true to prevent set -e from exiting)
 test_frontmatter || true
 test_value_statement || true
@@ -290,6 +406,7 @@ test_section_order || true
 test_label_usage || true
 test_open_questions || true
 test_status_values || true
+test_traceability_map || true
 
 # Output results
 echo ""

@@ -218,11 +218,17 @@ When a subagent returns a HARD BLOCK or the planner itself identifies a blocking
   9. Dependencies (DEP-*)
   10. Files (FILE-*)
   11. Tests (TEST-*)
-  12. Risks (RISK-*)
+  12. **Risks (RISK-*)**:
+      - Include a **Failure Modes (FM-*)** subsection — REQUIRED for all plans
+      - Each FM-* entry: identifier, failure description, impact, mitigating RISK-*/TASK-* reference
+      - "None identified" is acceptable when no failure modes apply
   13. Assumptions (ASSUMPTION-*)
   14. Open Questions (OPENQ-*)
   15. Approval & Sign-off
-  16. Traceability Map (recommended)
+  16. **Traceability Map (required)**:
+      - Format: `| Requirement | Tasks | Tests | Risk | Failure Mode |`
+      - MUST include ALL REQ-* entries from the Requirements section
+      - Cells may contain multiple comma-separated references or `—` for N/A
 - **Label usage**: All requirements, constraints, tasks, etc. MUST use labeled prefixes.
 - **TASK numbering**: Global across all phases (TASK-001, TASK-002... continuous).
 - **GOAL numbering**: One GOAL per phase, 1:1 mapping.

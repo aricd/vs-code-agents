@@ -4,6 +4,28 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-03-24 (Plan 003)
+
+### Added
+
+- **FM-* (Failure Mode) label prefix**: New required label for identifying how requirements or components can fail, with impact and mitigating references. FM-* is a required subsection within the Risks section (or "None identified").
+- **Traceability Map — new requirement-centric format**: Required columns are now `Requirement | Tasks | Tests | Risk | Failure Mode`. Every REQ-* must appear as a row, and all cross-references must resolve to existing labels in the plan body.
+- **Deep cross-reference validation in validators**: Both `validate-plan-template.sh` and `.ps1` now check that all TASK-*/TEST-*/RISK-*/FM-* references in the Traceability Map exist elsewhere in the plan. Missing references produce errors; missing risk analysis produces warnings.
+- **Backwards compatibility for old-format plans**: Plans using the old Phase→Files traceability map format (Plans 001, 002) are automatically detected by column headers and exempted from new validation checks.
+
+### Changed
+
+- **Traceability Map changed from recommended to required**: Section 16 in the plan template is now mandatory (structured-labeling skill updated).
+- **`plan-status-reporting` skill**: Removed Phase→File traceability map guidance. File verification now uses the FILE-* section instead.
+- **`planner.agent.md`**: Updated section ordering to show Traceability Map as required, added FM-* guidance in Risks section documentation, specified required Traceability Map columns.
+- **`critic.agent.md`**: Added Traceability Map validation to template checks — verifies correct columns, all REQs present, cross-references resolve, and FM-* subsection exists.
+- **Validation checklist in structured-labeling skill**: Added four new items for Traceability Map compliance.
+
+### Fixed
+
+- **`validate-plan-template.sh`**: Fixed section extraction regex to match `## Traceability Map` specifically rather than any heading containing "Traceability Map" (prevented false positive matches on plan titles).
+- **`validate-plan-template.ps1`**: Same fix applied to PowerShell version.
+
 ## 2026-03-24
 
 ### Added

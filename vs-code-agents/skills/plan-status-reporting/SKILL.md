@@ -122,9 +122,7 @@ If only forbidden evidence exists, set status to `Unknown` with a note explainin
 You may ONLY claim `Implemented (verified)` when you can point to at least ONE of:
 - Expected files/paths exist and are relevant to the milestone
 - A `git diff` / `git log` trail shows modifications consistent with the milestone
-- A plan-provided traceability map exists and matches repo state
-
-If a Traceability Map is present in the plan, prefer using it to identify expected files/globs rather than guessing file locations.
+- A plan-provided FILE-* section exists and expected files/paths match repo state
 
 If verification is not possible, set status to `Unknown` with a short note.
 
@@ -147,24 +145,6 @@ Rules:
    - If a plan is `Blocked` or has `Unknown` milestones due to missing traceability/evidence, include an early step to resolve that (e.g., add traceability map, locate files, run safe checks) before suggesting implementation.
    - Do not propose steps that assume unverified implementation is complete.
 5. If there are fewer than five meaningful actions, fill remaining slots with explicit admin/coordination actions (e.g., "Confirm priorities with user", "Await user approval") rather than inventing technical work.
-
----
-
-## Traceability Map (Recommended)
-
-For easier verification, plans SHOULD include a traceability map linking milestones to expected file paths or symbols:
-
-```text
-## Traceability Map
-| Milestone | Expected Files/Globs |
-|-----------|---------------------|
-| 1. Create service | `src/services/auth/*.ts` |
-| 2. Add tests | `tests/auth/*.test.ts` |
-```
-
-When present, the traceability map accelerates evidence-based status checks by providing expected file paths per milestone. Use it to quickly verify implementation status without scanning the entire repository.
-
-If a plan lacks a traceability map, do NOT guess file locations. Report `Unknown` if verification is impossible.
 
 ---
 
@@ -208,7 +188,7 @@ Suggested Next 5 Steps (ordered):
 When evidence is incomplete or unavailable:
 
 1. **Missing agent-output folders**: Acceptable. Report what you can verify from repo state.
-2. **Missing traceability in plan**: Set milestone status to `Unknown` rather than guessing.
+2. **Missing FILE-* section in plan**: Set milestone status to `Unknown` rather than guessing file locations.
 3. **No test outputs anywhere**: Report `Tests/linters: not run/unknown (no captured outputs found)`.
 4. **Conflicting evidence**: Prefer repository evidence over artifact text; note the conflict.
 

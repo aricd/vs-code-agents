@@ -14,6 +14,7 @@ Target Release: N/A (test fixture)
 | Date | Agent | Change | Notes |
 |---|---|---|---|
 | 2026-02-09 | Planner | Created | Test fixture for validator parity |
+| 2026-03-24 | Implementer | Updated | Added FM-* and new Traceability Map format |
 
 ## Value Statement and Business Objective
 As a validator maintainer, I want a known-good plan fixture, so that I can verify validators pass valid plans.
@@ -24,7 +25,8 @@ Provide a minimal valid plan that passes both PowerShell and bash validators.
 ## Requirements & Constraints
 
 - **REQ-001**: This fixture must pass validation
-- **CON-001**: Must include all required sections
+- **REQ-002**: Must include all required sections
+- **CON-001**: Must follow structured-labeling template
 
 ## Contracts (CONTRACT-*)
 **CONTRACT-001**: No contracts for this test fixture.
@@ -37,12 +39,13 @@ Provide a minimal valid plan that passes both PowerShell and bash validators.
 
 ## Implementation Plan
 
-### Phase 1 — Test Setup
+### Phase 1 - Test Setup
 GOAL-001: Create valid fixture
 
 | Task | Description | Status | Owner | Date |
 |---|---|---|---|---|
 | TASK-001 | Create fixture file | complete | planner | 2026-02-09 |
+| TASK-002 | Add required sections | complete | planner | 2026-02-09 |
 
 ## Alternatives (ALT-*)
 - **ALT-001**: None considered (test fixture).
@@ -51,24 +54,29 @@ GOAL-001: Create valid fixture
 - **DEP-001**: None.
 
 ## Files (FILE-*)
-- **FILE-001**: `scripts/test-fixtures/valid-plan.md` (this file)
+- **FILE-001**: scripts/test-fixtures/valid-plan.md (this file)
 
 ## Tests (TEST-*)
-- **TEST-001**: Run validators against this file → PASS
+- **TEST-001**: Run validators against this file - PASS
+- **TEST-002**: Verify traceability map validation works
 
 ## Risks (RISK-*)
 - **RISK-001**: None (test fixture).
+
+### Failure Modes (FM-*)
+- **FM-001**: Validator rejects valid plan - Impact: false negatives. Mitigated by: TASK-001, TEST-001
 
 ## Assumptions (ASSUMPTION-*)
 - **ASSUMPTION-001**: Both validators are available.
 
 ## Open Questions (OPENQ-*)
-- **OPENQ-001 [RESOLVED]**: Is this fixture complete? → Yes.
+- **OPENQ-001 [RESOLVED]**: Is this fixture complete? - Yes.
 
 ## Approval & Sign-off
 - User: N/A (test fixture)
 
 ## Traceability Map
-| Task | Expected Files/Symbols |
-|---:|---|
-| 1 | `scripts/test-fixtures/valid-plan.md` |
+| Requirement | Tasks | Tests | Risk | Failure Mode |
+|-------------|-------|-------|------|--------------|
+| REQ-001 (valid) | TASK-001, TASK-002 | TEST-001, TEST-002 | RISK-001 | FM-001 |
+| REQ-002 (sections) | TASK-002 | TEST-001 | - | - |

@@ -68,6 +68,7 @@ All agents producing `.agent-output/` artifacts MUST use these prefixes when app
 |--------|------|------------|---------|
 | `ALT-*` | Alternative | Alternative approach considered, with rationale and execution implications | `ALT-001: Store state in SQLite (rejected: over-engineering)` |
 | `RISK-*` | Risk | Identified risk with mitigation strategy | `RISK-001: Template friction initially → mitigate with examples` |
+| `FM-*` | Failure Mode | Specific way a requirement or component can fail, with impact and mitigating reference | `FM-001: Validator rejects valid old-format plans — Impact: blocks DevOps. Mitigated by RISK-002, TASK-014` |
 | `ASSUMPTION-*` | Assumption | Explicit assumption (MUST NOT be buried in prose) | `ASSUMPTION-001: Agents can load skills by name` |
 | `OPENQ-*` | Open Question | Explicitly unanswered question; MUST be listed before handoff | `OPENQ-001: Should REQ lists be capped at 10?` |
 
@@ -136,7 +137,48 @@ Planner's plan output MUST follow this section order. Sections may be omitted on
 | 13 | Assumptions (ASSUMPTION-*) | ✅ Always | Explicit assumptions |
 | 14 | Open Questions (OPENQ-*) | ✅ Always | Unresolved questions |
 | 15 | Approval & Sign-off | ✅ Always | User/Critic/Architect tracking |
-| 16 | Traceability Map | ⚠️ Recommended | Phase→File mapping |
+| 16 | Traceability Map | ✅ Always | Requirement-centric cross-reference matrix |
+
+### Failure Modes (FM-*) — Required Subsection within Risks
+
+The Risks section (Section 12) MUST include a **Failure Modes (FM-*)** subsection. This subsection identifies specific ways that requirements or components can fail.
+
+**Required for all plans**: FM-* is mandatory. If no failure modes apply, state "None identified."
+
+**Each FM-* entry MUST include:**
+- **Identifier**: FM-NNN (numbering restarts at FM-001 per plan, like RISK-*)
+- **Failure description**: What specifically fails
+- **Impact**: Consequence of the failure (e.g., "blocks DevOps", "causes data loss")
+- **Mitigating reference**: RISK-* or TASK-* that addresses this failure mode
+
+**Example FM-* subsection:**
+```markdown
+### Failure Modes (FM-*)
+
+- FM-001: Validator rejects valid old-format plans — Impact: blocks DevOps on existing work. Mitigated by: RISK-002, TASK-014
+- FM-002: Cross-reference check produces false positives — Impact: plan authors waste time debugging. Mitigated by: RISK-001, TEST-001
+```
+
+### Traceability Map — Required Format
+
+The Traceability Map (Section 16) MUST use a requirement-centric format linking requirements to their implementing tasks, tests, associated risks, and failure modes.
+
+**Required columns:** `Requirement | Tasks | Tests | Risk | Failure Mode`
+
+**Rules:**
+- Every REQ-* from the Requirements section MUST appear as a row
+- Cells may contain multiple comma-separated references (e.g., `TASK-001, TASK-002`)
+- Use `—` (em-dash) for N/A cells (e.g., a requirement with no associated risk)
+- All TASK-*/TEST-*/RISK-*/FM-* references in the map MUST exist elsewhere in the plan
+
+**Example Traceability Map:**
+```markdown
+| Requirement | Tasks | Tests | Risk | Failure Mode |
+|-------------|-------|-------|------|--------------|
+| REQ-001 (Validation required) | TASK-001, TASK-002 | TEST-001, TEST-002 | RISK-001 | FM-001 |
+| REQ-002 (Backwards compat) | TASK-003 | TEST-003, TEST-004 | RISK-002 | FM-001 |
+| REQ-003 (Documentation) | TASK-004 | — | — | — |
+```
 
 ---
 
@@ -308,6 +350,10 @@ Before handoff, verify:
 - [ ] No unresolved OPENQ-* without user acknowledgment
 - [ ] BACKCOMPAT decision explicitly stated
 - [ ] TEST-SCOPE defined (even if "unit tests only")
+- [ ] All REQ-* from Requirements section appear as rows in the Traceability Map
+- [ ] All TASK-*/TEST-*/RISK-*/FM-* references in the Traceability Map exist in the plan body
+- [ ] FM-* subsection present in Risks section (or states "None identified")
+- [ ] No REQ row in Traceability Map missing both TASK and TEST entries
 
 ### For All Artifacts
 

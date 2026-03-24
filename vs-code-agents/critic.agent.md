@@ -69,6 +69,13 @@ Review Method:
    - **OPENQ handling**: Scan for all OPENQ-* items not marked `[RESOLVED]` or `[CLOSED]`:
      - List prominently in critique under "Unresolved Open Questions" section
      - Check if any unresolved OPENQ exist in CONTRACT/BACKCOMPAT sections (hard-gate failure)
+   - **Traceability Map validation**:
+     - Verify Traceability Map has correct columns: `Requirement | Tasks | Tests | Risk | Failure Mode`
+     - Verify ALL REQ-* from Requirements section appear as rows in the map
+     - WARN on any REQ row missing both TASK and TEST entries (uncovered requirement)
+     - Verify all TASK-*/TEST-*/RISK-*/FM-* references in map cells exist elsewhere in the plan
+   - **Failure Modes validation**:
+     - Verify FM-* subsection exists in Risks section (or states "None identified")
    - Document all template findings in critique with severity (C-*/H-*/M-* per structured-labeling)
    - **REJECT** plans that violate critical template rules (missing required sections, hard-gate OPENQ failures)
 6. Execute review:

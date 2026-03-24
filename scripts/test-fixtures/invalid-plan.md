@@ -12,6 +12,7 @@ Epic Alignment: Testing / Validator parity
 | Date | Agent | Change | Notes |
 |---|---|---|---|
 | 2026-02-09 | Planner | Created | Intentionally invalid fixture |
+| 2026-03-24 | Implementer | Updated | Added traceability map violation |
 
 ## Value Statement
 This plan intentionally omits the "As a [user], I want..." format.
@@ -28,6 +29,11 @@ GOAL-001: Missing required sections
 ## Open Questions (OPENQ-*)
 - **OPENQ-001**: Unresolved question without resolution marker
 
+## Traceability Map
+| Requirement | Tasks | Tests | Risk | Failure Mode |
+|-------------|-------|-------|------|--------------|
+| REQ-999 (nonexistent) | TASK-999 | TEST-999 | RISK-999 | FM-999 |
+
 <!-- 
 INTENTIONAL ERRORS IN THIS FIXTURE:
 1. Missing UUID in frontmatter
@@ -36,4 +42,5 @@ INTENTIONAL ERRORS IN THIS FIXTURE:
    Backwards Compatibility, Testing Scope, Dependencies, Files, 
    Tests, Risks, Assumptions, Approval & Sign-off
 4. Unresolved OPENQ-001
+5. Traceability Map references REQ-999, TASK-999, TEST-999, RISK-999, FM-999 which don't exist
 -->
