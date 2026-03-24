@@ -42,18 +42,29 @@ Each agent has **clear constraints** (Planner can't write code, Implementer can'
 
 Use as many or as few as you need, in any order. They are designed to know their own role and work together with other agents in this repo. They are designed to work together to create a structured and auditable development process. They are also designed to challenge each other to ensure the best possible outcome.
 
+## Requirements
+
+| Requirement | Minimum |
+|-------------|---------|
+| **VS Code** | **1.110** or later (agent plugins introduced in [v1.110 — February 2026](https://code.visualstudio.com/updates/v1_110#_agent-plugins-experimental)) |
+| **GitHub Copilot** | Active subscription with the GitHub Copilot Chat extension installed |
+| **Setting** | `chat.plugins.enabled` must be `true` (plugins are currently a Preview feature) |
+
+> [!TIP]
+> Option B (copy to workspace) works on any VS Code version that supports custom agents and skills (v1.107+). The v1.110 requirement applies only to the Plugin install method.
+
 ## Quick Start
 
 ### Option A: Install as a Plugin (Recommended)
 
-1. Open VS Code and ensure `chat.plugins.enabled` is `true` in your settings
+1. Open VS Code **1.110+** and ensure `chat.plugins.enabled` is `true` in your settings
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Chat: Install Plugin From Source**
 4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
 5. All 13 agents and 19 skills are immediately available in Copilot Chat
 
 > [!NOTE]
-> Agent Plugins are currently a Preview feature. You must enable `chat.plugins.enabled` in VS Code settings.
+> Agent Plugins are currently a Preview feature in VS Code 1.110+. You must enable `chat.plugins.enabled` in VS Code settings.
 
 ### Option B: Copy to Your Project (Per-Workspace)
 
