@@ -213,6 +213,64 @@ This is the recommended workflow for any structured, multi-step delivery effort.
 
 ---
 
+## Plugin Testing
+
+Scripts for validating plugin structure and verifying VS Code integration.
+
+### Level 1: Smoke Tests (Structural Validation)
+
+Validates plugin files without launching VS Code:
+
+```bash
+# Basic validation (agents/, skills/, hooks, plugin.json)
+./scripts/smoke-test-plugin.sh
+
+# Also validate canonical source directory
+./scripts/smoke-test-plugin.sh --canonical
+
+# Check for drift between canonical and plugin copies
+./scripts/smoke-test-plugin.sh --sync-check
+```
+
+PowerShell equivalent:
+```powershell
+./scripts/smoke-test-plugin.ps1
+./scripts/smoke-test-plugin.ps1 -Canonical
+./scripts/smoke-test-plugin.ps1 -SyncCheck
+```
+
+### Level 2: Install Probe (VS Code Integration)
+
+Creates a temporary VS Code profile with the plugin registered for manual verification:
+
+```bash
+# Generate instructions for manual verification
+./scripts/install-probe.sh
+
+# Launch VS Code with the temporary profile
+./scripts/install-probe.sh --launch
+```
+
+After VS Code opens:
+1. Open Copilot Chat (`Ctrl+Shift+I`)
+2. Open Chat Diagnostics: Command Palette → `Chat: Show Chat Diagnostics`
+3. Verify all 13 agents and 19 skills appear in the diagnostics view
+
+### Level 3: Post-Install Discovery (Future)
+
+Automated verification that VS Code discovered the plugin is not yet available. VS Code does not currently provide a headless API to query loaded plugins programmatically.
+
+**Recommended future approach**: A custom VS Code test extension that queries the `chat.plugins` API and runs in CI via `@vscode/test-electron`.
+
+### Chat Diagnostics Reference
+
+To manually verify plugin loading at any time:
+1. Open Command Palette (`Ctrl+Shift+P`)
+2. Run `Chat: Show Chat Diagnostics`
+3. Expand the "Plugins" section to see registered plugins and their agents/skills
+
+---
+
 ## Migrating from Workspace-Level Agents to Plugin
 
 If you previously copied agent files into `.github/agents/` or `~/.config/Code/User/`, you may see duplicate agents after installing the plugin. To resolve:

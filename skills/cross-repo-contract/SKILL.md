@@ -1,3 +1,8 @@
+---
+name: cross-repo-contract
+description: Guidelines for implementing or consuming APIs that span multiple repositories. Covers contract discovery, standard structure, implementation guidelines, contract sync, and type validation.
+---
+
 # Cross-Repository API Contract Skill
 
 ## Purpose

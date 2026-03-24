@@ -1,4 +1,3 @@
-```skill
 ---
 name: executive-summary
 description: Generate an approval-time executive summary from an active plan. Produces a concise Markdown summary in chat (not a file) covering scope, phases, assumptions, alternatives, risks, and open questions before asking for user approval.
@@ -291,5 +290,3 @@ Before emitting the summary, verify:
 - [ ] No verbatim plan copy
 - [ ] No new requirements introduced
 - [ ] USER-TASK items not hidden
-
-```

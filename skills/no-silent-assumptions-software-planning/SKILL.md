@@ -1,5 +1,5 @@
 ---
-name: no-silent-assumptions.software-planning
+name: no-silent-assumptions-software-planning
 description: Prevents silent scope assumptions during software planning. Forces explicit Proposed Contracts, backwards-compatibility decisions, test-scope confirmation, and clearly labeled assumptions using low-friction, default-friendly questioning. Designed for Planner-first use and plan-wide consumption by other agents.
 license: MIT
 metadata:

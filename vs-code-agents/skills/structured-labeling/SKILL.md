@@ -1,4 +1,3 @@
-```skill
 ---
 name: structured-labeling
 description: Defines required label prefixes, numbering rules, section ordering, status enum, and approval tracking for all agent-output artifacts. Authoritative source for plan template compliance.
@@ -356,6 +355,4 @@ GOAL-001: [Phase objective]
 ```markdown
 - OPENQ-001 [RESOLVED]: Should X do Y? → Answer: Yes, because Z.
 - OPENQ-002 [CLOSED]: Not applicable for this scope.
-```
-
 ```

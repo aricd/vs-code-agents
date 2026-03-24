@@ -4,6 +4,24 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-03-24
+
+### Added
+
+- **`scripts/smoke-test-plugin.sh`**: Bash smoke test script validating plugin structure (plugin.json, agent frontmatter, skill frontmatter, hooks.json, no stale references, no duplicate agent names). Supports `--canonical` flag to validate source directory and `--sync-check` flag to detect drift between canonical and plugin copies.
+- **`scripts/smoke-test-plugin.ps1`**: PowerShell equivalent with identical checks and output format.
+- **`scripts/install-probe.sh`**: Level 2 install probe that creates a temporary VS Code user-data directory with plugin settings for manual verification. Supports `--launch` flag to auto-launch VS Code.
+- **`scripts/install-probe.ps1`**: PowerShell equivalent of the install probe.
+- **Plugin Testing documentation**: New "Plugin Testing" section in README.md covering smoke tests, install probe, Level 3 gap, and Chat Diagnostics reference.
+
+### Fixed
+
+- **`vs-code-agents/skills/analysis-methodology/SKILL.md`**: Added missing YAML frontmatter (`name`, `description`) — skill was not discoverable by VS Code.
+- **`vs-code-agents/skills/cross-repo-contract/SKILL.md`**: Added missing YAML frontmatter — skill was not discoverable by VS Code.
+- **`vs-code-agents/skills/no-silent-assumptions-software-planning/SKILL.md`**: Changed `name: no-silent-assumptions.software-planning` to `name: no-silent-assumptions-software-planning` (hyphens) to match directory name.
+- **`vs-code-agents/skills/executive-summary/SKILL.md`**: Removed code fence wrapping (` ```skill `) so frontmatter is at document boundary where VS Code expects it.
+- **`vs-code-agents/skills/structured-labeling/SKILL.md`**: Removed code fence wrapping — same fix as executive-summary.
+
 ## 2026-03-20
 
 ### Added

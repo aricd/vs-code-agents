@@ -1,3 +1,8 @@
+---
+name: analysis-methodology
+description: A systematic approach to converting unknowns to knowns through structured investigation. Provides confidence levels, gap tracking, investigation techniques, and handoff protocols for analysis work.
+---
+
 # Analysis Methodology
 
 A systematic approach to converting unknowns to knowns through structured investigation.
