@@ -2,7 +2,7 @@
 ID: 4
 Origin: 4
 UUID: d3f7a92e
-Status: RESOLVED
+Status: Resolved
 ---
 
 # Critique: Plan 004 — Remove Handoffs & Elevate Planner to Default Orchestrator
@@ -10,12 +10,13 @@ Status: RESOLVED
 | Date | Handoff | Request | Summary |
 |------|---------|---------|---------|
 | 2026-03-24 | User → Critic | Initial review | Review for clarity, completeness, and architectural alignment |
+| 2026-09-15 | Critic | Document closed | Status: Resolved (findings resolved at Rev 1) |
 
 ---
 
 ## Artifact Under Review
 
-- **Plan**: [.agent-output/planning/004-remove-handoffs-orchestrator-planner.md](../planning/004-remove-handoffs-orchestrator-planner.md)
+- **Plan**: [.agent-output/planning/closed/004-remove-handoffs-orchestrator-planner.md](../../planning/closed/004-remove-handoffs-orchestrator-planner.md)
 - **Analysis**: N/A (plan originated from user request)
 - **Review Date**: 2026-03-24
 - **Status**: Initial Review

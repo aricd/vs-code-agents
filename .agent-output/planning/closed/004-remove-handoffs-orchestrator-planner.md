@@ -2,7 +2,7 @@
 ID: 4
 Origin: 4
 UUID: d3f7a92e
-Status: UAT Approved
+Status: Committed
 
 # Approval Tracking
 User_Approved: true
@@ -11,8 +11,8 @@ Critic_Approved: true
 Critic_Approved_Date: 2026-03-24
 UAT_Approved: true
 UAT_Approved_Date: 2026-03-24
-DevOps_Committed: false
-DevOps_Committed_Date: null
+DevOps_Committed: true
+DevOps_Committed_Date: 2026-09-15
 ---
 
 # Plan 004 — Remove Handoffs & Elevate Planner to Default Orchestrator
@@ -22,6 +22,7 @@ DevOps_Committed_Date: null
 | 2026-03-24 | Initial draft | Plan created from user request |
 | 2026-03-24 | Rev 1 — Critic findings | Address M-001 (split TASK-014), M-002 (standardize grep), M-003 (add delegation contract reminder), L-001 (normalize section headings) |
 | 2026-03-24 | Rev 2 — QA complete | QA executed TEST-001..TEST-005 and additional checks; QA status set to QA Complete |
+| 2026-09-15 | Document closed | Status: Committed (DevOps closure; changes committed in ab38bc6) |
 
 ---
 

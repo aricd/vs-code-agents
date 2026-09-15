@@ -2,12 +2,12 @@
 ID: 4
 Origin: 4
 UUID: d3f7a92e
-Status: UAT Complete
+Status: Committed
 ---
 
 # UAT Report: Plan 004 — Remove Handoffs & Elevate Planner to Default Orchestrator
 
-**Plan Reference**: `.agent-output/planning/004-remove-handoffs-orchestrator-planner.md`
+**Plan Reference**: `.agent-output/planning/closed/004-remove-handoffs-orchestrator-planner.md`
 **Date**: 2026-03-24
 **UAT Verdict**: APPROVED FOR RELEASE
 
@@ -16,6 +16,7 @@ Status: UAT Complete
 | Date | Agent | Request | Summary |
 |------|-------|---------|---------|
 | 2026-03-24 | Planner → UAT | Validate value delivery | UAT Complete — all 6 scenarios pass, approved for release |
+| 2026-09-15 | DevOps | Document closed | Status: Committed |
 
 ## Value Statement Under Test
 

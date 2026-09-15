@@ -2,15 +2,15 @@
 ID: 4
 Origin: 4
 UUID: d3f7a92e
-Status: QA Complete
+Status: Committed
 ---
 
 # QA Report: Plan 004 — Remove Handoffs & Elevate Planner to Default Orchestrator
 
-**Plan Reference**: `.agent-output/planning/004-remove-handoffs-orchestrator-planner.md`
-**Critique Reference**: `.agent-output/critiques/004-remove-handoffs-orchestrator-planner-critique.md`
+**Plan Reference**: `.agent-output/planning/closed/004-remove-handoffs-orchestrator-planner.md`
+**Critique Reference**: `.agent-output/critiques/closed/004-remove-handoffs-orchestrator-planner-critique.md`
 **Code Review Reference**: `.agent-output/code-reviews/004-remove-handoffs-orchestrator-planner-review.md`
-**Implementation Reference**: `.agent-output/implementation/004-remove-handoffs-orchestrator-planner-impl.md`
+**Implementation Reference**: `.agent-output/implementation/closed/004-remove-handoffs-orchestrator-planner-impl.md`
 **QA Status**: QA Complete
 **QA Specialist**: qa
 
@@ -21,6 +21,7 @@ Status: QA Complete
 | 2026-03-24 | User | QA validation for Plan 004 | Hard blocked at TDD compliance gate due to missing implementation doc and code review artifact. |
 | 2026-03-24 | User | QA re-validation for Plan 004 | Implementation + code review docs now exist; QA remains hard blocked because the implementation doc’s TDD Compliance section does not include the mandatory QA-mode table format. Plan template validation passed. |
 | 2026-03-24 | User | QA validation of ready artifacts | Executed validation pre-check + TEST-001..TEST-005 + additional YAML/frontmatter and Critic-gate checks; all PASS. |
+| 2026-09-15 | DevOps | Document closed | Status: Committed |
 
 ## Timeline
 - **Test Strategy Started**: 2026-03-24
