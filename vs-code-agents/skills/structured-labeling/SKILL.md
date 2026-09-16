@@ -78,6 +78,7 @@ These prefixes are **artifact-local**: they are used inside a Criterion Ledger w
 
 | Prefix | Name | Definition | Example |
 |--------|------|------------|---------|
+| `TARGET-*` | Criterion Target | What the criterion is applied to (working tree, remote, branch, directory, document set), confirmed by a command run now and marked `user-stated` or `INHERITED` | `TARGET-001 (INHERITED): /home/user/proj @ main, origin github.com/acme/proj` |
 | `CRIT-*` | Stated Criterion | The user's scope criterion quoted **verbatim**, plus the mechanical per-candidate test it implies | `CRIT-001: "all python files that may be executed when interpreting specs"` |
 | `PROXY-*` | Declared Proxy Test | A test that differs from `CRIT-*`; declared before use, blocked until the user accepts it | `PROXY-001: "modules that own domain semantics" - narrower than CRIT-001, NOT APPLIED` |
 | `EXCL-*` | Exclusion Class | Why a candidate failed the stated criterion. Valid values only: `EXCL-FAILS-TEST`, `EXCL-UNREACHABLE`, `EXCL-NOT-IN-POPULATION`, `EXCL-USER-DIRECTED` | `EXCL-UNREACHABLE: nav_math.py - no live caller (grep: 0 hits outside legacy test)` |

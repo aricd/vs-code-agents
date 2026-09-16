@@ -4,6 +4,21 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-09-16 (follow-up)
+
+### Added
+
+- **`TARGET-*` — the criterion's target is now part of the ledger** (`literal-intent-fidelity` skill): a criterion always applies to *something* (a working tree, remote, branch, directory, or document set), and when that target is inherited rather than stated, every downstream step can be flawless while the whole result lands somewhere the user did not mean. New Step 0 in the Criterion Ledger, a "The Target Is Part of the Criterion" section covering the common sources of inherited targets (session/tooling binding, fork vs. abandoned remote, canonical vs. generated copies, branch drift, a prior task's target), and a graduated rule: quote a user-stated target, **disclose** an inherited one in a single line before the first edit, and **ask** when more than one plausible target exists.
+- **`TARGET-*` prefix registered** in the `structured-labeling` skill's Scope & Criterion Fidelity table, and added to the ledger template's field rules and both ledger forms.
+- **Second case study** in `references/worked-example-scope-substitution.md`: a target-substitution incident in which the work itself was entirely correct but was applied to a clone of an abandoned remote rather than the user's working repository, undetectable from the work product because the work product was correct. Includes the canonical-vs-generated-copy near-miss from the same task.
+
+### Changed
+
+- **`planner.agent.md`**: Process step 5b now leads with `TARGET-001` before `CRIT-001`.
+- **`architect.agent.md`**: notes that in projects with canonical sources plus generated/mirrored copies, which copy is edited is a target decision — edits to a generated copy are reverted by the next sync.
+- **`[MDT Literal-Criterion Check]` hook block** (bash + PowerShell): adds a line requiring the target to be stated before the first edit.
+- **`README.md`**: Literal Intent Fidelity feature section describes the target rule.
+
 ## 2026-09-16
 
 ### Added

@@ -51,6 +51,7 @@ This prompt states a scope criterion, or questions how stated intent was interpr
 Load the 'literal-intent-fidelity' skill BEFORE proposing or revising any scope, file list, target set, or include/exclude decision.
 Required: quote the criterion verbatim (CRIT-*); enumerate the candidate population now rather than from memory or a prior document; cite evidence for every verdict, exclusions included; declare any narrower or carried-over test as PROXY-* and do not apply it until the user accepts it.
 Role arguments ('it is only plumbing', 'it is a test harness', 'it does not own the domain semantics') are NOT valid exclusion reasons. Budget pressure is a COST-* decision, never a silent scope reduction.
+State the TARGET the criterion applies to (working tree, remote, branch) before the first edit: a target inherited from the session or a prior task is disclosed in one line, and an ambiguous one (fork vs. upstream, canonical source vs. generated copy) is asked about first.
 If the user is pushing back on a scope decision, re-run the FULL pass under their literal criterion - not only the items they named.
 '@
             $alertBlock = $alertBlock.TrimEnd("`r", "`n")

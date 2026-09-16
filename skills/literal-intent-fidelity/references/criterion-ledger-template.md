@@ -11,6 +11,14 @@ Keep it short. A ledger that is too long to read is a ledger nobody checks.
 ```md
 ## Scope Ledger
 
+### TARGET — what the criterion applies to
+
+TARGET-001 (user-stated | INHERITED - disclosing | ASK - ambiguous):
+  Working tree: <absolute path>
+  Remote:       <url> (<remote name>)   # omit for non-repo targets
+  Branch/ref:   <branch>
+  Confirmed by: <command(s) run now>
+
 ### CRIT — the user's criterion, verbatim
 
 CRIT-001 (verbatim, <source: user turn / plan REQ-00X / issue #N>):
@@ -63,6 +71,7 @@ IN: <n> | OUT: <n> | IN-but-sampled/deferred: <n> (see COST-001)
 
 | Field | Rule |
 |-------|------|
+| `TARGET-*` | Required. Confirmed by a command run now, never assumed. Mark it `user-stated` or `INHERITED`; an inherited target is disclosed in one line before work proceeds, and an ambiguous one (fork vs. upstream, canonical vs. generated copy, two checkouts) is asked about before work begins. |
 | `CRIT-*` | Verbatim only. If it is not in quotation marks and copied exactly, it is not a CRIT. |
 | `CRIT-* test` | Must be applicable by someone else without asking you what you meant. |
 | `CRIT-* population` | Must name how the list was produced *for this request* (a command, a directory walk, a route dump) and when. |
@@ -79,8 +88,9 @@ IN: <n> | OUT: <n> | IN-but-sampled/deferred: <n> (see COST-001)
 For small decisions, a one-line form is acceptable and still satisfies the skill:
 
 ```md
+TARGET-001 (inherited): ~/src/billing @ feature/audit-trail, origin git@github.com:acme/billing
 CRIT-001 "every handler that writes to the audit log" -> tested by: grep for `audit.write(` call sites
 (14 handlers enumerated via `rg -l 'audit\.write\('`; 14 IN, 0 OUT; PROXY none; DRIFT none)
 ```
 
-The obligation is not the table — it is the **verbatim criterion, the mechanical test, the enumerated population, and cited verdicts**. Use whichever form carries those four things.
+The obligation is not the table — it is the **confirmed target, the verbatim criterion, the mechanical test, the enumerated population, and cited verdicts**. Use whichever form carries those five things.

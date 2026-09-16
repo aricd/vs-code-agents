@@ -206,6 +206,8 @@ Critic reviews plans. Security audits code. QA verifies tests. Nothing ships wit
 ### 🎯 Literal Intent Fidelity
 When you state a criterion — *"all Python files that may be executed when interpreting specs"* — agents must test **those words**, not a narrower paraphrase of them. The `literal-intent-fidelity` skill requires the criterion to be quoted verbatim, the candidate list to be enumerated from the repository, and **every** verdict (inclusions and exclusions alike) to carry a citation. Role arguments ("it's just plumbing", "it's a test harness") are not valid exclusion reasons, and budget pressure is surfaced as an explicit cost decision instead of a quiet scope reduction.
 
+It also pins the **target** a criterion is applied to — working tree, remote, branch, canonical source vs. generated copy. A target inherited from the session or a prior task is disclosed in one line before the first edit, and an ambiguous one is asked about, because a flawless answer about the wrong repository is still the wrong answer.
+
 A `UserPromptSubmit` hook detects stated criteria and scope pushback in your prompt and injects a `[MDT Literal-Criterion Check]` reminder, so the guardrail applies even when the agent would not have thought to load the skill.
 
 ### 🔄 Handoffs

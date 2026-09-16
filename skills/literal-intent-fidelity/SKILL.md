@@ -21,6 +21,7 @@ Its goals are to:
 - Force every include/exclude verdict to carry **locatable evidence**
 - Make any deviation from the stated criterion **visible and approvable** before it affects the outcome
 - Separate **scope** decisions (what the criterion says) from **cost** decisions (what fits the budget), which are routinely and silently conflated
+- Pin the **target** the criterion is applied to, so a correct answer is not delivered about the wrong repository, branch, or working tree
 
 ### Relationship to `no-silent-assumptions-software-planning`
 
@@ -85,9 +86,57 @@ The literal scope is larger than the available budget (delegations, tokens, time
 
 ---
 
+## The Target Is Part of the Criterion
+
+The three modes above are all ways of getting the **test** wrong. There is a fourth failure one level up, and it is more expensive because nothing in the ledger detects it:
+
+> **Target substitution** — the criterion is applied perfectly, to the wrong thing.
+
+A criterion always applies to *something*: a repository, a working tree, a branch, a directory, a document set, an environment, a deployment. When that target is **inherited rather than stated**, every downstream step can be flawless and the whole result still lands somewhere the user did not mean.
+
+### Where inherited targets come from
+
+| Source | Example |
+|--------|---------|
+| Session or tooling binding | The agent was started against one checkout; the user is working in another |
+| A fork, mirror, or abandoned remote | Work lands on `origin` while the user's real tree is local, or vice versa |
+| Canonical vs. generated copies | A repo with a canonical source directory and generated/discoverable copies — editing the copy means the next sync silently reverts it |
+| Branch or ref drift | The criterion is applied to `main` while the user means their feature branch |
+| A prior task's target | The last request's repo, directory, or document set stays selected |
+
+### The rule (one line of friction, not a question)
+
+| Situation | Required action |
+|-----------|-----------------|
+| The user named the target | Quote it in `TARGET-*`, alongside the criterion |
+| The user did not name it, and one plausible target exists | **State the target you are using, in one line, in the first response that acts on it.** Do not ask — disclose |
+| The user did not name it, and **more than one** plausible target exists (fork vs. upstream, canonical vs. generated copy, two checkouts, multiple branches) | **Ask before acting.** Guessing here is unrecoverable work, not a recoverable detail |
+
+### Target evidence
+
+A target is confirmed by evidence, not by assumption. For a repository, that is the absolute path of the working tree, the remote it points at, and the branch — the output of a command run *now*:
+
+```md
+TARGET-001 (inherited from session binding, NOT user-stated - disclosing):
+  Working tree: /home/user/vs-code-agents
+  Remote:       https://github.com/example/vs-code-agents (origin)
+  Branch:       feature/criterion-ledger
+  Confirmed by: git rev-parse --show-toplevel; git remote -v; git branch --show-current
+```
+
+Stating this costs one line. Omitting it costs the entire task.
+
+---
+
 ## Required Procedure — The Criterion Ledger
 
-Run these seven steps before presenting any scope, selection, or filter result.
+Run these steps before presenting any scope, selection, or filter result.
+
+### 0. Establish the target (`TARGET-*`)
+
+Before applying anything, pin **what the criterion applies to** — working tree, remote, branch, directory, or document set — and record whether the user stated it or the agent inherited it. An inherited target is disclosed in one line; an ambiguous one is asked about before any work begins (see *The Target Is Part of the Criterion*).
+
+A ledger with no `TARGET-*` is incomplete, however well the rest of it is executed.
 
 ### 1. Quote it (`CRIT-*`)
 
@@ -231,6 +280,7 @@ Rules:
 ```md
 ## Scope Ledger
 
+TARGET-001 (user-stated | inherited - disclosing): <working tree> @ <branch>, remote <url>
 CRIT-001 (verbatim, user turn N): "<exact user words>"
 CRIT-001 test: Include C iff <mechanical test>
 PROXY: none declared | PROXY-001 (pending user acceptance)
@@ -251,6 +301,7 @@ In scope: 20 | Out: 4 | Sampled under COST-001: 12 of 13
 
 ## Quick Self-Check (before presenting any scope)
 
+0. Do I know **what this applies to** — which repository, working tree, and branch — from evidence gathered now? Did the user state it, or did I inherit it? If inherited, have I said so out loud?
 1. Can I point to the user's **exact words** for this criterion, or am I working from my summary of them?
 2. Is my actual test **word-identical in meaning** to those words?
 3. Does any exclusion use a **category the user never used**?
@@ -264,6 +315,9 @@ Any "no" means the ledger is not ready to present.
 
 ## Forbidden Anti-Patterns
 
+- Applying a correct ledger to a target the user never named — inherited from a session binding, a prior task, a fork, or the first path that matched
+- Treating a session-provided or tool-provided target as user-stated
+- Editing a generated or mirrored copy when the canonical source is what the user meant
 - Paraphrasing the user's criterion into the ledger instead of quoting it
 - Applying a narrower test and reporting the result as an answer to the original request
 - Excluding items by role, kind, layer, or "spirit" rather than by the stated test

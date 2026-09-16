@@ -86,6 +86,35 @@ Scope went from 6 files to ~20 — past what the agreed delegation budget covere
 
 ---
 
+## Second incident — target substitution (the same failure one level up)
+
+The skill above was itself built during a session that reproduced the failure on a different axis.
+
+**The setup.** The agent was working on the repository that holds these agent and skill definitions. The session had been started against a cloud clone of a GitHub remote. The user's actual working repository was a checkout on their own machine, at a path the agent could not reach and had never been told about.
+
+**The substitution.** No criterion was misread this time. Every edit, the wiring, the hook, the doc updates, the smoke tests, the commit and the push were correct — and all of them landed in a repository the user considered abandoned. The agent never stated which working tree it was operating on, because the target had arrived through the session binding rather than through the request, and inherited context does not feel like an assumption.
+
+**The discovery.** Not through review. The user volunteered it:
+
+> "I realize I silently assumed something for a while now... I assumed we were talking about my repo here, not the abandoned github repo."
+
+Both sides had held the same unstated assumption from opposite directions. Nothing in the work product could have exposed it, because the work product was *correct* — just correct about the wrong thing.
+
+**The cost.** Every artifact had to be re-delivered as a patch for manual application, and the verification that mattered (does the PowerShell hook run?) could not be performed at all, because the agent was on the wrong operating system — a fact that follows directly from the wrong target and went unnoticed for the same reason.
+
+**The near-miss in the same task.** That repository keeps a canonical source directory and generated, tool-discoverable copies of the same files, reconciled by a sync script. Editing the generated copies would have been silently reverted on the next sync — a second target trap inside the same request. That one was avoided only because the sync script was read first. It would not have been caught by any amount of care about the criterion.
+
+**What would have prevented it.** One line, in the first response that touched a file:
+
+```md
+TARGET-001 (inherited from session binding, not user-stated):
+  /home/user/vs-code-agents @ claude/busy-johnson-f1lzbs, origin github.com/<owner>/vs-code-agents
+```
+
+The user would have corrected it in the first thirty seconds instead of after the work was complete.
+
+---
+
 ## Compressed lessons
 
 1. A confident, well-cited exclusion can still be an answer to the wrong question. Citations validate the test you used — they cannot tell you it was the right test.
@@ -93,3 +122,5 @@ Scope went from 6 files to ~20 — past what the agreed delegation budget covere
 3. "Redundant" and "out of scope" are different words with different owners: redundancy is the user's call, scope is the user's words.
 4. When a user pushes back on one item, the test is what is broken. Re-run everything.
 5. If the literal criterion blows the budget, say so — do not let the budget quietly rewrite the criterion.
+6. A perfectly executed ledger applied to the wrong repository, branch, or working tree is worth nothing. Name the target out loud before the first edit — inherited context is an assumption that does not feel like one.
+7. Where a project keeps canonical sources and generated copies, "which file do I edit" is a target question, not a style question: the wrong answer is reverted by the next sync, silently.

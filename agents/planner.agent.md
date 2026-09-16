@@ -99,6 +99,7 @@ Prefer small, focused scopes delivering value quickly.
    **Do not force batch questions every time**—only when ambiguity is detected.
 
 5b. **Stated-criterion fidelity (the inverse of ambiguity)**: When the user *did* state a scope criterion explicitly, the risk is not under-specification — it is **substitution**: silently applying a narrower or semantically adjacent test and reporting the result as though it answered the original request. Load `literal-intent-fidelity` skill and produce a **Criterion Ledger** before presenting scope:
+   - `TARGET-001`: what the criterion applies to (working tree, remote, branch, directory), confirmed by a command run now. A target that arrived from the session, the tooling, or a prior task is **inherited, not stated** — disclose it in one line before the first edit; if more than one plausible target exists (fork vs. upstream, canonical source vs. generated copy, two checkouts), **ask first**
    - `CRIT-001`: the user's criterion **verbatim** (never paraphrased) plus the mechanical per-candidate test it implies
    - Enumerate the candidate population **now** (a command, a directory walk) — never from memory or a prior document's list
    - Every verdict, **include and exclude alike**, carries a citation (`path:line`, docstring quote, call site)
