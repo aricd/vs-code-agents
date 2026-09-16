@@ -72,6 +72,18 @@ All agents producing `.agent-output/` artifacts MUST use these prefixes when app
 | `ASSUMPTION-*` | Assumption | Explicit assumption (MUST NOT be buried in prose) | `ASSUMPTION-001: Agents can load skills by name` |
 | `OPENQ-*` | Open Question | Explicitly unanswered question; MUST be listed before handoff | `OPENQ-001: Should REQ lists be capped at 10?` |
 
+### Scope & Criterion Fidelity
+
+These prefixes are **artifact-local**: they are used inside a Criterion Ledger when the `literal-intent-fidelity` skill is loaded (scope tables, audit scopes, target sets, filters). They are **not** plan-template sections and are not checked by the plan validators.
+
+| Prefix | Name | Definition | Example |
+|--------|------|------------|---------|
+| `CRIT-*` | Stated Criterion | The user's scope criterion quoted **verbatim**, plus the mechanical per-candidate test it implies | `CRIT-001: "all python files that may be executed when interpreting specs"` |
+| `PROXY-*` | Declared Proxy Test | A test that differs from `CRIT-*`; declared before use, blocked until the user accepts it | `PROXY-001: "modules that own domain semantics" - narrower than CRIT-001, NOT APPLIED` |
+| `EXCL-*` | Exclusion Class | Why a candidate failed the stated criterion. Valid values only: `EXCL-FAILS-TEST`, `EXCL-UNREACHABLE`, `EXCL-NOT-IN-POPULATION`, `EXCL-USER-DIRECTED` | `EXCL-UNREACHABLE: nav_math.py - no live caller (grep: 0 hits outside legacy test)` |
+| `COST-*` | Cost Decision | Budget/redundancy decision surfaced separately from scope; sampled and deferred items stay IN scope | `COST-001: 20 modules vs 8-delegation budget - sample 1 of 13 identical generated modules` |
+| `DRIFT-*` | Criterion Drift | A verdict resting on anything other than `CRIT-*`, disclosed before conclusions | `DRIFT-001: exclusion reused scoping rule from analysis doc 351` |
+
 ---
 
 ## Numbering Rules

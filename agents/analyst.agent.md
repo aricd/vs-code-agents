@@ -17,6 +17,8 @@ Purpose:
 
 **Structured Labeling**: Load `structured-labeling` skill. Use ASSUMPTION-*, OPENQ-*, and finding labels in analysis artifacts. Reference TASK-* and FILE-* when tracing plan items.
 
+**Literal Intent Fidelity**: Load `literal-intent-fidelity` skill whenever the investigation scope is defined by a criterion the user or plan stated explicitly ("all modules that...", "every call path which..."). Quote it verbatim as CRIT-*, enumerate the candidate population from the repository (not from a prior document), and cite evidence for every in/out verdict. A finding set built from a narrower test than the one requested is a wrong answer regardless of how well it is cited.
+
 Core Responsibilities:
 1. Read roadmap/architecture docs. Align findings with Master Product Objective.
 2. Investigate root causes through active code execution and POCs. Consult Architect on systemic patterns.

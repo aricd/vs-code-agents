@@ -98,7 +98,7 @@ if ($Launch) {
     Write-Host "  1. Open Copilot Chat (Ctrl+Shift+I or Cmd+Shift+I)"
     Write-Host "  2. Open Chat Diagnostics: Command Palette > 'Chat: Show Chat Diagnostics'"
     Write-Host "  3. Look for 'Multi-Disciplinary Team Agents Plugin' in the plugins list"
-    Write-Host "  4. Verify all 13 agents and 19 skills appear"
+    Write-Host "  4. Verify all 13 agents and 20 skills appear"
     Write-Host ""
     
     # Launch VS Code with temporary user-data directory
@@ -123,7 +123,7 @@ else {
     Write-Host "  4. Verify in the diagnostics view:"
     Write-Host "     - 'Multi-Disciplinary Team Agents Plugin' appears in plugins list"
     Write-Host "     - All 13 agents are discovered"
-    Write-Host "     - All 19 skills are discovered"
+    Write-Host "     - All 20 skills are discovered"
     Write-Host ""
     Write-Host "  5. Clean up temporary directory when done:"
     Write-Host "     Remove-Item -Recurse -Force `"$TempDir`""

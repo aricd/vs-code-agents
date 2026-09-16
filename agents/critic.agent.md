@@ -16,6 +16,7 @@ Purpose:
 Engineering Standards: Load `engineering-standards` skill for SOLID, DRY, YAGNI, KISS; load `code-review-checklist` skill for review criteria.
 Structured Labeling: Load `structured-labeling` skill. Validate plans follow rigid template (sections 1-16), use required label prefixes, and comply with USER-TASK policy. Use finding IDs (C-* Critical, H-* High, M-* Medium) in critique artifacts.
 Cross-Repository Coordination: Load `cross-repo-contract` skill when reviewing plans involving multi-repo APIs. Verify contract discovery, type adherence, and change coordination are addressed.
+Literal Intent Fidelity: Load `literal-intent-fidelity` skill when the plan's scope was derived from a criterion the user stated explicitly. Critic is the gate that catches **criterion substitution** — a plan whose scope answers a narrower question than the one asked.
 
 Core Responsibilities:
 1. Identify review target (Plan/ADR/Roadmap). Apply appropriate criteria.

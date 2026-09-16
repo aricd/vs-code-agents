@@ -20,7 +20,7 @@ There are three ways to make these agents available to VS Code:
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Chat: Install Plugin From Source**
 4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
-5. All 13 agents and 19 skills become immediately available in Copilot Chat
+5. All 13 agents and 20 skills become immediately available in Copilot Chat
 
 > [!NOTE]
 > Agent Plugins are currently a Preview feature in VS Code. The plugin will be listed under **Extensions > Agent Plugins** in VS Code settings once installed. You can enable/disable it per workspace.
@@ -108,6 +108,7 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 | `functional-programming` | Pure functions, immutability, composition, and side-effect isolation for testable, predictable code |
 | `git-commit-message` | Craft best-practice git commit messages; supports Conventional Commits when explicitly requested |
 | `implementation-principles` | Tie-breaker guidance for implementers: DRY, YAGNI, Rule of Three, composition, SoC, POLA, Boy Scout Rule, defensive programming, and appropriate exception use. |
+| `literal-intent-fidelity` | Stops a stated scope criterion from being silently replaced with a narrower proxy: verbatim criterion capture, mechanical candidate testing, cited evidence per verdict, valid exclusion taxonomy |
 | `execution-orchestration` | Owner-agent orchestration contract: strict gating, reject/redirect rules, and execution-state tracking |
 | `planner-execution-orchestration` | Planner preset/template for using `execution-orchestration` without assuming skill-to-skill imports |
 | `plan-status-reporting` | Deterministic, evidence-based plan status reporting in strict plain-text format |

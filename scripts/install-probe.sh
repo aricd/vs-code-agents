@@ -127,7 +127,7 @@ if [[ "$LAUNCH_VSCODE" == true ]]; then
     echo "  1. Open Copilot Chat (Ctrl+Shift+I or Cmd+Shift+I)"
     echo "  2. Open Chat Diagnostics: Command Palette > 'Chat: Show Chat Diagnostics'"
     echo "  3. Look for 'Multi-Disciplinary Team Agents Plugin' in the plugins list"
-    echo "  4. Verify all 13 agents and 19 skills appear"
+    echo "  4. Verify all 13 agents and 20 skills appear"
     echo ""
     
     # Launch VS Code with temporary user-data directory
@@ -151,7 +151,7 @@ else
     echo "  4. Verify in the diagnostics view:"
     echo "     - 'Multi-Disciplinary Team Agents Plugin' appears in plugins list"
     echo "     - All 13 agents are discovered"
-    echo "     - All 19 skills are discovered"
+    echo "     - All 20 skills are discovered"
     echo ""
     echo "  5. Clean up temporary directory when done:"
     echo "     rm -rf $TEMP_DIR"

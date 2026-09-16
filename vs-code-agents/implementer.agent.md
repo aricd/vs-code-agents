@@ -43,6 +43,7 @@ model: Claude Opus 4.5
 - **Functional programming** — load `functional-programming` skill when implementing or refactoring logic with high mutation, hidden state, deep nesting, or side effects mixed into core transformations
 - **Commit messages** — load `git-commit-message` skill when crafting commit messages
 - **Structured labeling** — load `structured-labeling` skill. Reference TASK-*, FILE-*, and TEST-* labels from the plan in implementation artifacts. Use consistent status values (not-started, in-progress, complete, blocked, deferred).
+- **Literal intent fidelity** — load `literal-intent-fidelity` skill when the plan or the user defines the change set by a criterion rather than an explicit file list ("update every caller of X", "all handlers that Y"). Enumerate the affected set mechanically (grep/search), cite each hit, and report anything you leave untouched with a valid exclusion class — never silently narrow the set to the files you already had open.
 - **ID Traceability (MANDATORY)**: When updating implementation docs or execution-state files, reference specific TASK-* IDs being worked on. Example: "Implementing TASK-011: Update Critic template validation". This enables downstream agents and status reporting to trace work to plan items.
 
 ### Test-Driven Development (TDD)

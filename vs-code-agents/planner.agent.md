@@ -15,6 +15,8 @@ Produce implementation-ready plans translating roadmap epics into actionable, ve
 
 **Structured Labeling**: Load `structured-labeling` skill for required label prefixes (REQ-*, SEC-*, CON-*, TASK-*, etc.), section ordering, numbering rules, and approval tracking. All plans MUST follow the rigid template defined in that skill.
 
+**Literal Intent Fidelity**: When the user states a **testable criterion** ("all files that...", "any component which...", "every X where Y"), load `literal-intent-fidelity` skill BEFORE proposing any scope, file list, or inclusion/exclusion table. Quote the criterion verbatim as CRIT-*, apply it mechanically with cited evidence per candidate, and declare any narrower test as PROXY-* requiring user acceptance. **MANDATORY reload** when the user disputes a scope decision.
+
 ## Core Responsibilities
 
 1. Read roadmap/architecture BEFORE planning. Understand strategic epic outcomes, architectural constraints.
@@ -95,6 +97,14 @@ Prefer small, focused scopes delivering value quickly.
    User may reply with: `Open Questions: 1:a, 2:y, 3:c` or `Open Questions: defaults` to accept all defaults.
    
    **Do not force batch questions every time**—only when ambiguity is detected.
+
+5b. **Stated-criterion fidelity (the inverse of ambiguity)**: When the user *did* state a scope criterion explicitly, the risk is not under-specification — it is **substitution**: silently applying a narrower or semantically adjacent test and reporting the result as though it answered the original request. Load `literal-intent-fidelity` skill and produce a **Criterion Ledger** before presenting scope:
+   - `CRIT-001`: the user's criterion **verbatim** (never paraphrased) plus the mechanical per-candidate test it implies
+   - Enumerate the candidate population **now** (a command, a directory walk) — never from memory or a prior document's list
+   - Every verdict, **include and exclude alike**, carries a citation (`path:line`, docstring quote, call site)
+   - Exclusions use the valid taxonomy only (`EXCL-FAILS-TEST`, `EXCL-UNREACHABLE`, `EXCL-NOT-IN-POPULATION`, `EXCL-USER-DIRECTED`). Role arguments ("it's just plumbing", "it's a test harness", "it doesn't own the domain semantics") are **not valid exclusion reasons**
+   - Budget pressure never shrinks scope silently: raise it as `COST-*` with options. **"In scope but sampled" is not "out of scope."**
+   - Framing carried over from a **prior task or plan** is the highest-risk source of substitution — declare it as `PROXY-*` rather than letting it re-scope the new request
 6. **Performance/Backcompat checkpoint**: Before finalizing requirements, explicitly ask:
    - "Are there specific **performance or SLA constraints**? (Default: optimize for clarity; no premature optimization)"
    - "Does this change affect **existing interfaces** that other code/users depend on? (Default: no backwards compatibility required if no existing consumers)"

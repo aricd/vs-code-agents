@@ -617,6 +617,7 @@ This means agents can have access to many skills without consuming context until
 | `cross-repo-contract` | Multi-repo API type safety | Contract discovery, sync workflow, breaking change coordination |
 | `document-lifecycle` | Unified numbering, closure, orphan detection | ID inheritance, terminal statuses, closed/ folders |
 | `engineering-standards` | SOLID, DRY, YAGNI, KISS | Detection patterns, refactoring guidance |
+| `literal-intent-fidelity` | Scope-criterion fidelity | Criterion Ledger (CRIT/PROXY/EXCL/COST/DRIFT), exclusion taxonomy, pushback protocol |
 | `release-procedures` | Two-stage release workflow, semver | Version consistency, platform constraints |
 | `security-patterns` | OWASP Top 10, language vulnerabilities | Python, JavaScript, Java, Go specific patterns |
 | `testing-patterns` | TDD workflow, test pyramid | Anti-patterns, coverage strategies, mocking |

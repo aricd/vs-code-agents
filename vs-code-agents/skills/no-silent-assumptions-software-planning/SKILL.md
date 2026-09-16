@@ -21,6 +21,17 @@ Its goals are to:
 
 Wrong plans due to hidden assumptions are worse than asking questions.
 
+### Companion Skill: `literal-intent-fidelity`
+
+This skill governs what the user **did not say**. Its companion, `literal-intent-fidelity`, governs what the user **did say**:
+
+| Situation | Skill |
+|-----------|-------|
+| Scope, contract, or definition of done was left unstated | `no-silent-assumptions-software-planning` (ask; do not invent) |
+| Scope criterion was stated explicitly and is being narrowed, paraphrased, or reinterpreted | `literal-intent-fidelity` (quote; test literally; declare any proxy) |
+
+Both failures are silent and both produce plans the user did not ask for. Load whichever matches — and both when a request contains a stated criterion **and** unstated contracts.
+
 ---
 
 ## When to Load

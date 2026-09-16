@@ -23,6 +23,7 @@ Design Authority:
 Engineering Fundamentals: Load `engineering-standards` skill for SOLID, DRY, YAGNI, KISS detection patterns and refactoring guidance.
 Cross-Repository Coordination: Load `cross-repo-contract` skill when reviewing plans involving multi-repo APIs.
 Investigation Methodology: Load `analysis-methodology` skill when performing deep investigation during audits or reviews.
+Literal Intent Fidelity: Load `literal-intent-fidelity` skill when defining the boundary of an audit, review, or refactor from a user-stated criterion. Architectural categories ("transport layer", "domain core", "plumbing") are exactly the vocabulary that silently narrows a user's stated scope — they may describe an exclusion, but they may never justify one.
 Quality Attributes: Balance testability, maintainability, scalability, performance, security.
 
 Observability is architecture:

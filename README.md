@@ -1,6 +1,6 @@
 # Multi-Disciplinary Team Agents Plugin
 
-> 13 specialized AI agents and 19 skills for structured, auditable software delivery in VS Code — installable as a single VS Code Agent Plugin.
+> 13 specialized AI agents and 20 skills for structured, auditable software delivery in VS Code — installable as a single VS Code Agent Plugin.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -61,7 +61,7 @@ Use as many or as few as you need, in any order. They are designed to know their
 2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
 3. Run **Chat: Install Plugin From Source**
 4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
-5. All 13 agents and 19 skills are immediately available in Copilot Chat
+5. All 13 agents and 20 skills are immediately available in Copilot Chat
 
 > [!NOTE]
 > Agent Plugins are currently a Preview feature in VS Code 1.110+. You must enable `chat.plugins.enabled` in VS Code settings.
@@ -203,6 +203,11 @@ Agents produce Markdown documents in `.agent-output/`. Every decision is recorde
 ### 🔒 Quality Gates
 Critic reviews plans. Security audits code. QA verifies tests. Nothing ships without checks.
 
+### 🎯 Literal Intent Fidelity
+When you state a criterion — *"all Python files that may be executed when interpreting specs"* — agents must test **those words**, not a narrower paraphrase of them. The `literal-intent-fidelity` skill requires the criterion to be quoted verbatim, the candidate list to be enumerated from the repository, and **every** verdict (inclusions and exclusions alike) to carry a citation. Role arguments ("it's just plumbing", "it's a test harness") are not valid exclusion reasons, and budget pressure is surfaced as an explicit cost decision instead of a quiet scope reduction.
+
+A `UserPromptSubmit` hook detects stated criteria and scope pushback in your prompt and injects a `[MDT Literal-Criterion Check]` reminder, so the guardrail applies even when the agent would not have thought to load the skill.
+
 ### 🔄 Handoffs
 Agents hand off to each other with context. No lost information between phases.
 
@@ -265,7 +270,7 @@ Creates a temporary VS Code profile with the plugin registered for manual verifi
 After VS Code opens:
 1. Open Copilot Chat (`Ctrl+Shift+I`)
 2. Open Chat Diagnostics: Command Palette → `Chat: Show Chat Diagnostics`
-3. Verify all 13 agents and 19 skills appear in the diagnostics view
+3. Verify all 13 agents and 20 skills appear in the diagnostics view
 
 ### Level 3: Post-Install Discovery (Future)
 
@@ -313,7 +318,7 @@ rm -rf .github/skills/analysis-methodology .github/skills/architecture-patterns 
 │   ├── planner.agent.md
 │   ├── implementer.agent.md
 │   └── ... (11 more)
-├── skills/                      # Plugin-discoverable skills (19 directories)
+├── skills/                      # Plugin-discoverable skills (20 directories)
 │   ├── execution-orchestration/
 │   ├── testing-patterns/
 │   ├── reference/               # Shared reference docs

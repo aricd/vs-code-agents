@@ -4,14 +4,17 @@
 #
 # UserPromptSubmit hook for the Multi-Disciplinary Team Agents Plugin.
 #
-# Reads .agent-output/planning/*-execution-state.yaml files and injects
-# a compact [MDT Active Orchestrations] context block into every agent prompt.
+# Injects two context blocks into every agent prompt:
+#   1. [MDT Active Orchestrations] - from .agent-output/planning/*-execution-state.yaml
+#   2. [MDT Literal-Criterion Check] - when the prompt states a testable scope
+#      criterion or disputes how stated intent was interpreted, reminding the
+#      agent to load the 'literal-intent-fidelity' skill before scoping.
 #
 # CONTRACT-003: Output is JSON on stdout:
-#   {"contextInjection": "[MDT Active Orchestrations]\nPlan ..."}
-#   or {} if no execution-state files found or on any error.
+#   {"contextInjection": "[MDT Literal-Criterion Check]\n...\n\n[MDT Active Orchestrations]\nPlan ..."}
+#   Either block may be absent. Output is {} when neither applies, or on any error.
 #
-# Dependencies: bash, grep, awk, sed, find (no YAML parser required)
+# Dependencies: bash, grep, awk, sed, find (no YAML parser or JSON parser required)
 
 # Error trap: on ANY failure, write {} to stdout and exit 0
 cleanup() {
@@ -20,8 +23,47 @@ cleanup() {
 }
 trap cleanup ERR EXIT
 
-# Read stdin (UserPromptSubmit event sends JSON, but we don't need it)
-cat > /dev/null 2>&1 || true
+# Escape a context block for JSON (backslashes, quotes, newlines) and emit it
+emit_context() {
+  local escaped
+  escaped=$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
+  printf '{"contextInjection": "%s"}\n' "$escaped"
+}
+
+# Read stdin (UserPromptSubmit event sends JSON containing the user prompt)
+STDIN_RAW=""
+if STDIN_CAPTURED=$(cat 2>/dev/null); then
+  STDIN_RAW="$STDIN_CAPTURED"
+fi
+
+# ---------------------------------------------------------------------------
+# Literal-criterion detection
+#
+# Two marker families, both high-precision:
+#   (a) the user asserting/defending stated intent (pushback on interpretation)
+#   (b) the user stating a testable scope criterion ("every file that ...")
+#
+# Matching runs against the raw event payload; no JSON parser required, since
+# these phrases do not occur in the event's structural fields.
+# ---------------------------------------------------------------------------
+CRITERION_MARKERS='literally|literal intent|verbatim|word for word|exactly what i|exactly as i|i (said|stated|asked for|told you|specified)|my (stated )?intent|as (i )?stated|as (i )?wrote|misinterpret|misunderstood|misread|not what i (said|asked|meant)|why did you (exclude|omit|ignore|skip|narrow|drop|change)|(in|out of) scope|scope criterion|all [a-z]* ?files (that|which)|every (file|module|component|endpoint|handler|caller|path|script|test) (that|which)|any (file|module|component|endpoint|handler|caller|path|script|test) (that|which)'
+
+LITERAL_ALERT=0
+if [[ -n "$STDIN_RAW" ]]; then
+  if printf '%s' "$STDIN_RAW" | grep -Eiq "$CRITERION_MARKERS"; then
+    LITERAL_ALERT=1
+  fi
+fi
+
+ALERT_BLOCK=""
+if [[ "$LITERAL_ALERT" -eq 1 ]]; then
+  ALERT_BLOCK="[MDT Literal-Criterion Check]
+This prompt states a scope criterion, or questions how stated intent was interpreted.
+Load the 'literal-intent-fidelity' skill BEFORE proposing or revising any scope, file list, target set, or include/exclude decision.
+Required: quote the criterion verbatim (CRIT-*); enumerate the candidate population now rather than from memory or a prior document; cite evidence for every verdict, exclusions included; declare any narrower or carried-over test as PROXY-* and do not apply it until the user accepts it.
+Role arguments ('it is only plumbing', 'it is a test harness', 'it does not own the domain semantics') are NOT valid exclusion reasons. Budget pressure is a COST-* decision, never a silent scope reduction.
+If the user is pushing back on a scope decision, re-run the FULL pass under their literal criterion - not only the items they named."
+fi
 
 # Find execution-state YAML files
 STATE_FILES=()
@@ -29,10 +71,14 @@ while IFS= read -r -d '' f; do
   STATE_FILES+=("$f")
 done < <(find .agent-output/planning/ -maxdepth 1 -name '*-execution-state.yaml' -print0 2>/dev/null)
 
-# If no files found, return empty JSON
+# If no files found, emit the alert alone (or empty JSON)
 if [[ ${#STATE_FILES[@]} -eq 0 ]]; then
   trap - ERR EXIT
-  echo '{}'
+  if [[ -n "$ALERT_BLOCK" ]]; then
+    emit_context "$ALERT_BLOCK"
+  else
+    echo '{}'
+  fi
   exit 0
 fi
 
@@ -109,19 +155,26 @@ Plan ${id}: \"${mission}\"
   VALID_COUNT=$((VALID_COUNT + 1))
 done
 
-# If no valid plans were extracted, return empty JSON
+# If no valid plans were extracted, emit the alert alone (or empty JSON)
 if [[ "$VALID_COUNT" -eq 0 ]]; then
   trap - ERR EXIT
-  echo '{}'
+  if [[ -n "$ALERT_BLOCK" ]]; then
+    emit_context "$ALERT_BLOCK"
+  else
+    echo '{}'
+  fi
   exit 0
 fi
-
-# Escape the output for JSON: backslashes, quotes, newlines
-JSON_OUTPUT=$(printf '%s' "$OUTPUT" | sed 's/\\/\\\\/g; s/"/\\"/g' | awk '{printf "%s\\n", $0}' | sed 's/\\n$//')
 
 # Disable the error trap before final output
 trap - ERR EXIT
 
-# Return contextInjection JSON
-printf '{"contextInjection": "%s"}\n' "$JSON_OUTPUT"
+# Alert block (when present) leads, so it is read before orchestration state
+if [[ -n "$ALERT_BLOCK" ]]; then
+  emit_context "${ALERT_BLOCK}
+
+${OUTPUT}"
+else
+  emit_context "$OUTPUT"
+fi
 exit 0

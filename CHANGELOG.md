@@ -4,6 +4,29 @@ All notable changes to this repository will be documented in this file.
 
 The format is loosely based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 2026-09-16
+
+### Added
+
+- **`literal-intent-fidelity` skill**: New skill addressing **criterion substitution** — the failure where a user states an explicit, testable criterion and the agent silently applies a narrower or semantically adjacent test, then reports the result as though it answered the original request. Defines the Criterion Ledger procedure (verbatim `CRIT-*` capture, mechanical per-candidate testing, cited evidence for every verdict), the valid exclusion taxonomy, the separation of scope decisions from cost decisions, and the pushback protocol (one correct objection invalidates the test, so the full pass is re-run). Companion to `no-silent-assumptions-software-planning`: that skill covers what the user did NOT say, this one covers what the user DID say.
+- **`literal-intent-fidelity/references/criterion-ledger-template.md`**: Copy-paste ledger template with field rules and a minimal inline form for small decisions.
+- **`literal-intent-fidelity/references/worked-example-scope-substitution.md`**: End-to-end case study of a real substitution incident and its correction.
+- **Scope & Criterion Fidelity label prefixes** (`structured-labeling` skill): `CRIT-*`, `PROXY-*`, `EXCL-*`, `COST-*`, `DRIFT-*`. These are artifact-local (used inside a Criterion Ledger), not plan-template sections, and are not checked by the plan validators.
+- **`[MDT Literal-Criterion Check]` prompt injection**: `hooks/user-prompt-submit.sh` and `.ps1` now read the UserPromptSubmit payload and inject a literal-criterion reminder when the prompt states a testable scope criterion or disputes how stated intent was interpreted. This makes the guardrail fire without relying on the agent choosing to load the skill.
+
+### Changed
+
+- **CONTRACT-003 (UserPromptSubmit hook output)**: `contextInjection` may now carry two blocks — `[MDT Literal-Criterion Check]` (first, when triggered) and `[MDT Active Orchestrations]`. Either block may be absent; output remains `{}` when neither applies or on any error. Orchestration-block content and formatting are unchanged.
+- **Agent wiring for `literal-intent-fidelity`**:
+  - `planner.agent.md`: new skills-header directive plus Process step 5b (stated-criterion fidelity), the counterpart to the existing step 5 ambiguity detection.
+  - `critic.agent.md`: Critic is named as the gate that catches criterion substitution in plan scope.
+  - `analyst.agent.md`: applies when investigation scope comes from a stated criterion; candidate population must be enumerated from the repository, not a prior document.
+  - `architect.agent.md`: architectural categories ("transport layer", "domain core", "plumbing") may describe an exclusion but never justify one.
+  - `implementer.agent.md`: change sets defined by a criterion ("every caller of X") must be enumerated mechanically and cited.
+  - `qa.agent.md`: coverage reported against a narrower population than the one requested is a false pass.
+- **`no-silent-assumptions-software-planning` skill**: Added companion-skill section distinguishing unstated scope (ask) from stated-and-narrowed scope (quote and test literally).
+- **Skill count 19 → 20**: Updated in `plugin.json`, `README.md`, `USING-AGENTS.md`, `scripts/install-probe.sh`, and `scripts/install-probe.ps1`; skill catalogs in `USING-AGENTS.md` and `AGENTS-DEEP-DIVE.md` updated; new "Literal Intent Fidelity" feature section in `README.md`.
+
 ## 2026-03-24 (Plan 003)
 
 ### Added
