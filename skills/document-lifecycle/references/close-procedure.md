@@ -27,7 +27,7 @@ In the document's YAML frontmatter, update the Status:
 ID: 080
 Origin: 080
 UUID: a3f7c2b1
-Status: Committed    # ← Updated to terminal status
+Status: Committed    # <- Updated to terminal status
 ---
 ```
 
@@ -60,7 +60,7 @@ mv .agent-output/<domain>/NNN-name.md .agent-output/<domain>/closed/
 
 Report in your response:
 
-> Closed document `080-feature-name.md` (Status: Committed) → moved to `.agent-output/planning/closed/`
+> Closed document `080-feature-name.md` (Status: Committed) -> moved to `.agent-output/planning/closed/`
 
 ---
 
@@ -78,7 +78,7 @@ done
 ```
 
 Report:
-> Closed documents for Plan 080: planning, implementation, qa, uat → moved to respective `closed/` folders.
+> Closed documents for Plan 080: planning, implementation, qa, uat -> moved to respective `closed/` folders.
 
 ---
 

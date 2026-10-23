@@ -1,0 +1,29 @@
+{
+  "_doc": "CREST baseline example — illustrative schema only, NOT a real project's numbers. Bootstrap your own with: python crest_metrics.py --src . --write-baseline crest_baseline.json",
+
+  "plr_own": 0.5,
+  "plr_deep": 0.3,
+  "cc_max": 12,
+  "cc_df_count": 3,
+  "nd_max": 4,
+  "flc_max_ll": 80,
+  "functions_over_100ll": 2,
+  "import_cycles": 0,
+  "dead_export_count": 0,
+  "params_over_6_count": 1,
+  "undeclared_temporal_contract_count": 2,
+  "undocumented_raise_fn_ratio": 0.25,
+  "opaque_raise_ratio": 0.1,
+  "signature_infra_leak_ratio": 0.05,
+  "signature_private_leak_count": 0,
+  "pos_required_max": 4,
+  "functions_over_5_posreq": 0,
+
+  "_provenance": {
+    "_doc": "Stamped by --write-baseline so --check can detect stale baselines.",
+    "git_sha": "abc1234",
+    "effect_policy_version": "v1",
+    "graph_metric_policy_version": "v1",
+    "radon_version": "6.0.1"
+  }
+}

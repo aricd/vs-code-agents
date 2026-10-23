@@ -1,9 +1,7 @@
 ---
 name: testing-patterns
 description: TDD workflow and test strategy patterns including test pyramid, coverage strategies, mocking approaches, and anti-patterns. Load when writing tests, designing test strategies, or reviewing test coverage.
-license: MIT
 metadata:
-  author: groupzer0
   version: "1.1"
 ---
 
@@ -26,9 +24,9 @@ Systematic approach to effective testing. Use this skill when:
 ```
 ┌─────────────────────────────────────────┐
 │                                         │
-│   1. RED     → Write failing test       │
-│   2. GREEN   → Minimal code to pass     │
-│   3. REFACTOR → Clean up, tests stay green │
+│   1. RED     -> Write failing test       │
+│   2. GREEN   -> Minimal code to pass     │
+│   3. REFACTOR -> Clean up, tests stay green │
 │   4. REPEAT                             │
 │                                         │
 └─────────────────────────────────────────┘
@@ -113,7 +111,7 @@ def test_user_repository_finds_by_email():
 **What:** Test full user workflows
 **When:** Critical paths, smoke tests, happy paths
 **Speed:** Minutes
-**Isolation:** None—tests complete system
+**Isolation:** None--tests complete system
 
 ```python
 # E2E: tests full flow
@@ -131,11 +129,11 @@ def test_user_can_checkout():
 
 ### What to Cover (Priority Order)
 
-1. **Business logic** — revenue-impacting calculations
-2. **Security boundaries** — auth, validation, access control
-3. **Error paths** — exception handling, edge cases
-4. **Integration points** — API contracts, DB queries
-5. **Happy paths** — standard user workflows
+1. **Business logic** -- revenue-impacting calculations
+2. **Security boundaries** -- auth, validation, access control
+3. **Error paths** -- exception handling, edge cases
+4. **Integration points** -- API contracts, DB queries
+5. **Happy paths** -- standard user workflows
 
 ### What NOT to Prioritize
 
@@ -238,9 +236,9 @@ spy_logger = Mock(wraps=real_logger)
 
 ### The Iron Laws of Mocking
 
-1. **NEVER test mock behavior** — Use mocks to isolate your unit from dependencies, but assert on the unit's behavior, not the mock's existence. If your assertion is `expect(mockThing).toBeInTheDocument()`, you're testing the mock, not the code.
-2. **NEVER mock without understanding** — Know side effects before isolating
-3. **NEVER create incomplete mocks** — Mirror real API structure completely
+1. **NEVER test mock behavior** -- Use mocks to isolate your unit from dependencies, but assert on the unit's behavior, not the mock's existence. If your assertion is `expect(mockThing).toBeInTheDocument()`, you're testing the mock, not the code.
+2. **NEVER mock without understanding** -- Know side effects before isolating
+3. **NEVER create incomplete mocks** -- Mirror real API structure completely
 
 ### Anti-Pattern Red Flags
 
@@ -263,6 +261,69 @@ spy_logger = Mock(wraps=real_logger)
 | **Deterministic** | Same result every run? |
 | **Focused** | One assertion per test (or logical group)? |
 | **Maintainable** | Will this break for wrong reasons? |
+
+---
+
+## Boundary-Aware Testing
+
+When a change crosses an integration boundary (wire formats, trust boundaries, file parsers, network clients), standard unit testing is insufficient. Use the **Load-Bearing Test Table** to ensure each boundary is exercised with production-representative data.
+
+### Load-Bearing Test Table
+
+A thinking tool to ensure boundary code is tested with real-shaped data, not mocked away. Fill this table for any implementation touching `BOUNDARY-*` labeled items from the plan.
+
+| Boundary | Production path exercised | Mocked components | Test/assertion | Fixture provenance | Rationale |
+|----------|---------------------------|-------------------|----------------|--------------------| ---------|
+| JSON parser for upstream API | `ResponseParser.parse()` called with fixture bytes | HTTP transport only | `test_parse_upstream_v2_response` asserts field mapping | Sanitized from prod 2026-01; PII removed | Parser handles untrusted input; mock would hide schema drift |
+
+**Column definitions:**
+- **Boundary**: The `BOUNDARY-*` label from the plan (e.g., `BOUNDARY-001: Upstream API JSON parser`)
+- **Production path exercised**: The actual code path that runs in production, NOT a mock
+- **Mocked components**: What IS mocked (should be I/O, not parsers/validators)
+- **Test/assertion**: Specific test function and what it asserts
+- **Fixture provenance**: Where the test data came from (see Fixture Hygiene below)
+- **Rationale**: Why this boundary needs real-data testing (trust, schema drift, security)
+
+**When no boundaries are crossed:** If the plan declares no `BOUNDARY-*` labels and the change is purely internal logic or documentation, state "No boundaries crossed" with a one-line justification. This is acceptable -- the table is a thinking tool, not bureaucratic compliance.
+
+**Reference:** See [references/testing-anti-patterns.md](references/testing-anti-patterns.md) for Anti-Pattern 6: Mocking Above the Boundary.
+
+### Oracle Independence
+
+A differential/equivalence oracle (comparing two implementations, an A/B rewrite, or a port against
+its original) proves the two arms **agree with each other** -- not that either is correct. If both
+arms are mutually derived from the same source (same config, same spec misreading), the oracle is
+blind to a shared bug. At least one arm MUST be grounded in independent truth -- a spec-derived
+expected value, an invariant, or a third-party reference -- before the comparison counts as an
+oracle rather than a parity check. See [references/testing-anti-patterns.md](references/testing-anti-patterns.md#anti-pattern-7-blind-differential-oracle) for the full anti-pattern and gate function.
+
+### Fixture Hygiene
+
+Test fixtures that represent external data (API responses, config files, wire payloads) require careful handling to avoid security incidents and maintain test validity.
+
+**Forbidden in fixtures (SEC-001):**
+- API tokens, passwords, session cookies, auth headers
+- Internal hostnames or URLs identifying customer environments  
+- PII: names, emails, phone numbers, patient narratives, addresses
+- Any payload field whose presence in a public fixture would constitute a data-handling incident
+
+**Required fixture properties:**
+- **Sanitized**: All forbidden content removed or replaced with obviously-fake values (e.g., `user@example.com`, `token_REDACTED`)
+- **Minimal**: Smallest payload that preserves the shape/structure being tested
+- **Production-equivalent canonical fixtures allowed (SEC-003)**: If capturing real production data is risky, construct a fixture that matches the documented schema exactly -- this is preferable to pressuring teams to commit sensitive payloads
+
+**Provenance metadata (SEC-002):** Each fixture file or test comment SHOULD document:
+- **Source**: Where was this captured/constructed from? (e.g., "Based on API v2 docs", "Sanitized from staging 2026-01-15")
+- **Capture date**: When was the original captured? (helps detect staleness)
+- **Sanitization notes**: What was redacted? (e.g., "Replaced real user IDs with UUIDs, removed auth header")
+
+**Example provenance comment:**
+```python
+# Fixture: upstream_response_v2.json
+# Source: Constructed from API v2 OpenAPI spec + one sanitized staging capture
+# Capture date: 2026-01-15  
+# Sanitization: Removed X-Auth-Token header, replaced user.email with test@example.com
+```
 
 ---
 

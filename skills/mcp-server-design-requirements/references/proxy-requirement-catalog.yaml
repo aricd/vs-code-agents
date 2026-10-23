@@ -1,0 +1,245 @@
+requirements:
+  - req_id: "1.01"
+    category: "MCP Proxy Server Design"
+    sub_category: "General"
+    requirement: "MCP servers must ensure access to resources are strictly governed by the security principles of least access, least privilege and the use of contextual authorization."
+    standards: "System Lifecycle: 6.4 System Lifecycle Activities ---6.4.1 System Requirements and Design"
+
+  - req_id: "1.02"
+    category: "MCP Proxy Server Design"
+    sub_category: "General"
+    requirement: "System administration procedures, functional diagrams, and documentation must be created and/or updated."
+    standards: "System Lifecycle: 6.4 System Lifecycle Activities ---6.4.1 System Requirements and Design (i)"
+
+  - req_id: "1.03"
+    category: "MCP Proxy Server Design"
+    sub_category: "General"
+    requirement: "A security risk assessment must be performed when a system stores or manages data classified as Acme non-public to determine the most appropriate controls based on the system's assets, threats and vulnerabilities."
+    standards: "System Lifecycle Std: 6.4.2 Security Risk Assessment (b)"
+
+  - req_id: "1.05"
+    category: "MCP Proxy Server Design"
+    sub_category: "General"
+    requirement: "The MCP proxy server must limit each client’s access to only the data and actions it strictly needs (“principles  of least access and least privilege”)."
+    standards: "Identity & Access Control: 6.3 Access Management"
+
+  - req_id: "1.06"
+    category: "MCP Proxy Server Design"
+    sub_category: "General"
+    requirement: "Security by Design - incorporate security considerations from the earliest stages of AI system design. This includes threat modeling and risk assessments to identify potential vulnerabilities."
+    standards: "Artificial Intelligence Security Std: 6.2 AI System Lifecycle Management"
+
+  - req_id: "1.07"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Identity - Client ID - Static and Dynamic"
+    requirement: "MCP proxy server must use a dynamic client ID to authenticate with a third-party authorization server"
+    standards: ""
+
+  - req_id: "1.08"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Identity - Client ID - Static and Dynamic"
+    requirement: "If the MCP Proxy server uses a static client ID, it must obtain user consent for each dynamically registered client before forwarding to 3rd-party authorization servers"
+    standards: ""
+
+  - req_id: "1.09"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Identity - Client ID - Static and Dynamic"
+    requirement: "MCP servers MUST NOT accept any tokens that were not explicitly issued for the MCP server."
+    standards: "Identity &  Access Control: 6.5 Tokens 6.5.1.3.2 Consumer"
+
+  - req_id: "1.10"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Identity - Client ID - Static and Dynamic"
+    requirement: "MCP servers that implement authorization MUST verify all inbound requests"
+    standards: "Identity &  Access Control: 6.5 Tokens 6.5.1.3.2 Consumer"
+
+  - req_id: "1.11"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Sessions"
+    requirement: "MCP Servers MUST NOT use sessions for authentication."
+    standards: "Identity & Access Controls: 6.3.1 Authentication Leverage modern authentication wherever technically possible. C) Systems must verify identities using an Acme IAM authentication process bound to the Acme identity."
+
+  - req_id: "1.12"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Sessions"
+    requirement: "MCP servers MUST use secure, non-deterministic session IDs. Generated session IDs (e.g., UUIDs) SHOULD use secure random number generators. Avoid predictable or sequential session identifiers that could be guessed by an attacker. Rotating or expiring session IDs can also reduce the risk."
+    standards: "Application Security Std: 6.2 Secure Application Design and Architecture"
+
+  - req_id: "1.13"
+    category: "MCP Proxy Server Design"
+    sub_category: "Design Detail: Sessions"
+    requirement: "MCP servers SHOULD bind session IDs to user-specific information. When storing or transmitting session-related data (e.g., in a queue), combine the session ID with information unique to the authorized user, such as their internal user ID. Use a key format like <user_id>:<session_id>. This ensures that even if an attacker guesses a session ID, they cannot impersonate another user as the user ID is derived from the user token and not provided by the client."
+    standards: "Application Security Std: 6.2 Secure Application Design and Architecture"
+
+  - req_id: "2.01"
+    category: "MCP Proxy Server Development / Build"
+    sub_category: "General"
+    requirement: "Any open-source components must be thoroughly vet, review, and test before using them in production."
+    standards: "Application Security Std: 6.4 Secure Usage of Custom, Open-Source, and Third-Party Libraries"
+
+  - req_id: "2.02"
+    category: "MCP Proxy Server Development / Build"
+    sub_category: "General"
+    requirement: "Application development must utilize a secure development environment that protects code, tracks changes, and aligns with industry standard software development."
+    standards: "Application Security Std: 6.1 Secure Application Development Environment"
+
+  - req_id: "2.03"
+    category: "MCP Proxy Server Development / Build"
+    sub_category: "General"
+    requirement: "Software must be securely designed and architected."
+    standards: "Application Security Std: 6.2 Secure Application Design and Architecture"
+
+  - req_id: "2.04"
+    category: "MCP Proxy Server Development / Build"
+    sub_category: "General"
+    requirement: "Software must be coded securely and adhere to Acme secure coding standards."
+    standards: |-
+      Application Security Std: 6.3 Secure Application Development
+      Secure Coding Std:  6.1 Secure Coding Principles thru 6.2.5 Key Components of Secure Code Testing
+
+  - req_id: "2.05"
+    category: "MCP Proxy Server Development / Build"
+    sub_category: "General"
+    requirement: "Software must be thoroughly tested during development and prior to production release."
+    standards: "Application Security Std: 6.5 Application Security Testing and Review"
+
+  - req_id: "2.06"
+    category: "MCP Proxy Server Development / Build"
+    sub_category: "General"
+    requirement: "All systems must be properly reviewed, and security features must be successfully tested and documented before being introduced into the Acme production environment."
+    standards: "System Lifecycle: 6.4 System Lifecycle Activities ---6.4.1 System Requirements and Design  (j)"
+
+  - req_id: "3.01"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "Every MCP server's authentication, access controls, and data handling should be verified and hardened, especially for those interfacing with sensitive business systems."
+    standards: |-
+      Systems Lifecycle Std: 6.4 Systems Lifecycle Activities, 6.5 Implementation Activities
+      Artificial Intelligence Security Std: 6.1.2 Adversarial Threats or Actions a) Threat Modeling b) Adversarial Testing
+
+  - req_id: "3.02"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "Deploy MCP servers in dedicated secure segments or DMZs, restricting access only to authorized clients and administrators."
+    standards: "Operations & Configuration Management Std: 6.1.2 Network Level Configuration, 6.1.3 Required Use of Firewalls,  6.4.3 External Network Connections, 6.4.3.1 Network Access for External Connections, 6.4.3.2 External Connection Approval, 6.4.3.3 External Connection Documentation, Network Configuration for External Connections, 6.4.3.5 Management of External Connections."
+
+  - req_id: "3.03"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "Deploy firewalls or allowlist controls so only whitelisted IPs (such as known AI agent endpoints) can initiate MCP connections."
+    standards: "Operations & Configuration Management Std: 6.1.2 Network Level Configuration, 6.1.3 Required Use of Firewalls,  6.4.3 External Network Connections, 6.4.3.1 Network Access for External Connections, 6.4.3.2 External Connection Approval, 6.4.3.3 External Connection Documentation, Network Configuration for External Connections, 6.4.3.5 Management of External Connections."
+
+  - req_id: "3.04"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "All MCP Proxy server deployments must enforce up-to-date encryption standards (e.g., TLS 1.2 or greater)."
+    standards: "Cryptography Std: 6.1 Encryption"
+
+  - req_id: "3.05"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "All data classified as non-public must be encrypted in transit using at TLS 1.2 or TLS 1.3."
+    standards: "Cryptography Std: 6.1.2 Encrypting Data in Transit,"
+
+  - req_id: "3.06"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "All data at rest must follow the encryption at rest requirements which are based on the level of sensitivity as defined by the Information Security Classification standard."
+    standards: "Cryptography Std: 6.1.1 Encrypting Data at Rest"
+
+  - req_id: "3.07"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "All systems must be registered in the CMDB (Configuration Management Database) prior to system release."
+    standards: "Information Systems Lifecycle: 6.4 System Lifecycle Activities ---6.4.1 Systems Requirements and Design (l)"
+
+  - req_id: "3.08"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "MCP Proxy server must be assigned to an Asset Owner and it must be managed and accounted for throughout its lifecycle."
+    standards: "Information System Lifecycle Std: 6.1 Asset Management, 6.2 Asset Owner Responsibilities"
+
+  - req_id: "3.09"
+    category: "MCP Proxy Server Implementation"
+    sub_category: "General"
+    requirement: "Only approved, appropriately licensed (regardless of whether there is a fee), and propertly tested assets, may be installed on an Acme system or network infrastructure."
+    standards: "6.3 Acquisition of Technology Solutions"
+
+  - req_id: "4.01"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "MCP Servers must take measures to protect against malicious code and run a supported operating system on supported hardware. Controls must be implemented to detect and prevent malicious code from propagating, adversely affecting or manipulating Acme systems or information."
+    standards: "Endpoint Protection Std: 6.1 Malicious Code"
+
+  - req_id: "4.02"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Ongoing auditing, vulnerability testing, and rapid patching must be integral parts of the operational posture."
+    standards: "Operations & Configuration Management Std: 6.2.1  Security Operations and Administration, 6.2.2 System Hygiene"
+
+  - req_id: "4.03"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Released production software must utilize runtime protections and continue to be monitored for new software vulnerabilities."
+    standards: "Application Security Std: 6.6 Released Application Security"
+
+  - req_id: "4.04"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: |-
+      MCP Servers must be operated and administered securely. Tasks include: 
+      Perform ongoing security administration functions. Adminstering users and access.
+      Performing ongoing system maintenance - including performing system vulnerability assessments and applying security patches.
+      Conducting appropriate training and awareness for users.
+      Identification of information owners.
+      Verifying system security controls, both automated and manual, are functioning correctly and effectively.
+      Reviewing system logs toevaluate system security audit controls.
+      Monitoring systems and accounts to detect security violations and unauthorized changes.
+    standards: "Operations & Configuration Management Std: 6.2.1  Security Operations and Administration (a-k)"
+
+  - req_id: "4.05"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Procedures to verify the correct and secure operation of information processing systems and sites must be defined and followed."
+    standards: "Operations & Configuration Management Std: 6.2.7 Operations and Maintenance Documentation"
+
+  - req_id: "4.06"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: |-
+      Both server and client (AI assistant) should authenticate each other’s identity. This can be achieved using:
+      X.509 certificates (for enterprise setups)
+      OAuth2 or SSO (for organizations wanting federated and auditable access)
+    standards: ""
+
+  - req_id: "4.07"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Each connection or token should be scoped to the minimum required permissions, reducing the blast radius if a credential is compromised."
+    standards: "Identity & Access Control: 6.3 Access Management, 6.5 Tokens"
+
+  - req_id: "4.08"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "It is important to log and monitor the performance and security of MCP proxy servers because they are a component of an AI system. Logging and montitoring of AI systems is important because they may have a higher degree of difficulty in predicting failure modes for emergent properties of large scale pre-trained models."
+    standards: |-
+      Artificial Intelligence Std: 6.1.2 Adversarial Threats or Actions c) Monitoring and Detection.
+      6,2 AI System Lifecycle Management e) Monitoring and Logging. 
+
+  - req_id: "4.09"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Instrument all MCP connectors and clients to log authentication attempts, data access, and errors. Verify that logs are protected and regularly monitored."
+    standards: "Logging and Monitoring Std: 6.1 General Requirements"
+
+  - req_id: "4.10"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Ensure the MCP proxy server has the capability to monitor, detect and provide an alert for signficant security events. Alerts must be forwarded to an appropriate responser in a timely fashion."
+    standards: "Logging and Monitoring Std: 6.5.2 Monitoring and Alerting"
+
+  - req_id: "4.11"
+    category: "MCP Proxy Server Operations"
+    sub_category: "General"
+    requirement: "Acme must be able to control tools/APIs/external source for MCP server"
+    standards: ""

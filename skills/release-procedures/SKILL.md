@@ -1,9 +1,7 @@
 ---
 name: release-procedures
 description: Version management, release verification, and deployment procedures for software releases. Includes semver guidance, version consistency checks, and platform-specific constraints.
-license: MIT
 metadata:
-  author: groupzer0
   version: "1.0"
 ---
 
@@ -36,7 +34,7 @@ Systematic approach to packaging and releasing software. Use this skill when:
 │  │  2. User approves release                               │    │
 │  │  3. Git tag, push, publish                              │    │
 │  │  4. Update all plan statuses: "Released"                │    │
-│  │  5. Hand off to Retrospective                           │    │
+│  │  5. Planner runs mini-retro (pre-DevOps gate)           │    │
 │  └─────────────────────────────────────────────────────────┘    │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -241,7 +239,7 @@ git push origin v1.2.3
 - **Stage 1 (Per-Plan)**: After UAT approval, commit changes locally with detailed message. Do NOT push.
 - **Stage 2 (Per-Release)**: After all plans committed and user approves release, push and publish.
 - Track which plans are committed for current release
-- Coordinate with Roadmap agent to maintain release→plan mappings
+- Coordinate with Roadmap agent to maintain release->plan mappings
 - Never push without explicit release approval
 - Document in `.agent-output/deployment/`
 
@@ -260,7 +258,7 @@ git push origin v1.2.3
 ### Roadmap Agent
 - Maintain Active Release Tracker section
 - Track current working release version
-- Monitor plan→release mappings
+- Monitor plan->release mappings
 - Notify when all plans for a release are committed
 
 ---

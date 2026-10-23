@@ -10,7 +10,7 @@ Detailed phase-by-phase methodology for comprehensive security reviews.
 
 ### 1. Trust Boundary Analysis
 - Map all trust boundaries in the system
-- Identify where data crosses boundaries (user→app, app→database, service→service)
+- Identify where data crosses boundaries (user->app, app->database, service->service)
 - Verify authentication/authorization at every boundary crossing
 - Document implicit trust assumptions that may be violated
 

@@ -1,0 +1,23 @@
+{
+  "skill_name": "table-view",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have query results from my orders database (about 2000 rows: order_id, customer, region, total, priority flag, created date). Give me an excel-like view I can filter and search, as a single HTML file I can serve from my MCP server's UI.",
+      "expected_output": "Self-contained HTML via build_table_html.py: type-aware header filters (numeric >= on total, selects on region/priority), global search, export buttons, zero external requests.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Users need to correct bad category labels directly in the table and my backend should receive the edits. Build the table view and tell me exactly what my host page has to listen for.",
+      "expected_output": "editable=True table; explanation of the tableview:change postMessage contract with the changes array shape.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Show me the first look at this 80MB CSV as a browsable table.",
+      "expected_output": "Does NOT inline 80MB: samples/limits rows or aggregates first per the size guidance, states the limit, produces a working table of the subset.",
+      "files": []
+    }
+  ]
+}

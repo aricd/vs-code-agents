@@ -1,0 +1,51 @@
+# invalid-work-order-blocker.yaml
+# Gate script fixture — OPEN BLOCKER
+# Expected: run-work-order-gates[.ps1|.sh] exits 1
+# Error must contain: "open blocker"
+#
+# Validates: gate script detects and rejects work-orders with unresolved blockers.
+
+meta:
+  plan_id: "024"
+  plan_name: "work-order-handoff-mechanism"
+  phase: 1
+  phase_name: "Schema, Scripts, Skill Section"
+  issued_by: Planner
+  issued_date: "2026-07-07"
+  target_agent: Implementer
+  status: blocked
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Schema file exists"
+    kind: Asserted
+    status: blocked
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers:
+  - id: BLK-001
+    description: "Cannot proceed without schema field clarification from owner"
+    raised_by: Implementer
+    raised_date: "2026-07-07"
+    status: open
+    resolution: null

@@ -13,8 +13,8 @@ When implementing or consuming APIs that span multiple repositories, ensure type
 
 Before implementing any API endpoint or client, check for contract definitions in these locations (in order of precedence):
 
-1. **`api-contract/`** — This repo is the source of truth for the contract
-2. **`.contracts/`** — Synced copy from an external source repo (typically via CI)
+1. **`api-contract/`** -- This repo is the source of truth for the contract
+2. **`.contracts/`** -- Synced copy from an external source repo (typically via CI)
 
 If neither exists and you are implementing API endpoints, propose creating an `api-contract/` directory following the standard structure.
 
@@ -33,9 +33,9 @@ api-contract/ (or .contracts/)
 ### When Implementing API Endpoints (Backend)
 
 1. Read `.contracts/types.ts` (or `api-contract/types.ts`) before writing handler code
-2. Import or reference the types directly — do not redefine them
+2. Import or reference the types directly -- do not redefine them
 3. Validate that Lambda/function request and response shapes match the contract exactly
-4. If the contract is missing fields you need, document as an OPEN QUESTION — do not add fields unilaterally
+4. If the contract is missing fields you need, document as an OPEN QUESTION -- do not add fields unilaterally
 
 ### When Implementing API Clients (Extension/Frontend)
 
@@ -45,6 +45,8 @@ api-contract/ (or .contracts/)
 4. If the API behaves differently than the contract specifies, flag this as a bug
 
 ### When Proposing Contract Changes
+
+Use [`deep-modules`](../deep-modules/SKILL.md) to evaluate proposed contract shape (depth, ILC, RCK relative to caller baseline) before bumping `version.ts`.
 
 1. **Additive changes** (new optional fields, new endpoints): Safe to propose inline
 2. **Breaking changes** (removing fields, changing types): Document as OPEN QUESTION with migration notes
@@ -58,7 +60,7 @@ If this repo consumes an external contract (indicated by `.contracts/` existing)
 - The contract is synced automatically via GitHub Actions
 - Check `.github/workflows/sync-contract.yml` for sync frequency
 - If contract seems stale, trigger the sync workflow manually
-- Do not edit files in `.contracts/` directly — they will be overwritten
+- Do not edit files in `.contracts/` directly -- they will be overwritten
 
 ## Type Validation
 

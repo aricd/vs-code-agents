@@ -1,190 +1,164 @@
 ---
 name: git-commit-message
-description: Craft best-practice git commit messages. Supports standard format by default and Conventional Commits when explicitly requested. Load when crafting commit messages for staged changes.
-license: MIT
+description: Craft best-practice git commit messages AND keep git history usable as a measurement dataset for code-health analytics (hotspot analysis, defect prediction, churn attribution). ALWAYS apply this skill whenever committing code, crafting or reviewing commit messages, creating or describing PRs, staging changes, deciding how to split a batch of work into commits, performing file renames or moves, or wrapping up a plan/feature with mixed changes — even when the user just says "commit this", "push my changes", "wrap this up", or "write the commit message". Uses Conventional Commits by default; plain standard format on explicit request.
 metadata:
-  author: aricd
-  version: "1.0"
+  version: "2.0"
 ---
 
-# Git Commit Message Skill
+# Git Commit Message & History Hygiene
 
-Produces one best-practice git commit message per request. Use this skill when:
-- Crafting a commit message for staged changes
-- Writing commit messages that follow best practices
-- Creating Conventional Commit messages (when explicitly requested)
+A commit is two things at once: a **permanent human-readable artifact** and a **row in a
+dataset**. Future tooling will grep this history to answer: *Which files keep breaking? Did
+that refactor reduce rework? Where is risk concentrating?* It reads commit **types**,
+**file sets**, and **trailers** as signal — and a sloppy commit poisons those labels forever.
+A real audit found commit-message-based bug labels had ~50% precision, and a single 27-file
+commit titled "Plan 192: … cluster fixes" accounted for half of all file-level bug labels in
+a 90-day window. These rules cost seconds at commit time and are unrecoverable if skipped.
 
-## Activation Triggers
+Two mandates, chosen by what was asked:
 
-Load this skill when the user says:
-- "Craft a git commit message for …"
-- "Write the commit message for the staged changes …"
-- "Create a commit message for …"
-- "Create a **Conventional Commit** message …" (Conventional format only when explicitly requested)
+- **Message crafting** ("write a commit message for…") — produce one message per request
+  under the rules below. If you can read the staged diff, read it; if not, ask briefly for
+  *what changed* and *why*. Never fabricate change details.
+- **Committing work** ("commit this", "wrap up plan N") — full hygiene: split mixed work
+  into atomic commits, isolate renames, attach trailers, then commit.
 
-## Required Inputs
+## Format Rules (every message, both formats)
 
-When context is missing, ask for the following (briefly):
-- **What changed**: Summary of the change
-- **Why changed**: Reason or user impact
-- **Issue references** (optional): e.g., `Closes #123`
-- **Breaking change** (if applicable): What breaks and how to migrate
-- **For Conventional Commits only**: Desired `type` and optional `scope` (or permission to infer)
+1. Separate subject from body with a blank line.
+2. Subject ≤50 characters (hard target; revise if exceeded).
+3. Imperative mood ("Add feature", not "Added feature"); capitalize the first word of the
+   description; no trailing period.
+4. Body wrapped at 72 characters; explains **what and why**, not a file-by-file changelog.
+5. References and trailers go in the footer (see Trailers below).
 
-If the user declines to provide required context, return a short response:
-> "Cannot complete: I need at minimum [what changed] and [why changed] to craft an accurate commit message."
+**Default format — Conventional Commits:** `<type>(<scope>): <Subject>` (scope optional).
+Types drive changelogs, SemVer automation, and — critically — defect analytics. Use the
+plain standard format (no type prefix) only when the user explicitly asks for it; the
+vocabulary rules below still apply either way.
 
-Do NOT guess or fabricate change details.
+## Exclusions: no transient state in a permanent artifact
 
----
+Do NOT include process or repository state that becomes false or meaningless once the
+commit is pushed, merged, or rebased:
 
-## Output Format Rules (All Commit Messages)
+- **Push/locality status** — `Local-commit-only`, `not pushed`, `do not push`. A workflow
+  rule like *"commit locally, don't push"* is an action directive to the committer — never
+  transcribe it into the message.
+- **Branch/PR mechanics** — "on branch X", "will squash later", "WIP until review".
+- **Ephemeral agent/process chatter** — orchestration or review scaffolding notes.
 
-Every commit message must follow these rules:
+**Keep** durable provenance that stays true forever: issue/requirement IDs (`Closes #123`,
+`AXIS-3820`, `Refs: PLAN-026`) and dated approval/gate records (`UAT Approved: 2026-06-21`).
+These describe what the change is and how it was vetted — not where the commit currently sits.
 
-1. **Separate subject from body with a blank line**
-2. **Subject line ≤ 50 characters** (hard target; revise if exceeded)
-3. **Subject in imperative mood** ("Add feature" not "Added feature")
-4. **No trailing period on subject line**
-5. **Body wrapped at 72 characters**
-6. **Body explains what and why** (not a file-by-file changelog)
-7. **References (issues/PRs) in footer**
+## Type semantics: `fix:` is a measurement, not a vibe
 
----
+Analytics pipelines label "this file had a defect" by grepping for fix-like commits. That
+only works if the type is used precisely. **The one-question test:** *Was there observably
+wrong behavior before this change — something a user, test, or downstream system experienced
+as broken?* Yes → `fix:`, and name the broken behavior in the subject. No → not a fix, no
+matter how much it improves things.
 
-## Standard Commit Message Format
+| The change is... | Type | NOT |
+|---|---|---|
+| New user-facing capability | `feat:` | — |
+| Repairing observably wrong behavior | `fix:` | — |
+| Hardening/defensive/reliability work, no known defect | `refactor:` or `perf:` | `fix:` |
+| Planned improvement work ("Plan NNN", tech-debt cleanup) | `refactor:` / `chore:` | "Plan NNN: fixes" |
+| Repairing a broken test (production code unchanged) | `test:` | `fix:` |
+| Docs, typos, comments | `docs:` | `fix:` |
+| Formatting only, no behavior change | `style:` | — |
+| CI/build config repair | `ci:` / `build:` | `fix:` |
+| Restoring behavior a previous commit broke | `fix:` + `Defect-Origin:` trailer | `revert:` unless a literal revert |
 
-Use this format by default (when Conventional Commits is NOT requested):
+Use only these standard types — never invent types (`harden:`, `improve:`). Prefer a
+user-provided type; infer from described intent, not filenames; if genuinely ambiguous, ask
+one clarifying question.
+
+Keep fix-adjacent words (`fix`, `bug`, `broken`, `regression`, `repair`, `patch`) out of the
+subjects of non-fix commits — in both formats. "refactor: Harden session teardown", not
+"refactor: Fix up session teardown". Naive greps will run against this history.
+
+## Scope: one concern per commit
+
+File-level analytics attribute a commit's meaning to **every file it touches**. A commit
+that fixes one bug and also reformats six other files just labeled six innocent files as
+defective.
+
+- One logical concern per commit; "and" in a subject line is a splitting signal.
+- A `fix:` commit touches only the files involved in the defect — typically 1–5 source
+  files plus their tests. A 10+ file "fix" is almost certainly bundled concerns.
+- Separate unrelated test-only and doc-only changes. Tests written *for* a fix belong with
+  the fix.
+- Wrapping up mixed plan/feature work: split with `git add -p` / per-file staging:
 
 ```text
-<imperative subject ≤50 chars>
+BAD  (one commit):  Plan 214: reliability fixes and cleanup        [27 files]
 
-<body: what changed and why, wrapped at 72 chars>
-
-<optional footer: issue references>
+GOOD (four commits):
+  fix(router): Dispatch drops params on retry paths     [2 files]  Refs: PLAN-214
+  fix(session): Stale lock left after failed promote    [3 files]  Refs: PLAN-214
+  refactor(soap): Extract row-cell parsing helpers      [6 files]  Refs: PLAN-214
+  test: Consolidate session fixtures                    [9 files]  Refs: PLAN-214
 ```
 
----
+Same work, same day — but history now says two real defects existed in five files, instead
+of "27 files are buggy."
 
-## Conventional Commits Format
+## Trailers: link commits to their evidence
 
-Use this format **only when the user explicitly requests** Conventional Commits.
+Machine-parseable `Key: value` footers let future tooling join commits to issues, plans, and
+defect origins without guesswork. Use them when the information exists — an absent trailer
+is honest; a wrong one is not.
 
-### Header Format
+- `Fixes: #NNN` / `Closes: #NNN` — the issue this repairs or completes.
+- `Refs: <id>` — the plan, epic, or ticket the work belongs to (context, not causation).
+- `Defect-Origin: <sha>` — the commit that introduced the defect. For every `fix:` commit,
+  spend the ten seconds to check `git blame`/`git log -L` on the repaired lines; if the
+  introducing commit is identifiable, add this trailer. It is the single highest-value
+  trailer for analytics — it makes rigorous bug-introduction (SZZ-style) analysis possible
+  instead of forcing tools to guess.
+- `BREAKING CHANGE: <what breaks and how to migrate>` — see below; always the **last** footer.
 
 ```text
-<type>(<scope>): <subject>
+fix(session): Stale lock left after failed promote
+
+Promote failures returned early without releasing the session
+lock, so the next request on the same session hung.
+
+Fixes: #482
+Refs: PLAN-214
+Defect-Origin: 3bc3de78
 ```
 
-- `scope` is optional; omit parentheses when scope is absent
-- Subject follows the same rules: imperative, ≤50 chars total for the header, no period
+## Breaking changes
 
-### What is Type?
+Both markers, always: `!` after type/scope in the header (`feat(api)!:`) and a
+`BREAKING CHANGE:` footer placed after all other footers so it is unmissable. Only when the
+user confirms the change is breaking; describe user/API-visible impact plus minimal
+migration guidance.
 
-**Type** is the change category that drives:
-- **Release notes grouping**: Changelogs organize entries by type
-- **SemVer automation**: Tools like semantic-release use type to determine version bumps
-- **History filtering**: `git log --grep="^feat"` finds all features
+## Renames and moves: pure, in their own commit
 
-### Type Selection (Minimum Set)
+Churn attribution breaks silently when a rename is combined with edits — git's rename
+detection degrades below ~50% similarity and the file's history appears to end at the move.
 
-| Type | Use When |
-|------|----------|
-| `feat` | New user-facing capability |
-| `fix` | Bug fix |
-| `docs` | Documentation-only change |
-| `style` | Formatting only, no behavior change |
-| `refactor` | Code change that is neither fix nor feature |
-| `perf` | Performance improvement |
-| `test` | Adding or fixing tests |
-| `chore` | Build, tooling, or maintenance |
+- A rename/move commit contains only renames/moves (100% similarity), typed `refactor:`
+  with a subject that says it's a move.
+- Edit contents in a separate commit before or after the move.
+- Isolate mass mechanical changes too (`style: Apply formatter — no logic change`) so they
+  can be excluded from churn analysis.
 
-**Selection guidance:**
-- Prefer user-provided type when available
-- Infer type from described intent (not by guessing from filenames alone)
-- If type is ambiguous, ask one clarifying question rather than guessing
+## Snapshot cadence
 
----
+If the repo has metric snapshot tooling (e.g. `make snapshot`), run it at every merge to the
+default branch — or at minimum at every plan/feature completion — so snapshots tie to merge
+SHAs. Retain machine-readable artifacts (coverage, metric JSON). Never rewrite published
+history; it orphans the SHAs that snapshots and CI records point to.
 
-## Breaking Change Handling
+## Worked example (conventional, breaking)
 
-Breaking changes require **both**:
-1. `!` after type/scope in the header: `feat!:` or `feat(api)!:`
-2. `BREAKING CHANGE:` footer at the **bottom** (after other footers)
-
-### Footer Format
-
-```text
-BREAKING CHANGE: <what breaks and how to migrate>
-```
-
-**Rules:**
-- Only include when user confirms the change is breaking
-- Must describe user-visible or API-visible impact
-- Must include minimal migration guidance
-- Must be placed **after** other footers (e.g., `Closes #123`) so it is unmissable
-
----
-
-## Worked Examples
-
-### Example 1: Standard Commit Message
-
-**Input:**
-- What: Added rate limiting to the API
-- Why: Prevent abuse and ensure fair usage
-- Issue: #456
-
-**Output:**
-```text
-Add rate limiting to API endpoints
-
-Implement token bucket algorithm to limit requests per user.
-This prevents abuse and ensures fair resource allocation for
-all API consumers.
-
-Rate limits are configurable via environment variables and
-default to 100 requests per minute per user.
-
-Closes #456
-```
-
-### Example 2: Conventional Commit (Non-Breaking)
-
-**Input:**
-- User requests Conventional Commit
-- Type: feat
-- Scope: auth
-- What: Add OAuth2 support
-- Why: Users requested single sign-on
-- Issue: #789
-
-**Output:**
-```text
-feat(auth): Add OAuth2 support for single sign-on
-
-Integrate OAuth2 authorization code flow with configurable
-providers. Initially supports Google and GitHub as identity
-providers.
-
-Users can now authenticate via their existing accounts,
-reducing friction during onboarding.
-
-Closes #789
-```
-
-### Example 3: Conventional Commit with Breaking Change
-
-**Input:**
-- User requests Conventional Commit
-- Type: feat
-- Scope: api
-- What: Change response format from XML to JSON
-- Why: JSON is more widely supported by modern clients
-- Breaking: All clients using XML parsing will break
-- Issue: #123
-
-**Output:**
 ```text
 feat(api)!: Switch responses from XML to JSON
 
@@ -192,34 +166,20 @@ Replace XML response serialization with JSON across all API
 endpoints. JSON provides better tooling support and smaller
 payload sizes.
 
-Clients must update their parsers from XML to JSON format.
-See migration guide in docs/api-migration.md.
-
 Closes #123
-
 BREAKING CHANGE: API responses are now JSON instead of XML.
-All clients must update their response parsers. XML format
-is no longer supported.
+All clients must update their response parsers.
 ```
 
----
+## Pre-commit checklist
 
-## Quick Reference
+1. Type passes the one-question test; no fix-vocabulary in non-fix subjects; no invented types.
+2. One concern (no "and" in subject; fix commits ≤5 source files or justified in the body).
+3. Subject ≤50 chars, imperative, capitalized, no period; body wrapped at 72, says what + why.
+4. No transient state (push status, branch mechanics, agent chatter).
+5. Trailers where evidence exists (`Fixes:`, `Refs:`, `Defect-Origin:`); `BREAKING CHANGE:` last.
+6. Renames pure and separate; mechanical changes isolated.
+7. Landing on the default branch with snapshot tooling present? Run the snapshot.
 
-### Subject Line Checklist
-- [ ] Imperative mood ("Add" not "Added")
-- [ ] ≤ 50 characters
-- [ ] No trailing period
-- [ ] Capitalized first word
-
-### Body Checklist
-- [ ] Blank line after subject
-- [ ] Wrapped at 72 characters
-- [ ] Explains what changed
-- [ ] Explains why it changed
-
-### Conventional Commits Checklist (when requested)
-- [ ] Valid type from the defined set
-- [ ] Scope in parentheses (if used)
-- [ ] `!` after type/scope for breaking changes
-- [ ] `BREAKING CHANGE:` footer at the bottom for breaking changes
+When a user's request would violate these (e.g. "just commit everything as 'fixes'"), don't
+silently comply or silently override: make the compliant split and note why in one sentence.

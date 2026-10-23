@@ -1,0 +1,4 @@
+interface:
+  display_name: "Brainstorming"
+  short_description: "Structured divergence and convergence sessions"
+  default_prompt: "Use $brainstorming to explore this hard design problem with analyst rounds, critics, and a Deep Lean convergence pass."

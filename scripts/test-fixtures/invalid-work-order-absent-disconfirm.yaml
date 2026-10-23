@@ -1,0 +1,50 @@
+# invalid-work-order-absent-disconfirm.yaml
+# Gate script fixture — DEMONSTRATED ITEM WITH NO disconfirm KEY AT ALL
+# Expected: run-work-order-gates[.ps1|.sh] exits 1
+# Error must contain: "Demonstrated item" and "missing disconfirm"
+#
+# Validates REQ-028/REQ-029: an absent `disconfirm` key (never written at all, as
+# opposed to written and set to null) must be treated identically to an explicit
+# null — the .sh arm distinguishes the two states structurally ("UNSET" vs "NULL"
+# sentinel) but both MUST fail the same check.
+
+meta:
+  plan_id: "033"
+  plan_name: "verification-discipline-hardening"
+  phase: 1
+  phase_name: "gate-correctness-resolution-observability"
+  issued_by: Planner
+  issued_date: "2026-09-08"
+  target_agent: Implementer
+  status: pending
+  base_commit: "HEAD"
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Gate script validates Demonstrated items have disconfirm (absent key)"
+    kind: Demonstrated
+    entry_point: "scripts/run-work-order-gates.ps1"
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []

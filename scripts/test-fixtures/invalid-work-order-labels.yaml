@@ -1,0 +1,48 @@
+# invalid-work-order-labels.yaml
+# Gate script fixture — PLANNING LABEL IN SOURCE FILE
+# Expected: run-work-order-gates[.ps1|.sh] exits 1
+# Error must contain: "planning label in" and name the matched pattern
+#
+# The label_audit gate targets scripts/test-fixtures/invalid-plan.md which
+# is an existing test fixture that intentionally contains forbidden planning-label
+# patterns (plan-level labels like GOAL, TASK, REQ, OPENQ, RISK followed by numbers).
+
+meta:
+  plan_id: "024"
+  plan_name: "work-order-handoff-mechanism"
+  phase: 1
+  phase_name: "Schema, Scripts, Skill Section"
+  issued_by: Planner
+  issued_date: "2026-07-07"
+  target_agent: Implementer
+  status: pending
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "No planning labels leak into source files"
+    kind: Asserted
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: label_audit
+    description: "Detect forbidden planning-label patterns in target file"
+    command: null
+    must_match_only: null
+    paths:
+      - scripts/test-fixtures/invalid-plan.md
+    status: not-run
+    result: null
+
+blockers: []

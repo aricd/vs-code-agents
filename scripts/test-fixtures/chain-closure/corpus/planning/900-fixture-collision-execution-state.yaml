@@ -1,0 +1,3 @@
+uuid: "eeee5555"
+plan_name: "fixture-collision-plan"
+mission: "Rule-5 fixture: this file's expected close destination is already occupied by an unrelated chain's file, reproducing the real 027-execution-state.yaml collision."

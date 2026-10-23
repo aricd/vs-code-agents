@@ -1,0 +1,22 @@
+[
+  {"query": "show these query results in an excel-like table i can filter and sort, as a single html file for my MCP server UI", "should_trigger": true},
+  {"query": "i've got about 4000 rows of orders (id, customer, region, total, priority, date) - let me browse and search them interactively", "should_trigger": true},
+  {"query": "make this csv explorable - i just want to poke around the rows with per-column filters", "should_trigger": true},
+  {"query": "i need a data grid where users can edit the category cells and my backend gets the changes", "should_trigger": true},
+  {"query": "spreadsheet-style view of this json so my team can eyeball it and export to csv", "should_trigger": true},
+  {"query": "render these rows as a filterable grid that works inside a sandboxed iframe with no external requests", "should_trigger": true},
+  {"query": "drop this dataframe into an interactive table with sorting and a search box", "should_trigger": true},
+  {"query": "let me look at the rows of this dataset with column filters and dark mode", "should_trigger": true},
+  {"query": "browse this 20k row table, filter by status, and let me download the filtered subset", "should_trigger": true},
+  {"query": "present this SQL result as a grid with pills for the enum columns and check marks for the booleans", "should_trigger": true},
+  {"query": "what's the most effective chart to visualize the relationship between these two numeric columns", "should_trigger": false},
+  {"query": "make a bar chart of average revenue by region", "should_trigger": false},
+  {"query": "create an xlsx file from this data with a totals row and conditional formatting", "should_trigger": false},
+  {"query": "pivot this by product and month with aggregated sums, drag-and-drop style", "should_trigger": false},
+  {"query": "recommend and validate a chart design for this dataset using formal perception rules", "should_trigger": false},
+  {"query": "write these records to a google sheet via the API", "should_trigger": false},
+  {"query": "build me a histogram of order totals binned into 10 buckets", "should_trigger": false},
+  {"query": "summarize this csv in a few sentences - key trends and outliers", "should_trigger": false},
+  {"query": "clean this malformed csv, fix the header row and junk rows, and give me a tidy spreadsheet file", "should_trigger": false},
+  {"query": "generate a treemap of storage usage by folder", "should_trigger": false}
+]

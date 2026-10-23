@@ -1,9 +1,7 @@
 ---
 name: implementation-principles
 description: Tie-breaker guidance for implementers covering DRY (with AHA nuance), YAGNI, Rule of Three, composition over inheritance, separation of concerns, POLA, Boy Scout Rule, defensive programming, and appropriate exception use. Load when making design decisions during implementation or resolving competing approaches.
-license: MIT
 metadata:
-  author: groupzer0
   version: "1.0"
 ---
 
@@ -17,11 +15,23 @@ Practical tie-breaker guidance for implementers. Use this skill when:
 
 ---
 
+## Primary Lens: Deep Modules
+
+**Deep modules** is the dominant criterion for evaluating design alternatives (A-vs-B), module boundaries, and abstraction costs. Load `deep-modules` skill for the full counting methodology.
+
+**Core principle**: Powerful functionality behind small, stable interfaces. The ratio of implementation complexity hidden to interface surface exposed is the primary measure of abstraction quality.
+
+**When comparing designs**, score with deep-modules ISC (Interface Surface Count), CouplingCount, and LeakageCount. The design with lower interface surface that hides more complexity wins.
+
+**The principles below** (DRY, YAGNI, Rule of Three, SoC, etc.) serve as **tie-breakers** for style, naming, defensive posture, and exception use — they do NOT override the deep-modules verdict when interface costs differ.
+
+---
+
 ## Efficiency Principles
 
 ### DRY (Don't Repeat Yourself)
 
-Avoid duplicating **knowledge**—not just code. When the same logic or concept exists in multiple places, changes require updating all copies, risking inconsistency and bugs.
+Avoid duplicating **knowledge**--not just code. When the same logic or concept exists in multiple places, changes require updating all copies, risking inconsistency and bugs.
 
 **When to apply:**
 - Same business rule implemented in multiple locations
@@ -68,7 +78,7 @@ Build only what current requirements demand. Speculative features add complexity
 Wait for **three occurrences** before extracting a shared abstraction. Two occurrences may be coincidence; three suggests a genuine pattern.
 
 **When to apply:**
-- Noticing similar code in two places—resist the urge to abstract immediately
+- Noticing similar code in two places--resist the urge to abstract immediately
 - Evaluating whether to create a utility function or class
 
 **Guidance:**
@@ -113,26 +123,7 @@ Favor assembling behavior from smaller, focused components rather than building 
 
 ### Separation of Concerns (SoC)
 
-Each module, class, or function should have a single, well-defined responsibility. Related: **cohesion** (how focused a module is) and **coupling** (how dependent modules are on each other).
-
-**Goals:**
-- **High cohesion**: Everything in a module relates to its core purpose
-- **Low coupling**: Modules interact through narrow, well-defined interfaces
-
-**When to apply:**
-- A class is doing UI rendering *and* database access
-- A function handles parsing, validation, *and* transformation
-- Changes to one feature require touching many unrelated files
-
-**Guidance:**
-- Split responsibilities into separate modules/classes
-- Define clear boundaries (input/output contracts)
-- Push side effects to the edges; keep core logic pure
-
-**Detection patterns:**
-- Class names with "And" or "Manager" doing multiple things
-- Functions longer than 30-50 lines with distinct phases
-- High import counts from unrelated domains
+**Goal**: Concentrate complexity at the implementation level; minimize what callers must know to use the module. Score with `deep-modules` — `CouplingCount` is the count-based version of "low coupling."
 
 ---
 
@@ -252,8 +243,22 @@ Use **explicit control flow** (conditionals, pattern matching, result types) for
 | YAGNI | Speculative features | Build only for current needs |
 | Rule of Three | Duplication temptation | Wait for three before extracting |
 | Composition | Behavior reuse | Prefer injection over inheritance |
-| SoC | Mixed responsibilities | High cohesion, low coupling |
+| SoC | Mixed responsibilities | Score with deep-modules CouplingCount |
 | POLA | Naming, APIs, defaults | No surprises |
 | Boy Scout | Incidental cleanup | Small, low-risk improvements |
 | Defensive | Boundaries, inputs | Fail fast, validate early |
 | Exceptions | True errors only | Explicit flow for expected branches |
+
+---
+
+## Appendix: SOLID Detection Patterns
+
+Quick symptom checklist for identifying SOLID violations. For interface-cost scoring, load `deep-modules` skill.
+
+| Principle | Detection Pattern | Refactoring Direction |
+|-----------|-------------------|----------------------|
+| **SRP** (Single Responsibility) | Class with many public methods doing unrelated things (see `deep-modules` for ISC counting) • Method with multiple distinct phases • Class name contains "And" or "Manager" with mixed concerns | Extract class per responsibility • Split into focused modules |
+| **OCP** (Open/Closed) | Switch/case on type with frequent additions • if/else chains checking instance types • Modifying existing code to add new features | Strategy pattern • Plugin architecture • Dependency injection |
+| **LSP** (Liskov Substitution) | Override that throws "not implemented" • Subclass that ignores parent behavior • Type checks before calling inherited methods | Composition over inheritance • Extract interface for true polymorphism |
+| **ISP** (Interface Segregation) | Interface with many methods (see `deep-modules` for ISC counting) • Implementing classes stub methods as no-ops • "Fat" interfaces with unrelated method groups | Split into role-specific interfaces • Compose focused interfaces |
+| **DIP** (Dependency Inversion) | Direct instantiation of dependencies • Hard-coded connections • Test files creating production instances | Constructor injection • Factory pattern • Interface-based dependencies |

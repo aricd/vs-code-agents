@@ -1,0 +1,17 @@
+# defect-observability settings — https://<your-org>/skills/defect-observability
+# States are strings: disabled | advisory | load-bearing  (never bare off/on — YAML
+# coerces those to booleans). Every module enters at advisory; promote to
+# load-bearing only after it has run cleanly and someone consumes its output.
+version: 1
+artifacts_dir: .observability
+default_branch: main
+freshness_days: 35          # load-bearing artifact staler than this fails check_sensors
+
+modules:
+  snapshots:    { state: disabled, cadence: merge }
+  churn:        { state: disabled }
+  reports:      { state: disabled, top_k: 20 }
+  ci:           { state: disabled }
+  runtime_attr: { state: disabled, boundaries: [] }
+  mutation:     { state: disabled, top_k: 10, cadence: monthly }
+  labels:       { state: disabled, windows: [90] }

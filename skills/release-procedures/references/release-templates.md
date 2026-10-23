@@ -98,7 +98,7 @@ Use in `.agent-output/deployment/[version].md`:
 
 ## Next Actions
 - [If aborted: required fixes]
-- [If complete: none or hand off to retrospective]
+- [If complete: none or Planner runs mini-retro]
 ```
 
 ---

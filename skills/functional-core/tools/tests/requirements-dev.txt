@@ -1,0 +1,11 @@
+# Test dependencies for tools/tests/
+# Run: pip install -r tools/requirements-dev.txt
+#
+# radon is required for crest_metrics.py (used by most tests):
+radon>=6.0
+
+# esprima is required for test_crest_scorecard_rendering.py.
+# Pinned: pure-Python ES2017 parser; stable and unmaintained upstream.
+# Fail-closed: if absent, collection of the scorecard rendering test fails
+# (ImportError), not silently skips — this is intentional (CON-005).
+esprima==4.0.1

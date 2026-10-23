@@ -8,38 +8,22 @@ This repo defines a set of `.agent.md` files that configure specialized AI perso
 
 A typical high-level workflow looks like:
 
-Roadmap → Planner → (Analyst, Architect, Critic, Security) → Implementer → Code Reviewer → QA → UAT → DevOps → Retrospective → ProcessImprovement
+Roadmap -> Planner -> (Analyst, Architect, Critic, Security) -> Implementer -> Code Reviewer -> QA -> UAT -> Planner mini-retro -> DevOps
 
 ## Where to Put These Files
 
-There are three ways to make these agents available to VS Code:
+**The one supported path is system-level linking** -- a single whole-directory link, made once per machine (full detail, including why the linker must not be pointed at it, in [LINKING.md](LINKING.md)):
 
-### Option 1: Install as a Plugin (Recommended)
+```
+mklink /J "%USERPROFILE%\.agents\skills" "C:\path\to\vs-code-agents\skills"   :: Windows
+ln -s /path/to/vs-code-agents/skills ~/.agents/skills                            # POSIX
+```
 
-1. Ensure `chat.plugins.enabled` is set to `true` in your VS Code settings
-2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-3. Run **Chat: Install Plugin From Source**
-4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
-5. All 13 agents and 19 skills become immediately available in Copilot Chat
+VS Code reads `~/.agents/skills` for every local workspace on that machine -- no plugin registration, no per-workspace copy to keep in sync, no re-run when a skill is added, and no cache-locality problem when a workspace is opened over Remote-SSH (make the same link once on each Remote-SSH host too, since `~/.agents` is scoped per machine).
 
-> [!NOTE]
-> Agent Plugins are currently a Preview feature in VS Code. The plugin will be listed under **Extensions > Agent Plugins** in VS Code settings once installed. You can enable/disable it per workspace.
+This repo previously also documented installing itself as a VS Code **Agent Plugin** (`chat.plugins.enabled`, **Chat: Install Plugin From Source**). That path is retired: Agent Plugin registrations are cached on the local client machine and are not discovered once the workspace is reopened over Remote-SSH -- every agent/skill silently disappears, with no error shown. See [ADR-017](docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md).
 
-### Option 2: Per-workspace (recommended for a single project)
-
-Place the `.agent.md` files under `.github/agents/` in your repository. They will only apply to that workspace.
-
-### Option 3: User-level (available in every workspace)
-
-Place the `.agent.md` files in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles). Paths by OS:
-   - **Linux**: `~/.config/Code/User/`
-   - **macOS**: `~/Library/Application Support/Code/User/`
-   - **Windows**: `%APPDATA%\Code\User\`
-
-> [!TIP]
-> The easiest way to create a user-level agent is via the Command Palette: **Chat: New Custom Agent** → select **User profile**. VS Code will place it in the correct location automatically.
-
-In this repo, the source copies live under `vs-code-agents/`; you can copy or sync from there into `.github/agents/` or your user-level folder.
+Agents and prompts do not have a confirmed system-level VS Code discovery location yet (also ADR-017), so the `claude-user` target only links skills by default. A workspace that needs synced agents/prompts specifically can add a per-workspace target (`.github/agents`/`.github/prompts`) in `scripts/link-config.yaml` -- see LINKING.md's Per-Workspace Fallback section. Doing so reintroduces a small double-registration risk for anything also covered by a future system-level location, so scope it to workspaces that actually need it.
 
 For more guidance on GitHub Copilot agents in VS Code, see the official documentation: https://code.visualstudio.com/docs/copilot/customization/custom-agents
 
@@ -61,7 +45,7 @@ The Copilot CLI has a known upstream bug ([github/copilot-cli#452](https://githu
 **Workaround:**
 
 - Use per-repository agents under `.github/agents/` instead of relying on `~/.copilot/agents/`.
-- If you prefer a single source of truth, you can keep your agents in one folder and copy or symlink them into each repo’s `.github/agents/` directory.
+- If you prefer a single source of truth, you can keep your agents in one folder and copy or symlink them into each repo's `.github/agents/` directory.
 
 Once the upstream bug is fixed, this section can be updated to reflect the restored user-level behavior.
 
@@ -92,24 +76,25 @@ Custom agents give you:
 
 ## Skills
 
-Agents can load **Skills**—modular, reusable instruction sets that provide specialized knowledge on-demand. Skills are stored in the `vs-code-agents/skills/` directory.
+Agents can load **Skills**--modular, reusable instruction sets that provide specialized knowledge on-demand. Skills are stored in the `skills/` directory.
 
 ### Available Skills
 
+> This is a representative sample, not the complete list -- see the `skills/` directory for the full, current catalog.
+
 | Skill | Purpose |
-|-------|---------|  
-| `analysis-methodology` | Confidence levels, gap tracking, investigation techniques |
+| --- | --- |
 | `architecture-patterns` | ADR templates, patterns, anti-pattern detection |
-| `code-review-checklist` | Pre/post-implementation review criteria |
-| `code-review-standards` | Code review checklist, severity definitions, document templates |
+| `code-review` | Unified pre/post-implementation review criteria, severity definitions, document templates |
 | `cross-repo-contract` | Multi-repo API type safety and contract coordination |
+| `deep-modules` | Scores interface depth (ISC/ILC/RCK/CHEC) for any caller-facing surface; produces an A-vs-B depth verdict |
+| `design-rubrics` | Router for the three design-quality rubrics; hosts the shared auditable-judgment output contract and the impactful-decision scorecard template |
 | `document-lifecycle` | Unified numbering, automated closure, orphan detection |
-| `engineering-standards` | SOLID, DRY, YAGNI, KISS with detection patterns |
-| `functional-programming` | Pure functions, immutability, composition, and side-effect isolation for testable, predictable code |
-| `git-commit-message` | Craft best-practice git commit messages; supports Conventional Commits when explicitly requested |
+| `functional-core` | Scorecard for function-level purity, decomposition, and complexity (PLR, FLC-max, CC-max, TCC); also covers the functional-core/imperative-shell technique for making code predictable and testable |
 | `implementation-principles` | Tie-breaker guidance for implementers: DRY, YAGNI, Rule of Three, composition, SoC, POLA, Boy Scout Rule, defensive programming, and appropriate exception use. |
+| `lean-design` | Ambient "minimum that works" bound at every scale (function → architecture); owns the earn-a-name rule and the auditable ladder-trace output format |
+| `git-commit-message` | Craft best-practice git commit messages; supports Conventional Commits when explicitly requested |
 | `execution-orchestration` | Owner-agent orchestration contract: strict gating, reject/redirect rules, and execution-state tracking |
-| `planner-execution-orchestration` | Planner preset/template for using `execution-orchestration` without assuming skill-to-skill imports |
 | `plan-status-reporting` | Deterministic, evidence-based plan status reporting in strict plain-text format |
 | `release-procedures` | Two-stage release workflow, semver, platform constraints |
 | `security-patterns` | OWASP Top 10, language-specific vulnerabilities |
@@ -118,10 +103,12 @@ Agents can load **Skills**—modular, reusable instruction sets that provide spe
 ### Execution State (Orchestration)
 
 If you use execution orchestration, keep a **single authoritative execution-state file** under:
+
 - `.agent-output/planning/` (recommended: `.agent-output/planning/<ID>-execution-state.yaml`)
 
 Schema reference:
-- `vs-code-agents/skills/execution-orchestration/references/execution-state.schema.md`
+
+- `skills/execution-orchestration/references/execution-state.schema.md`
 
 ### Planner as Orchestrator
 
@@ -130,10 +117,10 @@ The **Planner** agent is the primary orchestrator for structured multi-agent del
 1. **Create and approve plans**: Ask the Planner to create one or more plans. Each plan goes through Critic review and user approval.
 2. **Delegate execution**: Once approved, the Planner delegates tasks to specialized agents (Implementer, Code Reviewer, QA, etc.) as subagents.
 3. **Coordinate concurrently**: The Planner can manage multiple approved plans simultaneously, tracking each through its own execution-state YAML file.
-4. **Enforce workflow gates**: Plans progress through the defined sequence — Critic → Implementer → Code Reviewer → QA → UAT → DevOps — with the Planner ensuring gate compliance.
+4. **Enforce workflow gates**: Plans progress through the defined sequence -- Critic -> Implementer -> Code Reviewer -> QA -> UAT -> DevOps -- with the Planner ensuring gate compliance.
 5. **Monitor progress**: The Planner reads execution-state files to surface blockers, completion percentages, and current gate status.
 
-Skills used: `execution-orchestration`, `planner-execution-orchestration`
+Skills used: `execution-orchestration`
 
 See the [README](README.md#-planner-as-orchestrator) for an overview.
 
@@ -141,13 +128,12 @@ See the [README](README.md#-planner-as-orchestrator) for an overview.
 
 Skills are placed in different directories depending on your VS Code version:
 
-| Version | Location |
-|---------|----------|
-| **VS Code Stable (1.107.1)** | `.claude/skills/` |
-| **VS Code Insiders** | `.github/skills/` |
+| Version                     | Location          |
+| --------------------------- | ----------------- |
+| **VS Code Stable (1.107+)** | `.claude/skills/` |
+| **VS Code Insiders**        | `.github/skills/` |
 
-> [!NOTE]
-> These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. Check the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
+> [!NOTE] These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. Check the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
 
 ---
 
@@ -155,15 +141,7 @@ Skills are placed in different directories depending on your VS Code version:
 
 All agents produce their documents (plans, critiques, QA reports, implementation docs, etc.) into a `.agent-output/` directory at the root of your workspace.
 
-> [!IMPORTANT]
-> **Renamed from `agent-output/` to `.agent-output/`**: The leading dot makes it a hidden directory, aligning with conventions like `.github/` and `.vscode/`, and simplifying `.gitignore` management.
->
-> If you have an existing `agent-output/` directory, rename it:
-> ```bash
-> mv agent-output .agent-output
-> ```
-
-The directory is a **workspace runtime artifact** — it is NOT part of the plugin and is typically `.gitignore`'d. Add this to your `.gitignore`:
+The directory is a **workspace runtime artifact** -- it is NOT part of the plugin and is typically `.gitignore`'d. Add this to your `.gitignore`:
 
 ```gitignore
 .agent-output/
@@ -184,16 +162,19 @@ echo "1" > .agent-output/.next-id
 ```
 
 **What it does:**
+
 - When Analyst creates analysis `080`, Planner inherits `080` for the plan
 - QA, UAT, Implementation all use `080` too
-- Easy to follow: `analysis-080.md` → `plan-080.md` → `qa-080.md` → `uat-080.md`
+- Easy to follow: `analysis-080.md` -> `plan-080.md` -> `qa-080.md` -> `uat-080.md`
 
 **If you have existing plans:** Start with your highest plan number + 1:
+
 ```bash
 echo "75" > .agent-output/.next-id  # If your highest plan is 074
 ```
 
 **How it works:**
+
 1. Originating agents (Analyst, Planner) read the number, use it, then increment
 2. Downstream agents (QA, UAT, Implementer) inherit the ID from their source document
 3. Completed documents automatically move to `closed/` subfolders after commit
@@ -223,8 +204,8 @@ pwsh .\scripts\validate-plan-template.ps1 -FilePath ".agent-output/planning/your
 - YAML frontmatter with required fields (ID, Origin, UUID, Status)
 - Value Statement in user story format ("As a [user], I want...")
 - Required sections present in correct order
-- Label prefixes used correctly (REQ-*, TASK-*, GOAL-*, etc.)
-- No unresolved OPENQ-* in CONTRACT/BACKCOMPAT sections (hard gate)
+- Label prefixes used correctly (REQ-_, TASK-_, GOAL-\*, etc.)
+- No unresolved OPENQ-\* in CONTRACT/BACKCOMPAT sections (hard gate)
 - Standard status values (not-started, in-progress, complete, blocked, deferred)
 
 ### Exit Codes
@@ -240,251 +221,265 @@ Both validators enforce the same rules. See [docs/VALIDATOR-PARITY-CHECKLIST.md]
 
 ## Agent-by-Agent Guide
 
-### Roadmap – Product Vision & Epics
+### Roadmap - Product Vision & Epics
 
 **Role**: Owns product vision and outcome-focused epics, maintains the product roadmap.
 
 **Use when**:
+
 - Defining or revising product direction and epics
 - Checking if a plan/feature still aligns with the Master Product Objective
 
 **Example handoff prompts**:
+
 - To Architect: "Epic requires architectural assessment and documentation before planning."
 - To Planner: "Epic is ready for detailed implementation planning."
 
 **Tips**:
+
 - Talk about **user outcomes and business value**, not implementation details.
 - Use Roadmap to sanity-check that a proposed change is actually worth building.
 
 ---
 
-### Planner – High-Rigor Implementation Planning
+### Planner - High-Rigor Implementation Planning
 
 **Role**: Turns roadmap epics into concrete, implementation-ready plans (WHAT/WHY, not HOW).
 
 **Use when**:
+
 - You have a feature/epic and need a structured plan before coding.
 - Requirements or scope need to be clarified and broken into milestones.
 
 **Example handoff prompts**:
+
 - To Roadmap: "Validate that plan delivers epic outcomes defined in roadmap."
 - To Architect: "Please review this plan to ensure it aligns with the architecture."
 - To Analyst: "I've encountered technical unknowns that require deep investigation. Please analyze."
 - To Critic: "Plan is complete. Please review for clarity, completeness, and architectural alignment."
 
 **Tips**:
+
 - Expect a **Value Statement** like: "As a [user] I want [objective] so that [value]."
 - Planner writes **no code** and defines **no test cases**; it shapes the work for others.
 
 ---
 
-### Analyst – Deep Technical/Context Research
+### Analyst - Deep Technical/Context Research
 
 **Role**: Investigates unknowns, APIs, performance questions, and tricky tradeoffs.
 
 **Use when**:
+
 - The Planner or Implementer hits technical uncertainty.
 - You need API experiments, benchmarks, or comparative analysis.
 
 **Example handoff-style prompts**:
+
 - From Planner: "I've encountered technical unknowns that require deep investigation. Please analyze."
 - From Implementer: "I've encountered technical unknowns during implementation. Please investigate."
 
 **Tips**:
+
 - Use Analyst to **de-risk decisions** before committing to an approach.
-- Expect analysis docs that other agents then consume—not direct code changes.
+- Expect analysis docs that other agents then consume--not direct code changes.
 
 ---
 
-### Architect – System & Design Decisions
+### Architect - System & Design Decisions
 
 **Role**: Maintains architecture, patterns, boundaries, and high-level design decisions.
 
 **Use when**:
+
 - A feature affects system structure, boundaries, or cross-cutting concerns.
 - You need ADRs or architectural guidance for a plan.
 
 **Example handoff prompts**:
+
 - From Roadmap: "Epic requires architectural assessment and documentation before planning."
 - From Planner: "Please review this plan to ensure it aligns with the architecture."
-- From Retrospective: "Retrospective reveals architectural patterns that should be documented."
+- From ProcessImprovement: "Mini-retro findings reveal architectural patterns that should be documented."
 
 **Tips**:
+
 - Use Architect to define **where** things live and how they interact, not the exact code.
 - Have Architect bless or adjust big structural changes before coding.
 
 ---
 
-### Critic – Plan Reviewer & Program Manager
+### Critic - Plan Reviewer & Program Manager
 
 **Role**: Critically reviews plans (and sometimes architecture/roadmap) before implementation.
 
 **Use when**:
+
 - A plan is "done" and you need a quality gate before implementation.
 
 **Example handoff prompts**:
+
 - To Planner: "Please revise the plan based on my critique findings."
 - To Analyst: "Plan reveals research gaps or unverified assumptions. Please investigate."
 - To Implementer: "Plan is sound and ready for implementation. Please begin implementation now."
 
 **Tips**:
+
 - Expect structured critiques focusing on **clarity, completeness, scope, and alignment**, not code style.
-- Treat Critic as your pre‑implementation "red team" for plans.
+- Treat Critic as your pre-implementation "red team" for plans.
 
 ---
 
-### Implementer – Coding & Tests
+### Implementer - Coding & Tests
 
 **Role**: Writes and modifies code, implements the approved plan, and ensures tests exist and pass.
 
 **Use when**:
-- The plan has been approved and you’re ready to make code changes.
+
+- The plan has been approved and you're ready to make code changes.
 - You need to fix implementation issues uncovered by QA/UAT.
 
 **Example handoff prompts**:
+
 - To Analyst: "I've encountered technical unknowns during implementation. Please investigate."
 - To Planner: "The plan has ambiguities or conflicts. Please clarify."
 - To Code Reviewer: "Implementation is complete. Please review code quality."
 
 **Tips**:
+
 - Provide the **plan file path** and any existing analysis/architecture links.
-- Expect the Implementer to: update code and tests, run tests, and produce an implementation doc—without editing QA/UAT docs directly.
+- Expect the Implementer to: update code and tests, run tests, and produce an implementation doc--without editing QA/UAT docs directly.
 
 ---
 
-### Code Reviewer – Code Quality Gate
+### Code Reviewer - Code Quality Gate
 
 **Role**: Reviews code quality, architecture alignment, and maintainability before QA.
 
 **Use when**:
+
 - Implementation is complete and ready for quality review.
 - You want to catch design issues before QA invests testing time.
 
 **Example handoff prompts**:
+
 - To Implementer: "Code review found quality issues. Please address findings."
 - To Architect: "Implementation reveals architectural issues or deviates from design."
 - To QA: "Code review approved. Implementation ready for testing."
 
 **Tips**:
+
 - Code Reviewer can **reject on code quality alone**.
 - It checks: architecture alignment, SOLID/DRY/YAGNI/KISS, TDD compliance, documentation/comments, code smells.
 - Uses Architect's `system-architecture.md` as source of truth.
 
 ---
 
-### QA – Testing Strategy & Execution
+### QA - Testing Strategy & Execution
 
 **Role**: Designs test strategy, ensures coverage, and runs tests to validate technical quality.
 
 **Use when**:
+
 - You need a test plan before implementation.
 - Code review is complete and you want a thorough technical test pass.
 
 **Example handoff prompts**:
+
 - To Planner: "Testing infrastructure is missing or inadequate. Please update plan to include required test frameworks, libraries, and configuration."
 - To Implementer: "Implementation has test coverage gaps or test failures. Please address."
 - To UAT: "Implementation is completed and QA passed. Please review."
 
 **Tips**:
+
 - QA focuses on **tests, coverage, and technical risk**, not business value.
 - Use QA to design/execute tests and verify they're meaningful, not just green.
 
 ---
 
-### UAT – Product Owner / Value Validation
+### UAT - Product Owner / Value Validation
 
-**Role**: Validates that implementation delivers the plan’s **value statement** and user outcomes.
+**Role**: Validates that implementation delivers the plan's **value statement** and user outcomes.
 
 **Use when**:
+
 - QA is complete and you want to confirm that the feature actually solves the intended problem.
 
 **Example handoff prompts**:
+
 - To Planner: "Implementation does not deliver stated value. Plan revision may be needed."
 - To Implementer: "Implementation has gaps in value delivery. Please address UAT findings."
 - To DevOps: "Implementation complete with release decision. Please manage release steps."
 
 **Tips**:
-- UAT reads the plan’s value statement and **assesses code against that**, not just tests.
+
+- UAT reads the plan's value statement and **assesses code against that**, not just tests.
 - Expect a clear decision: **APPROVED FOR RELEASE** or **NOT APPROVED**, with evidence.
 
 ---
 
-### DevOps – Packaging & Release
+### DevOps - Packaging & Release
 
 **Role**: Ensures packaging/versioning is correct and executes releases (with explicit user approval).
 
 **Use when**:
-- QA and UAT are complete and you’re ready to prepare/publish a release.
+
+- QA and UAT are complete and you're ready to prepare/publish a release.
 
 **Example handoff prompts**:
+
 - To Implementer: "Packaging issues or version mismatches detected. Please fix before release."
-- To Retrospective: "Release complete. Please capture deployment lessons learned."
 
 **Tips**:
+
 - DevOps checks versions, packaging, tags, registry publish, etc.
 - It **must** ask you for a final "yes" before releasing.
 
 ---
 
-### Security – Security Audits & Guidance
+### Security - Security Audits & Guidance
 
 **Role**: Security specialist reviewing plans and code for vulnerabilities and compliance.
 
 **Use when**:
+
 - A feature touches sensitive data, auth, or external interfaces.
 - You want a targeted security audit or threat model.
 
 **Example handoff prompts**:
+
 - To Analyst: "Security finding requires deep technical investigation."
 - To Planner: "Security risks require plan revision."
 - To Implementer: "Security remediation requires code changes."
 
 **Tips**:
+
 - Use Security early (during planning/architecture) and again after implementation.
 - Expect reports with prioritized risks and concrete remediation guidance.
 
 ---
 
-### Retrospective – Lessons Learned
+### ProcessImprovement - Evolving Agents & Workflow
 
-**Role**: Runs post‑implementation/post‑release retrospectives focusing on process, not blame.
-
-**Use when**:
-- A plan/feature has gone through QA, UAT, and (optionally) deployment.
-- You want to understand what went well/poorly in your **workflow**.
-
-**Example handoff prompts**:
-- To Architect: "Retrospective reveals architectural patterns that should be documented."
-- To Planner: "Retrospective identifies process improvements for future planning."
-- To Roadmap: "Retrospective is closed for this plan. Please update the roadmap accordingly."
-
-**Tips**:
-- Use this to feed continuous improvement, not to fix code.
-- Expect structured retrospectives and clear process-improvement candidates.
-
----
-
-### ProcessImprovement – Evolving Agents & Workflow
-
-**Role**: Reads retrospectives and updates the **agent instructions/workflow** (with your approval).
+**Role**: Reads `.agent-output/mini-retro/` lessons and updates the **agent instructions/workflow** (with your approval).
 
 **Use when**:
-- You have retrospectives and want to evolve how the agents work together.
+
+- You have recurring mini-retro findings and want to evolve how the agents work together.
 
 **Example handoff prompt**:
+
 - To Planner: "Previous work iteration is complete. Ready to start something new."
 
 **Tips**:
+
 - This is the only agent that should routinely edit `.agent.md` files (after you approve changes).
-- Use it to keep your multi‑agent workflow sharp and aligned with real-world lessons.
+- Use it to keep your multi-agent workflow sharp and aligned with real-world lessons.
 
 ---
-
 
 ## Putting It All Together
 
 - Start with **Roadmap** for vision, then **Planner** for a concrete plan.
-- Use **Architect / Analyst / Security / Critic** to refine and de‑risk the plan and architecture.
-- Hand off to **Implementer** for code and tests, then **QA** for technical quality, **UAT** for value, **DevOps** for release.
-- Afterward, let **Retrospective** and **ProcessImprovement** update how you work next time.
-
+- Use **Architect / Analyst / Security / Critic** to refine and de-risk the plan and architecture.
+- Hand off to **Implementer** for code and tests, then **QA** for technical quality and **UAT** for value.
+- The **Planner** authors the mandatory mini-retro before handing off to **DevOps**; **ProcessImprovement** consumes recurring lessons for future workflow updates.

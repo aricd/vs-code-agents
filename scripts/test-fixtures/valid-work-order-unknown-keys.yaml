@@ -1,0 +1,64 @@
+# valid-work-order-unknown-keys.yaml
+# Gate script fixture — FORWARD-COMPAT (unknown top-level key)
+# Expected: run-work-order-gates[.ps1|.sh] exits 0
+#
+# Validates: the gate script silently tolerates unknown top-level keys
+# (such as the deferred 'coverage_map' section) for forward compatibility.
+# Unknown keys MUST NOT cause a parse error or non-zero exit.
+
+meta:
+  plan_id: "024"
+  plan_name: "work-order-handoff-mechanism"
+  phase: 1
+  phase_name: "Schema, Scripts, Skill Section"
+  issued_by: Planner
+  issued_date: "2026-07-07"
+  target_agent: Implementer
+  status: pending
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+    - scripts/run-work-order-gates.sh
+    - scripts/test-fixtures/valid-work-order-unknown-keys.yaml
+    - skills/execution-orchestration/references/work-order.schema.yaml
+    - skills/execution-orchestration/SKILL.md
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Schema file exists"
+    kind: Asserted
+    status: not-started
+    evidence: null
+
+  - id: AC-002
+    task_ref: null
+    criterion: "Gate script tolerates unknown top-level keys"
+    kind: Demonstrated
+    entry_point: "powershell -File scripts/run-work-order-gates.ps1 -WorkOrder scripts/test-fixtures/valid-work-order-unknown-keys.yaml"
+    disconfirm: "If script exits 1 for an unknown key, forward-compat is broken"
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []
+
+# ── Unknown top-level key (forward-compat test) ────────────────────
+# The coverage_map section is deferred per plan constraints.
+# The gate script MUST silently ignore this key and exit 0.
+coverage_map: []

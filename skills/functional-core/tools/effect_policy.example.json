@@ -1,0 +1,83 @@
+{
+  "_doc": "CREST effect policy — copy to effect_policy.json and customize for your project. All keys are optional; absent keys keep the built-in generic defaults.",
+
+  "hard_effect_patterns": {
+    "_doc": "Overridable HARD effect regex patterns. Only 'network' and 'db' are supported. Patterns are matched against code-only source (comments/strings blanked).",
+    "_network_examples": "Project extensions: zeep SOAP → r\"\\bzeep\\.\" | r\"\\bclient\\.service\\.\" | r\"\\.get_element\\s*\\(\" | r\"\\bServiceProxy\\b\" | r\"\\bwsdl\\b\"",
+    "_db_examples": "Project extensions: DuckDB → r\"\\bduckdb\\.\" | r\"\\bDuckDBPyConnection\\b\"",
+    "network": [
+      "\\brequests\\.",
+      "\\bhttpx\\.",
+      "\\burllib",
+      "\\baiohttp\\b",
+      "\\bsocket\\.",
+      "\\bgrpc\\.",
+      "\\bboto3\\.",
+      "\\bparamiko\\."
+    ],
+    "db": [
+      "\\bsqlite3\\b",
+      "\\.execute\\s*\\(",
+      "\\bSELECT\\s",
+      "\\bINSERT\\s",
+      "\\bUPDATE\\s",
+      "\\bDELETE\\s",
+      "\\bCREATE\\s+TABLE",
+      "\\bsqlalchemy\\b",
+      "\\bpsycopg2\\b",
+      "\\bpymysql\\b",
+      "\\bmotor\\b",
+      "\\bpymongo\\b"
+    ]
+  },
+
+  "substrate_modules": {
+    "_doc": "Modules granted infra-type signature-leak exemptions. Key = module relpath (relative to --src root, forward-slash separated), value = substrate label. A substrate module owns an infrastructure boundary (e.g. a DB session manager) and its functions are exempt from the signature_infra_leak_ratio gate.",
+    "_example_key": "db_session.py",
+    "_example_value": "db",
+    "_example2_key": "clients/soap_client.py",
+    "_example2_value": "network",
+    "_usage": "Replace _example* keys with your actual paths. To activate, set this to a plain object: {\"db_session.py\": \"db\"}"
+  },
+
+  "_infra_roots_doc": "Root import names whose types are treated as infra in signature-leak detection. This should be a JSON array when used. Project extensions to add: zeep, duckdb, openpyxl, pypdf, fitz.",
+  "infra_roots": [
+    "requests",
+    "httpx",
+    "urllib3",
+    "urllib",
+    "aiohttp",
+    "sqlite3",
+    "socket",
+    "lxml",
+    "grpc",
+    "boto3"
+  ],
+
+  "infra_bare_types": {
+    "_doc": "Bare type names (no module prefix) treated as infra. Default empty — set this to a plain array when used: [\"DuckDBPyConnection\", \"TransportError\"].",
+    "_example": ["DuckDBPyConnection", "DuckDBPyRelation", "Fault", "TransportError", "CompoundValue", "AnyObject", "Session"],
+    "_usage": "Replace this entire object with a plain JSON array to activate."
+  },
+
+  "ordering_verbs": {
+    "_doc": "Regex patterns matched against raise-statement source to detect temporal ordering contracts. Default list covers generic English patterns. Set this to a plain array to override.",
+    "_default_patterns": [
+      "not initialized", "not started", "not connected", "not configured",
+      "must.*call.*first", "call.*first", "must.*init", "call.*open",
+      "before.*use", "must.*start"
+    ],
+    "_project_example": "r\"call.*build_server\" — project entry-point name",
+    "_usage": "Replace this entire object with a plain JSON array to override the default verb list."
+  },
+
+  "infra_type_suffixes": {
+    "_doc": "Type name suffixes used by the heuristic infra-leak detector. A public signature whose return/param type ends in one of these suffixes is counted as exposing infrastructure. Default covers common infra patterns. Set to a plain array to override.",
+    "_default_suffixes": ["Cache", "Client", "Connection", "Pool", "Session", "Driver", "Adapter", "Connector", "Repository", "Backend", "Manager", "Store", "Broker", "Registry"],
+    "_project_example": ["Cache", "Client", "Connection", "Pool", "Session", "Driver", "Adapter", "Connector", "Repository", "Backend", "Manager", "Store", "Broker", "Registry", "Proxy"],
+    "_usage": "Replace this entire object with a plain JSON array to override the default suffix list."
+  },
+
+  "infra_exception_boundary_count": 0,
+  "_infra_exception_boundary_count_doc": "Number of functions counted as infrastructure exception boundary owners. Set to the count of catch-and-rewrap functions in your substrate_modules. Default 0."
+}

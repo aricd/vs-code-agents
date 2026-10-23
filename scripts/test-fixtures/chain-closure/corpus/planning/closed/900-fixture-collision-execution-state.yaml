@@ -1,0 +1,3 @@
+uuid: "ffff5555"
+plan_name: "fixture-collision-unrelated-plan"
+mission: "Rule-5 fixture: this file occupies the destination path that fixture plan 905's own closure move would target, so the move is refused as a destination collision."

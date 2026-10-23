@@ -1,0 +1,47 @@
+# GitHub Actions starting point for the ci module (rung 4).
+# The five duties (see references/ci.md) port to any CI system:
+# full-depth checkout -> tests+coverage (record even on failure) -> sensors ->
+# check_sensors gate -> persist artifacts.
+name: observability
+on:
+  push:
+    branches: [main]
+  # schedule:               # uncomment for the mutation module (rung 6)
+  #   - cron: "0 2 1 * *"   # monthly
+
+jobs:
+  sensors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0            # churn needs full history
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Install
+        run: pip install radon pyyaml coverage && pip install -e . || true
+      - name: Tests + coverage (record even on failure)
+        run: |
+          set +e
+          START=$(date +%s)
+          coverage run -m pytest -q; STATUS=$?
+          coverage json -o cov.json || true
+          python tools/observability/append_ci_event.py \
+            --status $([ $STATUS -eq 0 ] && echo pass || echo fail) \
+            --duration $(( $(date +%s) - START )) --coverage cov.json
+          exit 0                     # gate happens in check_sensors, not here
+      - name: Sensors
+        run: |
+          python tools/observability/snapshot.py
+          python tools/observability/churn.py
+          python tools/observability/report.py || true
+      - name: Load-bearing gate
+        run: python tools/observability/check_sensors.py
+      - name: Persist artifacts (bot commit)
+        run: |
+          git config user.name "observability-bot"
+          git config user.email "bot@invalid"
+          git add .observability/
+          git diff --cached --quiet || \
+            git commit -m "chore(observability): append sensor records [skip ci]"
+          git push

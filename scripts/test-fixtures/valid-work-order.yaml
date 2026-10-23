@@ -1,0 +1,66 @@
+# valid-work-order.yaml
+# Gate script fixture — HAPPY PATH
+# Expected: run-work-order-gates[.ps1|.sh] exits 0
+#
+# Validates: all checklist items satisfied / Demonstrated items have entry_point;
+# no open blockers; gate command is in allowlist and exits 0; no scope violations.
+
+meta:
+  plan_id: "024"
+  plan_name: "work-order-handoff-mechanism"
+  phase: 1
+  phase_name: "Schema, Scripts, Skill Section"
+  issued_by: Planner
+  issued_date: "2026-07-07"
+  target_agent: Implementer
+  status: pending
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+    - scripts/run-work-order-gates.sh
+    - scripts/test-fixtures/valid-work-order.yaml
+    - scripts/test-fixtures/invalid-work-order-blocker.yaml
+    - scripts/test-fixtures/invalid-work-order-scope.yaml
+    - scripts/test-fixtures/invalid-work-order-labels.yaml
+    - scripts/test-fixtures/valid-work-order-unknown-keys.yaml
+    - scripts/test-fixtures/invalid-work-order-disallowed-cmd.yaml
+    - scripts/test-fixtures/invalid-work-order-missing-entry-point.yaml
+    - skills/execution-orchestration/references/work-order.schema.yaml
+    - skills/execution-orchestration/SKILL.md
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  test_invocation_ps1: "powershell -File scripts/run-work-order-gates.ps1 -WorkOrder scripts/test-fixtures/valid-work-order.yaml"
+  test_invocation_sh: "bash scripts/run-work-order-gates.sh scripts/test-fixtures/valid-work-order.yaml"
+  notes: "No venv required. Git must be available for gate commands."
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Schema file exists under skills/execution-orchestration/references/"
+    kind: Asserted
+    status: not-started
+    evidence: null
+
+  - id: AC-002
+    task_ref: null
+    criterion: "Gate script runs valid fixture to exit 0"
+    kind: Demonstrated
+    entry_point: "powershell -File scripts/run-work-order-gates.ps1 -WorkOrder scripts/test-fixtures/valid-work-order.yaml"
+    disconfirm: "If script exits 1 for this valid fixture, the basic pass logic is broken"
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available in the environment"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []

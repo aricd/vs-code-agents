@@ -1,9 +1,7 @@
 ---
 name: plan-status-reporting
 description: Deterministic, evidence-based plan status reporting in strict plain-text format. Load when asked for current plan status or progress overview across active plans.
-license: MIT
 metadata:
-  author: aricd
   version: "1.0"
 ---
 
@@ -43,11 +41,11 @@ Evidence (must be non-comment-based):
 - Notes: <only if blocked/ambiguous>
 
 Suggested Next 5 Steps (ordered):
-1. <next action> — Agent: <planner|implementer|qa|code-reviewer|uat|devops|security|analyst|architect|critic|pi|roadmap|retrospective>
-2. <next action> — Agent: <...>
-3. <next action> — Agent: <...>
-4. <next action> — Agent: <...>
-5. <next action> — Agent: <...>
+1. <next action> -- Agent: <planner|implementer|qa|code-reviewer|uat|devops|security|analyst|architect|critic|pi|roadmap>
+2. <next action> -- Agent: <...>
+3. <next action> -- Agent: <...>
+4. <next action> -- Agent: <...>
+5. <next action> -- Agent: <...>
 ```
 
 Repeat the per-plan block for every active plan. Do NOT include closed plans.
@@ -131,7 +129,7 @@ If verification is not possible, set status to `Unknown` with a short note.
 The final section must be actionable and consistent with the reported statuses.
 
 Rules:
-1. Provide **exactly five** steps, numbered 1–5.
+1. Provide **exactly five** steps, numbered 1-5.
 2. Each step MUST include both:
    - the task/action (reference plan ID and/or milestone when applicable)
    - the responsible agent name (lowercase, chosen from the allowed list in the output format)
@@ -163,8 +161,8 @@ Plan Approval: Critic=Approved  User=Approved
 Plan Status: In Progress
 
 Milestones:
-1. Create skill: vs-code-agents/skills/plan-status-reporting/SKILL.md - Status: Implementation started
-2. Integrate skill into Planner agent: vs-code-agents/planner.agent.md - Status: Not started
+1. Create skill: skills/plan-status-reporting/SKILL.md - Status: Implementation started
+2. Integrate skill into Planner agent: agents/planner.agent.md - Status: Not started
 3. Document skill in USING-AGENTS.md - Status: Not started
 4. Update CHANGELOG.md - Status: Not started
 
@@ -174,11 +172,11 @@ Evidence (must be non-comment-based):
 - Notes: Plan is drafted; no repo changes applied yet
 
 Suggested Next 5 Steps (ordered):
-1. Verify active plans and current git state (collect branch/sha/dirty) — Agent: analyst
-2. Implement Milestone 2 for Plan 008 (integrate skill into planner agent) — Agent: implementer
-3. Run the project’s standard tests/linters and capture outputs — Agent: qa
-4. Perform code review against Plan 008 acceptance criteria — Agent: code-reviewer
-5. Update docs/CHANGELOG for Plan 008 and request user confirmation — Agent: planner
+1. Verify active plans and current git state (collect branch/sha/dirty) -- Agent: analyst
+2. Implement Milestone 2 for Plan 008 (integrate skill into planner agent) -- Agent: implementer
+3. Run the project's standard tests/linters and capture outputs -- Agent: qa
+4. Perform code review against Plan 008 acceptance criteria -- Agent: code-reviewer
+5. Update docs/CHANGELOG for Plan 008 and request user confirmation -- Agent: planner
 ```
 
 ---

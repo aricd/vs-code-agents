@@ -1,0 +1,47 @@
+# invalid-work-order-disallowed-cmd.yaml
+# Gate script fixture — DISALLOWED COMMAND
+# Expected: run-work-order-gates[.ps1|.sh] exits 1
+# Error must contain: "disallowed command"
+#
+# Validates: the gate script rejects any gate command whose first token
+# is not in the declared allowlist (make, git, grep, Select-String,
+# python, pytest, pwsh, powershell, bash).
+
+meta:
+  plan_id: "024"
+  plan_name: "work-order-handoff-mechanism"
+  phase: 1
+  phase_name: "Schema, Scripts, Skill Section"
+  issued_by: Planner
+  issued_date: "2026-07-07"
+  target_agent: Implementer
+  status: pending
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Gate script rejects disallowed commands"
+    kind: Asserted
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: external_fetch
+    description: "This command is intentionally not in the allowlist (curl is not a permitted prefix)"
+    command: "curl http://example.com"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []

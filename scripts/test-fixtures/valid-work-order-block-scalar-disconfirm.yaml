@@ -1,0 +1,66 @@
+# valid-work-order-block-scalar-disconfirm.yaml
+# Gate script fixture — POSITIVE: disconfirm as BOTH `>` and `|` block scalars
+# Expected: run-work-order-gates[.ps1|.sh] exits 0 (both before AND after the
+# REQ-028/029 fix — this fixture is not part of the red-against-pre-fix set: before
+# the fix, disconfirm is simply unread, so a valid work-order stays valid; after the
+# fix, non-empty block-scalar content must read as present, so it stays valid too).
+#
+# Two Demonstrated items, one using `>` (folded) and one using `|` (literal), each
+# with real non-blank content — validates REQ-029's block-scalar parsing on both
+# forms in both arms.
+
+meta:
+  plan_id: "033"
+  plan_name: "verification-discipline-hardening"
+  phase: 1
+  phase_name: "gate-correctness-resolution-observability"
+  issued_by: Planner
+  issued_date: "2026-09-08"
+  target_agent: Implementer
+  status: pending
+  base_commit: "HEAD"
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Gate script accepts a folded (>) block-scalar disconfirm"
+    kind: Demonstrated
+    entry_point: "scripts/run-work-order-gates.ps1"
+    disconfirm: >
+      If disconfirm parsing is removed, this Demonstrated item's evidence
+      would be indistinguishable from a tautology, and the gate would no
+      longer be able to tell a real demonstration from an assertion.
+    status: not-started
+    evidence: null
+
+  - id: AC-002
+    task_ref: null
+    criterion: "Gate script accepts a literal (|) block-scalar disconfirm"
+    kind: Demonstrated
+    entry_point: "scripts/run-work-order-gates.ps1"
+    disconfirm: |
+      Line one of the disconfirmation rule.
+      Line two, preserved verbatim by the literal block scalar.
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []

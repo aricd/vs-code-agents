@@ -1,0 +1,28 @@
+# .gitattributes — line-ending policy for vsc-agents repo
+#
+# Default: normalise all text files to LF on commit (text=auto).
+# This prevents CRLF files from being committed accidentally and mirrors
+# the CRLF-safe defensive parsing in smoke-test-plugin.{sh,ps1}.
+#
+# BOUNDARY-001: the smoke-test CRLF-safe path is validated by the
+# crlf-frontmatter fixture below, which MUST preserve CRLF on checkout.
+
+# Normalise line endings for all text files
+* text=auto eol=lf
+
+# Keep scripts executable on all platforms
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+
+# Preserve CRLF in the smoke-test CRLF fixture (test evidence)
+scripts/test-fixtures/smoke-checks/crlf-frontmatter/SKILL.md text eol=crlf
+
+# Preserve BOM bytes in the BOM fixture — treat as binary so git never strips/rewrites bytes
+scripts/test-fixtures/smoke-checks/bom-frontmatter/SKILL.md -text
+
+# Binary files — no line-ending conversion
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.ico  binary
+*.zip  binary

@@ -1,0 +1,33 @@
+# crest_budget.example.yaml — illustrative metric-budget schema only, NOT a
+# real plan's numbers. Authored by the Planner per work-order phase; consumed by:
+#   python crest_metrics.py --src <src> --diff-base <ref> --budget <this file>
+# Live copies belong at: .agent-output/metrics/<plan-id>-metric-budget.yaml
+# (and in the work-order's scope.blocked_files).
+# Schema + workflow: references/metric-budget-template.md
+
+version: 1
+plan: "000"
+effect_policy_version: v1
+
+# Keys removed from the ratchet for this phase (justify in the plan).
+ratchet_exempt_keys: []
+
+# Firm absolute bands for NEW files (direction-aware: lower-is-better uses <=,
+# higher-is-better uses >=).
+new_code_bands:
+  cc_max: 10
+  nd_max: 4
+  flc_max_ll: 60
+  functions_over_100ll: 0
+  params_over_6_count: 0
+  plr_deep: 0.5
+
+# Reported, never gating.
+advisory_bands:
+  annotation_coverage: 0.9
+
+# Per-path escape hatches. 'reason' is mandatory.
+exemptions:
+  - path: src/adapters/*_shell.py
+    keys: [plr_deep, plr_own]
+    reason: declared I/O shell modules — effects are their job

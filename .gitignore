@@ -1,6 +1,11 @@
 #.github/
-.agent-output/
+.agent-output/.exec-probe-ok
+.agent-output/tmp*.txt
+.agent-output/tmp/
+.agent-output/tmp-audit/
 *.env
 *.local 
 .DS_Store
 **.mardownlint.json
+**/__pycache__/
+scripts/link-config.yaml

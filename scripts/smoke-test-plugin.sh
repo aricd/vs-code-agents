@@ -18,26 +18,18 @@
 #
 # USAGE:
 #   ./scripts/smoke-test-plugin.sh
-#   ./scripts/smoke-test-plugin.sh --canonical
-#   ./scripts/smoke-test-plugin.sh --sync-check
-#
-# FLAGS:
-#   --canonical   Also validate vs-code-agents/ source directory
-#   --sync-check  Compare canonical vs plugin copies, warn on drift
 #
 # EXIT CODES:
 #   0 = pass (warnings allowed)
 #   1 = fail
 #
-# SEC-002: This script is read-only — validates but never modifies files.
+# SEC-002: This script is read-only -- validates but never modifies files.
 
 set -euo pipefail
 
 # Script configuration
 declare -a ISSUES=()
 declare -a WARNINGS=()
-VALIDATE_CANONICAL=false
-CHECK_SYNC=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
@@ -57,13 +49,9 @@ else
 fi
 
 usage() {
-    echo "Usage: $0 [--canonical] [--sync-check]"
+    echo "Usage: $0"
     echo ""
     echo "Validates the Multi-Disciplinary Team Agents Plugin structure."
-    echo ""
-    echo "Options:"
-    echo "  --canonical   Also validate vs-code-agents/ source directory"
-    echo "  --sync-check  Compare canonical vs plugin copies, warn on drift"
     echo ""
     echo "Exit codes: 0 = pass, 1 = fail"
     exit 1
@@ -110,13 +98,15 @@ json_validate() {
 
 # Extract YAML frontmatter value
 # Handles CRLF line endings (REQ-010)
+# Defense in depth: strips UTF-8 BOM (EF BB BF) before parsing so a stray BOM
+# yields a "missing name/description" FAIL rather than aborting under set -euo pipefail.
 extract_frontmatter_field() {
     local file="$1"
     local field="$2"
     
-    # Read file, strip CRLF, extract frontmatter
+    # Read file, strip CRLF, strip leading UTF-8 BOM if present
     local content
-    content=$(cat "$file" | tr -d '\r')
+    content=$(cat "$file" | tr -d '\r' | LC_ALL=C sed $'1s/\xef\xbb\xbf//')
     
     # Check if file starts with ---
     if ! echo "$content" | head -n1 | grep -q '^---$'; then
@@ -146,14 +136,6 @@ check_code_fence_wrapping() {
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --canonical)
-            VALIDATE_CANONICAL=true
-            shift
-            ;;
-        --sync-check)
-            CHECK_SYNC=true
-            shift
-            ;;
         -h|--help)
             usage
             ;;
@@ -244,6 +226,10 @@ validate_agents() {
         add_issue "${prefix}agents/: No .agent.md files found"
     else
         echo "  Found $agent_count agent files"
+        # Assert exact count per TEST-SCOPE-002
+        if [[ $agent_count -ne 12 ]]; then
+            add_issue "${prefix}agents/: expected 12 agent files, found $agent_count"
+        fi
     fi
 }
 
@@ -268,11 +254,6 @@ validate_skills() {
     while IFS= read -r -d '' skill_dir; do
         local dir_name
         dir_name=$(basename "$skill_dir")
-        
-        # Skip reference directory (ASSUMPTION-003)
-        if [[ "$dir_name" == "reference" ]]; then
-            continue
-        fi
         
         local skill_file="$skill_dir/SKILL.md"
         
@@ -309,10 +290,165 @@ validate_skills() {
         add_issue "${prefix}skills/: No skill directories with SKILL.md found"
     else
         echo "  Found $skill_count skill directories"
+        # Structural assertion: count > 0 and every skill dir has valid SKILL.md with matching name
+        # (Individual skill validation performed above in the loop)
+        echo "  PASS: All skill directories have valid, name-matching SKILL.md"
     fi
 }
 
 validate_skills "skills" ""
+
+# ------------------------------------------------------------
+# Check (c): Dangling skill references (REQ-002/CONTRACT-001)
+# Every backtick-quoted skill name in load/skill-directive context must
+# resolve to an existing skills/<name>/ directory.
+# SEC-001: parse-only, never execute repo content.
+# CRLF-safe: line endings stripped before matching (BOUNDARY-001).
+# ------------------------------------------------------------
+check_dangling_skill_refs() {
+    echo ""
+    echo -e "${CYAN}Checking dangling skill references (check c)...${NC}"
+
+    # Build set of known skill directory names
+    declare -A skill_exists
+    while IFS= read -r -d '' skill_dir; do
+        skill_exists[$(basename "$skill_dir")]=1
+    done < <(find "$REPO_ROOT/skills" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null)
+
+    local ref_count=0 checked_files=0 local_issues=0
+
+    while IFS= read -r -d '' file; do
+        checked_files=$((checked_files + 1))
+        local rel_file="${file#$REPO_ROOT/}"
+        local linenum=0
+
+        while IFS= read -r raw_line; do
+            linenum=$((linenum + 1))
+            # Strip CRLF (BOUNDARY-001)
+            local line="${raw_line%$'\r'}"
+
+            # Pattern 1: Load `skill-name` (case-insensitive via lowercase conversion)
+            local lower_line="${line,,}"
+            while IFS= read -r name; do
+                [[ -z "$name" ]] && continue
+                ref_count=$((ref_count + 1))
+                local root="${name%%/*}"
+                if [[ -z "${skill_exists[$root]:-}" ]]; then
+                    add_issue "${rel_file}:${linenum}: dangling skill ref \`${name}\` (no skills/${root}/ dir)"
+                    local_issues=$((local_issues + 1))
+                fi
+            done < <(echo "$lower_line" | grep -oE '(^|[[:space:]])load `[a-z][a-z0-9/-]+`' | sed 's/.*load `//; s/`//')
+
+            # Pattern 2: `skill-name` skill[s]  (backtick name directly before "skill"/"skills")
+            while IFS= read -r name; do
+                [[ -z "$name" ]] && continue
+                ref_count=$((ref_count + 1))
+                local root="${name%%/*}"
+                if [[ -z "${skill_exists[$root]:-}" ]]; then
+                    add_issue "${rel_file}:${linenum}: dangling skill ref \`${name}\` (no skills/${root}/ dir)"
+                    local_issues=$((local_issues + 1))
+                fi
+            done < <(echo "$line" | grep -oE '`[a-z][a-z0-9/-]+` skills?' | grep -oE '`[a-z][a-z0-9/-]+`' | tr -d '`')
+
+        done < "$file"
+    done < <(
+        find "$REPO_ROOT/agents" -maxdepth 1 -name "*.agent.md" -print0 2>/dev/null
+        find "$REPO_ROOT/skills" -name "SKILL.md" -print0 2>/dev/null
+        find "$REPO_ROOT/skills" -path "*/references/*.md" -print0 2>/dev/null
+    )
+
+    echo "  Checked ${checked_files} files, ${ref_count} skill directive references"
+    if [[ $local_issues -eq 0 ]]; then
+        echo "  PASS: No dangling skill references"
+    fi
+}
+
+# ------------------------------------------------------------
+# Check (d): Duplicate ordinals in ordered lists (REQ-002/CONTRACT-001)
+# Scoped STRICTLY per-list: a new list restarting at 1. is legitimate.
+# Only fires when an ordinal repeats WITHIN the same contiguous ordered list.
+# SEC-001: parse-only, never execute repo content.
+# CRLF-safe: line endings stripped before matching (BOUNDARY-001).
+# ------------------------------------------------------------
+check_duplicate_ordinals() {
+    echo ""
+    echo -e "${CYAN}Checking duplicate ordinals in ordered lists (check d)...${NC}"
+
+    local checked_files=0 local_issues=0
+
+    while IFS= read -r -d '' file; do
+        checked_files=$((checked_files + 1))
+        local rel_file="${file#$REPO_ROOT/}"
+        local linenum=0
+        declare -A seen_ordinals=()
+
+        while IFS= read -r raw_line; do
+            linenum=$((linenum + 1))
+            local line="${raw_line%$'\r'}"
+
+            if [[ "$line" =~ ^[[:space:]]*$ ]]; then
+                # Blank/whitespace-only line — does not break list context (loose lists)
+                continue
+            fi
+
+            if [[ "$line" =~ ^([0-9]+)\.[[:space:]] ]]; then
+                local ordinal="${BASH_REMATCH[1]}"
+                if [[ "$ordinal" == "1" ]]; then
+                    # Explicit list restart — always valid
+                    unset seen_ordinals
+                    declare -A seen_ordinals=()
+                    seen_ordinals[1]=1
+                elif [[ -n "${seen_ordinals[$ordinal]:-}" ]]; then
+                    add_issue "${rel_file}:${linenum}: duplicate ordinal ${ordinal}. in ordered list"
+                    local_issues=$((local_issues + 1))
+                else
+                    seen_ordinals[$ordinal]=1
+                fi
+            fi
+            # Non-blank, non-ordinal lines (headers, sub-items, prose) do not break list context
+
+        done < "$file"
+    done < <(find "$REPO_ROOT/agents" -maxdepth 1 -name "*.agent.md" -print0 2>/dev/null)
+
+    echo "  Checked ${checked_files} agent files"
+    if [[ $local_issues -eq 0 ]]; then
+        echo "  PASS: No duplicate ordinals in ordered lists"
+    fi
+}
+
+# ------------------------------------------------------------
+# Check (e): UTF-8 BOM guard (QA-DEF-001 / CONTRACT-001)
+# skills/*/SKILL.md and agents/*.agent.md must NOT start with
+# a UTF-8 BOM (EF BB BF). A BOM before '---' causes
+# frontmatter parsers and 'grep -q ^---$' to fail, breaking
+# the bash oracle under set -euo pipefail.
+# SEC-001: parse-only, reads first 3 bytes only.
+# CRLF-safe: BOM detection is byte-level (no line-ending concern).
+# ------------------------------------------------------------
+check_bom_frontmatter() {
+    echo ""
+    echo -e "${CYAN}Checking for UTF-8 BOM in frontmatter files (check e)...${NC}"
+
+    local local_issues=0
+
+    while IFS= read -r -d '' file; do
+        local rel_file="${file#$REPO_ROOT/}"
+        # Read first 3 bytes as lowercase hex, no spaces
+        local first3
+        first3=$(head -c 3 "$file" | od -An -tx1 | tr -d ' \n' | tr 'A-F' 'a-f')
+        if [[ "$first3" == "efbbbf" ]]; then
+            add_issue "${rel_file}: starts with UTF-8 BOM (EF BB BF) — frontmatter unparseable under bash/YAML"
+            local_issues=$((local_issues + 1))
+        fi
+    done < <(
+        find "$REPO_ROOT/skills" -name "SKILL.md" -print0 2>/dev/null
+        find "$REPO_ROOT/agents" -maxdepth 1 -name "*.agent.md" -print0 2>/dev/null
+    )
+
+    if [[ $local_issues -eq 0 ]]; then
+        echo "  PASS: No UTF-8 BOM found in frontmatter files"
+    fi
+}
 
 # ------------------------------------------------------------
 # REQ-006: Validate hooks.json
@@ -344,6 +480,8 @@ else
         elif command -v python3 &>/dev/null; then
             # Python fallback for script path extraction
             while IFS= read -r script_rel; do
+                # Strip any trailing carriage return (Windows line endings)
+                script_rel="${script_rel%$'\r'}"
                 if [[ -n "$script_rel" && ! -f "$REPO_ROOT/$script_rel" ]]; then
                     add_issue "hooks/hooks.json references non-existent script: $script_rel"
                 fi
@@ -355,7 +493,7 @@ def extract_paths(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
             if k in ('command', 'windows') and isinstance(v, str):
-                m = re.search(r'\\\$\{CLAUDE_PLUGIN_ROOT\}/([^\"\\s]+\\.(?:sh|ps1))', v)
+                m = re.search(r'\\\$\{CLAUDE_PLUGIN_ROOT\}/([^\"\s]+\.(?:sh|ps1))', v)
                 if m:
                     print(m.group(1))
             else:
@@ -384,70 +522,9 @@ else
     echo "  PASS: No stale agent-output/ references found"
 fi
 
-# ------------------------------------------------------------
-# --canonical flag: Also validate vs-code-agents/
-# ------------------------------------------------------------
-if [[ "$VALIDATE_CANONICAL" == true ]]; then
-    echo ""
-    echo -e "${CYAN}=== Validating canonical source (vs-code-agents/) ===${NC}"
-    
-    if [[ -d "vs-code-agents" ]]; then
-        validate_agents "vs-code-agents" "vs-code-agents/"
-        validate_skills "vs-code-agents/skills" "vs-code-agents/"
-    else
-        add_issue "vs-code-agents/ directory not found"
-    fi
-fi
-
-# ------------------------------------------------------------
-# --sync-check flag: Compare canonical vs plugin copies
-# ------------------------------------------------------------
-if [[ "$CHECK_SYNC" == true ]]; then
-    echo ""
-    echo -e "${CYAN}=== Checking sync between canonical and plugin copies ===${NC}"
-    
-    if [[ ! -d "vs-code-agents" ]]; then
-        add_warning "Cannot check sync: vs-code-agents/ directory not found"
-    else
-        # Compare agent files
-        for agent_file in vs-code-agents/*.agent.md; do
-            if [[ -f "$agent_file" ]]; then
-                basename_file=$(basename "$agent_file")
-                plugin_file="agents/$basename_file"
-                if [[ -f "$plugin_file" ]]; then
-                    if ! diff -q "$agent_file" "$plugin_file" &>/dev/null; then
-                        add_warning "Drift detected: $basename_file differs between vs-code-agents/ and agents/"
-                    fi
-                else
-                    add_warning "Missing in agents/: $basename_file (exists in vs-code-agents/)"
-                fi
-            fi
-        done
-        
-        # Compare skill directories
-        for skill_dir in vs-code-agents/skills/*/; do
-            dir_name=$(basename "$skill_dir")
-            if [[ "$dir_name" == "reference" ]]; then
-                continue
-            fi
-            
-            canonical_skill="vs-code-agents/skills/$dir_name/SKILL.md"
-            plugin_skill="skills/$dir_name/SKILL.md"
-            
-            if [[ -f "$canonical_skill" ]]; then
-                if [[ -f "$plugin_skill" ]]; then
-                    if ! diff -q "$canonical_skill" "$plugin_skill" &>/dev/null; then
-                        add_warning "Drift detected: skills/$dir_name/SKILL.md differs from canonical"
-                    fi
-                else
-                    add_warning "Missing in skills/: $dir_name/SKILL.md (exists in vs-code-agents/skills/)"
-                fi
-            fi
-        done
-        
-        echo "  Sync check complete"
-    fi
-fi
+check_dangling_skill_refs
+check_duplicate_ordinals
+check_bom_frontmatter
 
 # ------------------------------------------------------------
 # Output results

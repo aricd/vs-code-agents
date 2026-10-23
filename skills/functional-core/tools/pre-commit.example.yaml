@@ -1,0 +1,17 @@
+# Rename to .pre-commit-config.yaml at the repo root.
+# Optional local guardrail. Runs the SAME ratchet the CI runs, so contributors
+# see a regression before they push rather than after. It reads the committed
+# baseline and never rewrites it (re-baselining stays a manual, reviewed step).
+#
+#   pip install pre-commit && pre-commit install
+#
+repos:
+  - repo: local
+    hooks:
+      - id: crest-ratchet
+        name: functional-core ratchet (no regression)
+        # Replace <your-src-dir> with your source tree root
+        entry: python crest_metrics.py --src <your-src-dir> --effect-policy effect_policy.json --check crest_baseline.json --quiet
+        language: system
+        pass_filenames: false
+        files: \.py$

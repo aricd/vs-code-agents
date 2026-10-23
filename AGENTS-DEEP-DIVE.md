@@ -22,7 +22,7 @@
 
 ### Why Multiple Specialized Agents?
 
-A single general-purpose AI tries to do everything—plan, code, test, review—often poorly. By splitting responsibilities:
+A single general-purpose AI tries to do everything--plan, code, test, review--often poorly. By splitting responsibilities:
 
 1. **Each agent has clear constraints**: Planner can't write code, Implementer can't redesign
 2. **Quality gates are built in**: Critic reviews before implementation, Security audits before production
@@ -32,7 +32,7 @@ A single general-purpose AI tries to do everything—plan, code, test, review—
 ### The Separation of Concerns
 
 | Concern | Agent(s) | Key Constraint |
-|---------|----------|----------------|
+| --- | --- | --- |
 | **Vision** | Roadmap | Outcomes, not implementation |
 | **Planning** | Planner | WHAT/WHY, never HOW (no code) |
 | **Research** | Analyst | Analysis only, no fixes |
@@ -58,7 +58,7 @@ Every agent produces **Markdown documents** in `.agent-output/`:
 ├── security/           # Security assessments
 ├── qa/                 # Test strategies
 ├── uat/                # Value validation
-├── retrospectives/     # Lessons learned
+├── mini-retro/         # Orchestrator-authored lessons
 └── releases/           # Release documentation
 ```
 
@@ -91,13 +91,14 @@ Every agent produces **Markdown documents** in `.agent-output/`:
 **When to use**: Starting a new feature from scratch.
 
 **Example flow**:
-1. Select **Roadmap** → Define epic: "User authentication system"
-2. Select **Planner** → Create plan from epic → `.agent-output/planning/001-auth-plan.md`
-3. Select **Analyst** → Research OAuth providers → `.agent-output/analysis/001-auth-analysis.md`
-4. Select **Architect** → Review design fit → updates plan or creates ADR
-5. Select **Security** → Threat model → `.agent-output/security/001-auth-security.md`
-6. Select **Critic** → Final review → `.agent-output/critiques/001-auth-plan-critique.md`
-7. Select **Implementer** → Code when approved
+
+1. Select **Roadmap** -> Define epic: "User authentication system"
+2. Select **Planner** -> Create plan from epic -> `.agent-output/planning/001-auth-plan.md`
+3. Select **Analyst** -> Research OAuth providers -> `.agent-output/analysis/001-auth-analysis.md`
+4. Select **Architect** -> Review design fit -> updates plan or creates ADR
+5. Select **Security** -> Threat model -> `.agent-output/security/001-auth-security.md`
+6. Select **Critic** -> Final review -> `.agent-output/critiques/001-auth-plan-critique.md`
+7. Select **Implementer** -> Code when approved
 
 ### Pattern 2: The Implementation Loop
 
@@ -114,14 +115,15 @@ Every agent produces **Markdown documents** in `.agent-output/`:
 **When to use**: Plan is approved, coding phase.
 
 **Example flow**:
-1. Select **Implementer** → Implement plan → code changes + tests
-2. Select **Code Reviewer** → Verify code quality → `.agent-output/code-review/001-auth-code-review.md`
+
+1. Select **Implementer** -> Implement plan -> code changes + tests
+2. Select **Code Reviewer** -> Verify code quality -> `.agent-output/code-review/001-auth-code-review.md`
 3. If quality issues: back to Implementer
-4. Select **QA** → Verify coverage → `.agent-output/qa/001-auth-qa.md`
+4. Select **QA** -> Verify coverage -> `.agent-output/qa/001-auth-qa.md`
 5. If gaps: back to Implementer
-6. Select **UAT** → Validate value → `.agent-output/uat/001-auth-uat.md`
+6. Select **UAT** -> Validate value -> `.agent-output/uat/001-auth-uat.md`
 7. If gaps: back to Implementer
-8. Select **DevOps** → Release → requires user approval
+8. Select **DevOps** -> Release -> requires user approval
 
 ### Pattern 3: The Investigation Branch
 
@@ -135,12 +137,14 @@ Every agent produces **Markdown documents** in `.agent-output/`:
 **When to use**: Hit technical uncertainty during any phase.
 
 **Example flow**:
+
 1. With **Planner** selected, planning auth but unsure about JWT vs session tokens
-2. Select **Analyst** → investigates → `.agent-output/analysis/002-jwt-vs-sessions.md`
+2. Select **Analyst** -> investigates -> `.agent-output/analysis/002-jwt-vs-sessions.md`
 3. Findings go back to Planner to inform the plan
 
 **Incident/bug variant (when evidence is incomplete)**:
-- If logs/telemetry are insufficient to prove a single root cause, Analyst switches to an uncertainty-aware format: label Verified vs Hypothesis, then pivot to system weaknesses + required telemetry. A reusable template exists at `vs-code-agents/reference/uncertainty-review-template.md`.
+
+- If logs/telemetry are insufficient to prove a single root cause, Analyst switches to an uncertainty-aware format: label Verified vs Hypothesis, then pivot to system weaknesses + required telemetry. A reusable template exists at `agents/analyst.references/uncertainty-review-template.md`.
 
 ### Pattern 4: The Security Gate
 
@@ -154,25 +158,32 @@ Every agent produces **Markdown documents** in `.agent-output/`:
 **When to use**: Feature touches auth, sensitive data, external interfaces.
 
 **Security can be invoked**:
+
 - During planning (threat model)
 - During implementation (code audit)
 - Before production (final gate)
 
-### Pattern 5: The Retrospective Cycle
+### Pattern 5: The Mini-Retro Lesson Cycle
 
 ```text
-┌──────────┐    ┌───────────────┐    ┌────────────────────┐
-│ Delivery │───▶│ Retrospective │───▶│ ProcessImprovement │
-│ complete │    │ (lessons)     │    │ (evolve agents)    │
-└──────────┘    └───────────────┘    └────────────────────┘
+┌──────────────┐    ┌────────────────────┐    ┌────────┐
+│ UAT complete │───▶│ Planner mini-retro │───▶│ DevOps │
+└──────────────┘    └────────────────────┘    └────────┘
+                            │
+                            ▼
+                   ┌────────────────────┐
+                   │ ProcessImprovement │
+                   └────────────────────┘
 ```
 
-**When to use**: After feature delivery, to improve the workflow.
+**When to use**: After UAT and before the DevOps handoff, to capture execution lessons and improve the workflow.
 
 **Example flow**:
-1. Feature shipped
-2. Select **Retrospective** → captures what went well/poorly
-3. Select **ProcessImprovement** → updates agent instructions if patterns emerge
+
+1. UAT approves the delivered value
+2. The orchestrating Planner authors the mandatory mini-retro
+3. The orchestrator delegates release work to **DevOps**
+4. **ProcessImprovement** consumes recurring mini-retro findings when workflow changes are warranted
 
 ---
 
@@ -189,6 +200,7 @@ NNN-feature-name-type.md
 - **type**: Document type (plan, analysis, critique, security, etc.)
 
 **Examples**:
+
 - `001-user-auth-plan.md`
 - `001-user-auth-analysis.md`
 - `001-user-auth-plan-critique.md`
@@ -208,16 +220,17 @@ Every document should have:
 
 All agents now track and update document status fields. This provides at-a-glance visibility into document state:
 
-| Status | Meaning |
-|--------|---------|
-| `Draft` | Initial creation, not yet reviewed |
-| `In Progress` | Actively being worked on |
-| `Pending Review` | Ready for next agent's review |
-| `Approved` | Passed review gate |
-| `Blocked` | Cannot proceed until issues resolved |
-| `Released` | Committed and pushed |
+| Status           | Meaning                              |
+| ---------------- | ------------------------------------ |
+| `Draft`          | Initial creation, not yet reviewed   |
+| `In Progress`    | Actively being worked on             |
+| `Pending Review` | Ready for next agent's review        |
+| `Approved`       | Passed review gate                   |
+| `Blocked`        | Cannot proceed until issues resolved |
+| `Released`       | Committed and pushed                 |
 
 Agents update status when:
+
 - **Implementer**: Marks plan "In Progress" when starting implementation
 - **Critic/QA/UAT**: Updates to "Approved" or "Blocked" after review
 - **DevOps**: Updates to "Released" after successful release
@@ -229,9 +242,9 @@ Completed documents move to `closed/` subfolders to keep active work visible:
 ```text
 .agent-output/
 ├── planning/
-│   ├── 085-active-feature.md      ← currently active
+│   ├── 085-active-feature.md      <- currently active
 │   └── closed/
-│       ├── 080-completed.md       ← archived after commit
+│       ├── 080-completed.md       <- archived after commit
 │       └── 081-completed.md
 ├── qa/
 │   └── closed/
@@ -241,14 +254,15 @@ Completed documents move to `closed/` subfolders to keep active work visible:
 **Key concepts:**
 
 | Concept | Description |
-|---------|-------------|
-| **Unified numbering** | All documents in a work chain share the same ID (analysis 080 → plan 080 → qa 080) |
+| --- | --- |
+| **Unified numbering** | All documents in a work chain share the same ID (analysis 080 -> plan 080 -> qa 080) |
 | **`.next-id` file** | Global counter at `.agent-output/.next-id`, incremented by originating agents |
 | **Terminal statuses** | `Committed`, `Released`, `Abandoned`, `Deferred`, `Superseded` trigger closure |
 | **Closure trigger** | DevOps moves docs to `closed/` after successful commit |
 | **Orphan detection** | Agents self-check on start; Roadmap runs periodic sweep |
 
 **Document header format:**
+
 ```yaml
 ---
 ID: 080
@@ -265,18 +279,19 @@ See `document-lifecycle` skill for full details.
 Plans may contain `OPEN QUESTION` items that require resolution before implementation.
 
 **Question lifecycle:**
+
 1. Planner marks unresolved questions as `OPEN QUESTION: [description]`
 2. When resolved, Planner updates to `OPEN QUESTION [RESOLVED]: [description]` or `[CLOSED]`
 3. Before handoff, Planner warns user if unresolved questions remain
 
 **Implementer behavior:**
+
 - Scans plans for unresolved `OPEN QUESTION` items
 - If any exist, **halts and strongly recommends resolution** before proceeding
 - Requires explicit user acknowledgment to proceed despite warning
 - Documents user's decision in implementation doc
 
-> [!CAUTION]
-> Proceeding with unresolved open questions risks building on flawed assumptions. Always resolve or explicitly acknowledge before implementation.
+> [!CAUTION] Proceeding with unresolved open questions risks building on flawed assumptions. Always resolve or explicitly acknowledge before implementation.
 
 ### Handoff Protocol
 
@@ -285,10 +300,8 @@ When handing off between agents:
 ```markdown
 ## Handoff to [Next Agent]
 
-**From**: [Current Agent]
-**Artifact**: .agent-output/[type]/NNN-feature-type.md
-**Status**: [Ready for review / Blocked on X / Approved]
-**Key Context**:
+**From**: [Current Agent] **Artifact**: .agent-output/[type]/NNN-feature-type.md **Status**: [Ready for review / Blocked on X / Approved] **Key Context**:
+
 - [Important decision 1]
 - [Important decision 2]
 - [Open question]
@@ -305,17 +318,20 @@ When handing off between agents:
 **Purpose**: Own product vision and ensure features align with business objectives.
 
 **Key Responsibilities**:
+
 - Define and maintain product roadmap
 - Translate business needs into epics
 - Validate that plans deliver stated value
 - Guard the "Master Product Objective"
 
 **Outputs**:
+
 - Epic definitions
 - Roadmap updates
 - Value alignment assessments
 
 **When NOT to use**:
+
 - Implementation details
 - Technical decisions
 - Code review
@@ -327,6 +343,7 @@ When handing off between agents:
 **Purpose**: Transform epics into implementation-ready plans.
 
 **Key Responsibilities**:
+
 - Create structured plans with WHAT and WHY
 - Define milestones and deliverables
 - Identify unknowns requiring investigation
@@ -335,17 +352,20 @@ When handing off between agents:
 **Critical Constraint**: **Never writes code or implementation details**.
 
 Plans answer:
+
 - WHAT are we building?
 - WHY are we building it (value statement)?
 - WHAT are the acceptance criteria?
 - WHAT dependencies exist?
 
 Plans do NOT contain:
+
 - HOW to implement (code snippets, algorithms)
 - Test case implementations
 - Technical architecture (that's Architect's job)
 
 **Outputs**:
+
 - Plans in `.agent-output/planning/NNN-feature-plan.md`
 
 ---
@@ -355,22 +375,25 @@ Plans do NOT contain:
 **Purpose**: Deep technical investigation when unknowns arise.
 
 **Key Responsibilities**:
+
 - Research APIs, libraries, patterns
 - Conduct experiments and benchmarks
 - Analyze root causes
 - Document findings with evidence
 
 **Uncertainty-aware investigation (incident/bug work)**:
+
 - If a root cause cannot be proven with available evidence, Analyst must NOT force a narrative.
 - Analyst uses an objective hard pivot trigger (timebox/evidence gate) to stop digging and pivot to:
   - Weaknesses in architecture/code/process that could allow the observed behavior
   - Observability gaps: the minimal telemetry needed to isolate the issue next time
 - Telemetry is classified as **normal** vs **debug** (always-on actionable signals vs opt-in verbose signals).
-- Recommended output format: `vs-code-agents/reference/uncertainty-review-template.md`.
+- Recommended output format: `agents/analyst.references/uncertainty-review-template.md`.
 
 **Key Constraint**: **Investigates but doesn't fix**. Produces analysis docs, not code changes.
 
 **When to invoke**:
+
 - Technical uncertainty in planning
 - Performance questions
 - API/library evaluation
@@ -378,6 +401,7 @@ Plans do NOT contain:
 - Root cause investigation
 
 **Outputs**:
+
 - Analysis docs in `.agent-output/analysis/NNN-topic-analysis.md`
 
 ---
@@ -387,18 +411,21 @@ Plans do NOT contain:
 **Purpose**: Maintain system design coherence.
 
 **Key Responsibilities**:
+
 - Create and maintain Architecture Decision Records (ADRs)
 - Define patterns and boundaries
 - Review plans for architectural fit
 - Guide cross-cutting concerns
 
 **Observability is architecture (incident/bug work)**:
+
 - When RCA is uncertain, Architect treats insufficient telemetry as an architectural risk.
 - Architect requires explicit normal-vs-debug guidance and recommends a minimum viable incident telemetry baseline (correlation IDs, state transitions, dependency boundary signals, error taxonomy).
 
 **Key Constraint**: **Defines WHERE things live, not exact implementation**.
 
 **Outputs**:
+
 - ADRs in `.agent-output/architecture/`
 - Design guidance to Planner/Implementer
 
@@ -409,6 +436,7 @@ Plans do NOT contain:
 **Purpose**: Quality gate for plans before implementation.
 
 **Key Responsibilities**:
+
 - Review plans for clarity, completeness, scope
 - Check architectural alignment
 - Identify technical debt risks
@@ -417,6 +445,7 @@ Plans do NOT contain:
 **Key Constraint**: **Reviews but doesn't modify**. Creates critique docs, doesn't edit plans.
 
 **Review criteria**:
+
 - Value statement present and clear?
 - Aligned with roadmap and architecture?
 - Scope appropriate (not too big/small)?
@@ -424,10 +453,12 @@ Plans do NOT contain:
 - No code in plan?
 
 **Verdicts**:
-- Issues → Recommend revision
-- Clean → Approve for implementation
+
+- Issues -> Recommend revision
+- Clean -> Approve for implementation
 
 **Outputs**:
+
 - Critiques in `.agent-output/critiques/NNN-plan-critique.md`
 
 ---
@@ -436,9 +467,10 @@ Plans do NOT contain:
 
 **Purpose**: Comprehensive security assessment and guidance.
 
-The Security Agent has been significantly enhanced to provide truly objective, comprehensive security reviews. See [security.agent.md](vs-code-agents/security.agent.md) for the full specification.
+The Security Agent has been significantly enhanced to provide truly objective, comprehensive security reviews. See [security.agent.md](agents/security.agent.md) for the full specification.
 
 **Five-Phase Framework**:
+
 1. **Architectural Security**: Trust boundaries, STRIDE threat modeling, attack surface
 2. **Code Security**: OWASP Top 10, language-specific vulnerabilities
 3. **Dependency Security**: CVE scanning, supply chain risks
@@ -448,12 +480,14 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Key Constraint**: **Identifies and documents, doesn't fix**. Provides remediation guidance.
 
 **Verdicts**:
+
 - `APPROVED`: No blocking issues
 - `APPROVED_WITH_CONTROLS`: OK with specific controls implemented
 - `BLOCKED_PENDING_REMEDIATION`: Must fix before proceeding
 - `REJECTED`: Fundamental design flaw
 
 **Outputs**:
+
 - Security findings in `.agent-output/security/`
 
 ---
@@ -463,6 +497,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Purpose**: Write code that implements approved plans.
 
 **Key Responsibilities**:
+
 - Implement plan requirements
 - Write and run tests
 - Create implementation documentation
@@ -471,6 +506,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Key Constraint**: **Follows the plan**. Doesn't redesign or expand scope.
 
 **Outputs**:
+
 - Code changes
 - Tests
 - Implementation docs
@@ -482,6 +518,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Purpose**: Quality gate between implementation and QA.
 
 **Key Responsibilities**:
+
 - Review code for architecture alignment (uses Architect's docs as source of truth)
 - Check SOLID, DRY, YAGNI, KISS principles
 - Verify TDD compliance
@@ -494,9 +531,11 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Authority**: CAN REJECT implementation before QA invests testing time.
 
 **Outputs**:
+
 - Code review docs in `.agent-output/code-review/`
 
 **Verdicts**:
+
 - `APPROVED`: Code quality acceptable, proceed to QA
 - `APPROVED_WITH_COMMENTS`: Minor issues noted, proceed to QA
 - `REJECTED`: Quality issues require fixes before QA
@@ -508,18 +547,21 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Purpose**: Ensure technical quality through testing.
 
 **Key Responsibilities**:
+
 - Design test strategy
 - Verify test coverage
 - Execute tests
 - Identify gaps
 
 **Diagnosability as a QA concern (incident/bug work)**:
+
 - If a root cause cannot be proven, QA expects changes to improve diagnosability (telemetry markers, correlation IDs, structured context).
 - QA prefers validating telemetry via structured fields/events over brittle log string matching.
 
 **Key Constraint**: **Technical quality, not business value** (that's UAT).
 
 **Outputs**:
+
 - Test strategies in `.agent-output/qa/`
 - Test execution results
 
@@ -530,6 +572,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Purpose**: Validate that implementation delivers business value.
 
 **Key Responsibilities**:
+
 - Read plan's value statement
 - Review Implementation, Code Review, and QA docs (document-based, not code inspection)
 - Verify implementation satisfies value statement
@@ -539,10 +582,12 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Key Constraint**: **Value, not technical quality** (that's QA). Quick sanity check when docs are present.
 
 **Verdicts**:
+
 - `APPROVED FOR RELEASE`: Value delivered
 - `NOT APPROVED`: Gaps in value delivery
 
 **Outputs**:
+
 - UAT results in `.agent-output/uat/`
 
 ---
@@ -552,6 +597,7 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Purpose**: Manage releases safely.
 
 **Key Responsibilities**:
+
 - Verify packaging and versioning
 - Execute release process
 - Require explicit user approval
@@ -559,31 +605,34 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 **Critical Constraint**: **Must ask user before releasing**. Never auto-releases.
 
 **Outputs**:
+
 - Release docs in `.agent-output/releases/`
 
 ---
 
-### Retrospective Agent
+### Mini-Retro Skill
 
-**Purpose**: Capture lessons after delivery.
+**Purpose**: Capture first-hand execution lessons at the chain's commit boundary.
 
 **Key Responsibilities**:
-- Facilitate retrospective
-- Document what went well/poorly
-- Identify process improvements
-- Feed into ProcessImprovement
+
+- Run automatically under the orchestrating Planner before the DevOps handoff
+- Document what went well and what should change
+- Write structured findings for ProcessImprovement intake
 
 **Outputs**:
-- Retrospectives in `.agent-output/retrospectives/`
+
+- Mini-retros in `.agent-output/mini-retro/`
 
 ---
 
 ### ProcessImprovement Agent
 
-**Purpose**: Evolve the agent workflow based on retrospectives.
+**Purpose**: Evolve the agent workflow based on mini-retro lessons.
 
 **Key Responsibilities**:
-- Analyze retrospective patterns
+
+- Analyze mini-retro patterns
 - Propose agent instruction changes
 - Update `.agent.md` files (with user approval)
 
@@ -591,10 +640,9 @@ The Security Agent has been significantly enhanced to provide truly objective, c
 
 ---
 
-
 ## Skills System
 
-Agents leverage **Claude Skills**—modular, reusable instruction sets that load on-demand via progressive disclosure. This keeps agent files lean while providing deep expertise when needed.
+Agents leverage **Claude Skills**--modular, reusable instruction sets that load on-demand via progressive disclosure. This keeps agent files lean while providing deep expertise when needed.
 
 ### How Skills Work (Progressive Disclosure)
 
@@ -608,15 +656,15 @@ This means agents can have access to many skills without consuming context until
 
 ### Available Skills
 
+> This is a representative sample, not the complete list -- see the `skills/` directory for the full, current catalog.
+
 | Skill | Purpose | Key Content |
-|-------|---------|-------------|
-| `analysis-methodology` | Investigation techniques | Confidence levels, gap tracking, POC guidance |
+| --- | --- | --- |
 | `architecture-patterns` | ADR templates, patterns, anti-patterns | Layered architecture, repository pattern, STRIDE |
-| `code-review-checklist` | Pre/post-implementation review criteria | Value statement assessment, security checklist |
-| `code-review-standards` | Code review checklist, severity definitions, templates | Review focus areas, finding format, document template |
+| `code-review` | Unified pre/post-implementation review criteria | Value assessment, severity definitions, BOUNDGATE-\*, document template |
 | `cross-repo-contract` | Multi-repo API type safety | Contract discovery, sync workflow, breaking change coordination |
 | `document-lifecycle` | Unified numbering, closure, orphan detection | ID inheritance, terminal statuses, closed/ folders |
-| `engineering-standards` | SOLID, DRY, YAGNI, KISS | Detection patterns, refactoring guidance |
+| `implementation-principles` | DRY, YAGNI, Rule of Three, SoC, POLA | Tie-breakers for design decisions, exception use |
 | `release-procedures` | Two-stage release workflow, semver | Version consistency, platform constraints |
 | `security-patterns` | OWASP Top 10, language vulnerabilities | Python, JavaScript, Java, Go specific patterns |
 | `testing-patterns` | TDD workflow, test pyramid | Anti-patterns, coverage strategies, mocking |
@@ -626,19 +674,18 @@ This means agents can have access to many skills without consuming context until
 Skills are placed in different directories depending on your VS Code version:
 
 | Version | Location | Notes |
-|---------|----------|-------|
-| **VS Code Stable (1.107.1)** | `.claude/skills/` | Legacy location, still supported |
+| --- | --- | --- |
+| **VS Code Stable (1.107+)** | `.claude/skills/` | Legacy location, still supported |
 | **VS Code Insiders** | `.github/skills/` | New recommended location |
 
-> [!NOTE]
-> These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. Check the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
+> [!NOTE] These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. Check the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
 
 ### Creating Skills
 
 Each skill is a directory with a `SKILL.md` file:
 
 ```text
-vs-code-agents/skills/
+skills/
 └── my-skill/
     ├── SKILL.md           # Required: skill definition
     ├── references/        # Optional: detailed docs
@@ -653,12 +700,10 @@ vs-code-agents/skills/
 ---
 name: my-skill
 description: Brief description of when to use this skill
-license: MIT
 metadata:
   author: yourname
   version: "1.0"
 ---
-
 # Skill Title
 
 Detailed instructions, tables, code examples...
@@ -670,13 +715,13 @@ Detailed instructions, tables, code examples...
 
 ### Adding New Agents
 
-1. Create `your-agent.agent.md` in `vs-code-agents/`
+1. Create `your-agent.agent.md` in `agents/`
 2. Follow the frontmatter format:
    ```yaml
    ---
    description: One-line description
    name: YourAgent
-   tools: ['edit/createFile', 'search', ...]
+   tools: ["edit/createFile", "search", ...]
    model: Claude 4.5 Sonnet (or preferred)
    handoffs:
      - label: Handoff Name
@@ -691,23 +736,26 @@ Detailed instructions, tables, code examples...
 ### Modifying Existing Agents
 
 **Safe to modify**:
+
 - `description`: Update for clarity
 - `model`: Change to preferred model
 - `handoffs`: Add/remove handoff targets
 - Response style preferences
 
 **Modify with caution**:
+
 - `tools`: Removing tools limits capability
 - Constraints: Removing constraints changes behavior significantly
 
 **Generally don't modify**:
+
 - Core separation of concerns (e.g., making Planner write code)
 
 ### Creating Workspace-Specific Variants
 
 You can have project-specific agent variants:
 
-1. Copy agent from `vs-code-agents/` to `.github/agents/`
+1. Copy agent from `agents/` to `.github/agents/`
 2. Modify for project needs
 3. Project-specific agents override global agents with same name
 
@@ -718,52 +766,58 @@ You can have project-specific agent variants:
 ### Agent Issues
 
 **Q: Agent not appearing in Copilot**
+
 - Check file location: `.github/agents/` for workspace, [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles) for user-level
 - Verify file extension is `.agent.md`
 - Reload VS Code
 
 **Q: Agent ignores constraints**
+
 - Re-invoke with explicit constraint reminder
 - Check if constraint is clear in the `.agent.md` file
 - Models sometimes drift; be explicit
 
 **Q: Agent tries to do another agent's job**
+
 - Use explicit handoff: "Hand off to [Agent] for [task]"
 - Reference the agent's constraints
 
 ### Workflow Issues
 
 **Q: Plans have too much implementation detail**
+
 - Remind Planner of constraint: "WHAT and WHY, not HOW"
 - Check if Planner `.agent.md` has this constraint
 
 **Q: Security review is superficial**
+
 - Use the enhanced Security agent (v2)
 - Request specific phases: "Conduct Phase 2 (Code Security Review)"
 - Provide specific files/endpoints to review
 
 **Q: Too many handoffs, losing context**
+
 - Reference artifact paths explicitly
 - Include key context in handoff prompts
 - Prefer short written summaries at handoff boundaries
 
 ### General FAQ
 
-**Q: Do I need all 13 agents?**
-No. Start with Planner + Implementer. Add others as needed.
+**Q: Do I need all 12 agents?** No. Start with Planner + Implementer. Add others as needed.
 
 **Q: Why separate QA and UAT?**
+
 - QA = Technical quality (tests pass, coverage adequate)
 - UAT = Business value (feature solves the stated problem)
 
-**Q: Why can't Planner write code?**
-Keeping planning separate from implementation:
+**Q: Why can't Planner write code?** Keeping planning separate from implementation:
+
 - Forces clear requirements before coding
 - Prevents premature implementation decisions
 - Makes plans reviewable by non-coders
 
-**Q: How do I handle urgent fixes that don't need full planning?**
-For hotfixes:
+**Q: How do I handle urgent fixes that don't need full planning?** For hotfixes:
+
 1. Go directly to Implementer with clear scope
 2. Have Security review if security-relevant
 3. QA for test verification
@@ -789,16 +843,17 @@ See individual agent files for their specific improvement opportunities.
 > This section documents when and how to use local, background, and subagent execution patterns for custom agents in VS Code 1.107+.
 
 For strict, auditable delegation (`COMPLETE` vs `HARD BLOCK`) with a single progress tracker, see:
-- `vs-code-agents/skills/execution-orchestration/SKILL.md`
-- `vs-code-agents/skills/planner-execution-orchestration/SKILL.md`
+
+- `skills/execution-orchestration/SKILL.md`
 
 Execution-state file convention:
+
 - `.agent-output/planning/<ID>-execution-state.yaml`
 
 ### Execution Modes Overview
 
 | Mode | When to Use | Key Characteristics |
-|------|-------------|---------------------|
+| --- | --- | --- |
 | **Local Interactive** | Planning, strategy, review, handoffs | User in the loop, real-time collaboration |
 | **Background Agent** | Long-running implementation, parallel tasks | Git worktree isolation, hands-off execution |
 | **Subagent** | Focused subtask delegation | Context-isolated, returns findings to caller |
@@ -810,16 +865,16 @@ Execution-state file convention:
 **Pattern**: User selects agent from dropdown in VS Code chat. Conversation is interactive with frequent checkpoints.
 
 ```text
-User selects Roadmap agent → "Define epic for X"
-     selects Planner agent → "Create plan for epic"
-     selects Architect agent → "Review architectural fit"
-     selects Critic agent → "Review plan 002"
+User selects Roadmap agent -> "Define epic for X"
+     selects Planner agent -> "Create plan for epic"
+     selects Architect agent -> "Review architectural fit"
+     selects Critic agent -> "Review plan 002"
 ```
 
-> [!NOTE]
-> Custom agents are selected from the agents dropdown—not invoked with `@` syntax. The `@` symbol is for built-in participants like `@workspace`.
+> [!NOTE] Custom agents are selected from the agents dropdown--not invoked with `@` syntax. The `@` symbol is for built-in participants like `@workspace`.
 
 **When to use**:
+
 - Defining strategic direction (Roadmap)
 - Creating or revising plans (Planner)
 - Architectural decisions requiring judgment (Architect)
@@ -841,17 +896,20 @@ Planner (plan approved) ──▶ Background: Implementer in worktree
 ```
 
 **When to use**:
+
 - Multi-file implementation (Implementer)
 - Comprehensive test execution (QA)
 - Full 5-phase security audits (Security)
 - Any task expected to take >15 minutes
 
 **Benefits**:
+
 - Git worktree isolation prevents interference with main workspace
 - Can run multiple background agents in parallel (e.g., QA + Security)
 - Results can be reviewed and selectively merged
 
 **Tool approvals**: Background agents should NOT have "allow all" terminal access. Review and approve commands explicitly, especially for:
+
 - Package installs
 - Test execution with side effects
 - Any file writes outside `.agent-output/`
@@ -870,6 +928,7 @@ Background results ──▶ Local: @QA verify tests
 ```
 
 **When to use**:
+
 - Reviewing background implementation results
 - Final value validation (UAT)
 - Pre-release security gate (Security)
@@ -881,23 +940,23 @@ Background results ──▶ Local: @QA verify tests
 
 **Subagent-Eligible Agents** (may be auto-invoked):
 
-| Agent | Subagent Use Case |
-|-------|-------------------|
-| Analyst | Clarify technical questions mid-implementation |
-| Security | Targeted security review of specific code |
-| QA | Test implications for a specific change |
-| Retrospective | Synthesize lessons after a subtask completes |
+| Agent    | Subagent Use Case                              |
+| -------- | ---------------------------------------------- |
+| Analyst  | Clarify technical questions mid-implementation |
+| Security | Targeted security review of specific code      |
+| QA       | Test implications for a specific change        |
 
 **Explicit-Only Agents** (should NOT be auto-invoked):
 
-| Agent | Reason |
-|-------|--------|
-| Roadmap | Strategic decisions require user involvement |
-| Architect | System-level decisions need explicit review |
-| ProcessImprovement | Cross-cutting process changes need approval |
-| DevOps | Release actions require explicit user confirmation |
+| Agent              | Reason                                             |
+| ------------------ | -------------------------------------------------- |
+| Roadmap            | Strategic decisions require user involvement       |
+| Architect          | System-level decisions need explicit review        |
+| ProcessImprovement | Cross-cutting process changes need approval        |
+| DevOps             | Release actions require explicit user confirmation |
 
 **Subagent Invocation Example**:
+
 ```text
 Implementer working on feature
 ├── Hits technical unknown
@@ -911,18 +970,21 @@ Implementer working on feature
 #### Tool Approval Categories
 
 **Always Manual Approval** (never auto-approve):
+
 - `execute/runInTerminal` with destructive commands (rm, git push --force, npm publish)
 - `execute/runTask` for deploy/publish tasks
 - Any command modifying infrastructure or external services
 - Package install commands in production contexts
 
 **Session Auto-Approval Eligible** (based on risk tolerance):
+
 - Read-only file operations
 - Linters and formatters
 - Test execution (unit tests with no external dependencies)
 - `git status`, `git diff`, `git log`
 
 **Treat as Untrusted** (validate before following):
+
 - `fetch` results from external URLs
 - MCP tool outputs
 - User-pasted content from external sources
@@ -930,21 +992,25 @@ Implementer working on feature
 #### Per-Agent Tool Safety Rules
 
 **Implementer**:
+
 - Auto-approve: file reads, search, linters
 - Manual approve: terminal commands, package installs
 - Never auto-approve: git push, npm publish, deploy scripts
 
 **QA**:
+
 - Auto-approve: test execution (isolated), file reads
 - Manual approve: test execution with external dependencies
 - Never auto-approve: commands modifying test data in shared environments
 
 **DevOps**:
+
 - Manual approve: ALL terminal commands
 - MUST get explicit user confirmation before any release action
 - Never auto-approve: git tag, npm publish, vsce publish
 
 **Security**:
+
 - Auto-approve: file reads, grep, dependency scans
 - Manual approve: network requests, vulnerability scanner execution
 - Never auto-approve: any command that could exfiltrate data
@@ -981,9 +1047,3 @@ Implementer working on feature
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE)

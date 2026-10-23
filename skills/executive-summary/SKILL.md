@@ -1,292 +1,127 @@
 ---
 name: executive-summary
-description: Generate an approval-time executive summary from an active plan. Produces a concise Markdown summary in chat (not a file) covering scope, phases, assumptions, alternatives, risks, and open questions before asking for user approval.
-license: MIT
+description: 'Defines the executive summary artifact: its required fields, glyph convention, and MUST NOT list, plus its own MANDATORY auto-trigger conditions -- fires automatically at the Architect-approval and Critic-approval Review_State transitions, and on any explicit user ask ("executive summary", "executive summary of plan <ID>", "summarize plan <ID>", "give me a summary of this plan"). Load when producing, or asked for, an executive summary of a plan.'
 metadata:
-  author: groupzer0
   version: "1.0"
 ---
 
-# Executive Summary Skill
-
-Generates an approval-time executive summary for a single active plan. Used by Planner (and potentially other agents) to present a focused overview before requesting user approval.
-
----
-
-## Purpose
-
-Provide a concise, approval-oriented summary of a plan's scope, status, and key decisions without copying the full plan. The summary:
-- Informs the user of what they're approving
-- Highlights USER-TASK-* items that require human action
-- Surfaces risks, assumptions, and open questions
-- Ends with an explicit approval prompt
-
----
-
-## Activation Triggers
-
-Load this skill when:
-- **Final approval time**: After Critic approves the plan, before asking user for approval
-- **Early approval**: User indicates approval before Planner expects it—still produce the summary and continue
-
----
-
-## Relationship to Other Skills
-
-| Skill | Purpose | Scope | Orientation |
-|-------|---------|-------|-------------|
-| `executive-summary` | Single-plan overview at approval time | One plan | Plan-centric, approval-oriented |
-| `plan-status-reporting` | Cross-plan progress and evidence | Multiple plans | Execution-oriented, evidence-based |
-
-**Both skills coexist. Neither replaces the other.**
-
-- Use `executive-summary` when seeking user approval for a specific plan
-- Use `plan-status-reporting` when reporting progress across active plans
-
----
-
-## Output Requirements
-
-### Format
-
-- **Target**: Markdown output in chat (conversational response)
-- **NOT a file**: Do not create a separate document; emit directly in response
-
-### Required Sections
-
-The executive summary MUST include these sections in order:
-
-#### 1. Plan Identity
-
-| Field | Source |
-|-------|--------|
-| ID | Plan frontmatter `ID` |
-| Title | Plan title (H1 heading) |
-| Last Updated | Most recent changelog entry date |
-| Current Status | Plan frontmatter `Status` |
-
-**Example**:
-```markdown
-## Executive Summary: Plan 003
-
-| Field | Value |
-|-------|-------|
-| ID | 3 |
-| Title | Unified Labeled Planning + No-Silent-Assumptions + Executive Summary |
-| Last Updated | 2026-02-08 |
-| Status | Active |
-```
-
-#### 2. Scope Snapshot
-
-List REQ-*, SEC-*, CON-* items from the plan.
-
-**Capping Rule**:
-- If ≤10 items total: list all
-- If >10 items: show first 10, then add "... see plan for full list (N total items)"
-
-**Example**:
-```markdown
-### Scope
-
-- REQ-001: All agents produce labeled artifacts
-- REQ-002: Planner uses rigid template
-- SEC-001: No credential storage in plans
-- CON-001: Must maintain VS Code 1.85+ compatibility
-```
-
-#### 3. Phases Overview
-
-For each phase, show phase name + GOAL-* + phase status.
-
-**Status-based detail rules**:
-- If phase is `not-started` or `complete`: list only phase + status (no task details)
-- If phase is `in-progress`: list all tasks with TASK-* + status
-
-**Example**:
-```markdown
-### Phases
-
-| Phase | Goal | Status |
-|-------|------|--------|
-| Phase 1 — Labeling & Templates | GOAL-001: Define and adopt rigid labeled templates | complete |
-| Phase 2 — No-Silent-Assumptions | GOAL-002: Prevent hidden scope/contract assumptions | complete |
-| Phase 3 — Executive Summary | GOAL-003: Add approval-time executive summary | in-progress |
-
-#### Phase 3 Tasks (in-progress)
-
-| Task | Description | Status |
-|------|-------------|--------|
-| TASK-008 | Create executive-summary skill | in-progress |
-| TASK-009 | Update Planner for executive summary | not-started |
-| TASK-010 | Document approval tracking schema | not-started |
-```
-
-#### 4. USER-TASK Items (CRITICAL)
-
-**This section is MANDATORY if any USER-TASK-* items exist.**
-
-USER-TASK items MUST be:
-- Listed prominently with justification summary
-- Shown BEFORE the approval prompt
-- Never hidden or buried
-
-**Example**:
-```markdown
-### ⚠️ User Action Required (USER-TASK)
-
-| ID | Description | Justification |
-|----|-------------|---------------|
-| USER-TASK-001 | Configure API key in settings | Credentials cannot be auto-provisioned |
-| USER-TASK-002 | Approve license agreement | Legal acknowledgment required from human |
-
-**You must complete these actions manually during or after implementation.**
-```
-
-If no USER-TASK items exist, state: "No USER-TASK items — this plan is fully automatable."
-
-#### 5. Assumptions
-
-List ASSUMPTION-* items (at least titles). Highlight high-risk assumptions.
-
-**Example**:
-```markdown
-### Assumptions
-
-- ASSUMPTION-001: Agents can load skills by name
-- ASSUMPTION-002: Users prefer mega-plans over multiple small plans
-- ⚠️ ASSUMPTION-003 (HIGH RISK): External API availability assumed stable
-```
-
-#### 6. Alternatives
-
-List ALT-* items with 1–3 sentence rationale each.
-
-**Example**:
-```markdown
-### Alternatives Considered
-
-- **ALT-001**: Store state in SQLite — Rejected: over-engineering for current scope; JSON files sufficient
-- **ALT-002**: Use YAML instead of Markdown — Rejected: Markdown better for human readability and VS Code rendering
-```
-
-If no alternatives exist in the plan, state: "No alternatives documented."
-
-#### 7. Risks
-
-Include top RISK-* items with ⚠️ marker.
-
-**Example**:
-```markdown
-### Risks
-
-- ⚠️ RISK-001: Rigid templates increase friction initially — Mitigation: clear examples + auto-validation
-- ⚠️ RISK-002: Over-labeling leads to noisy docs — Mitigation: "when applicable" rule
-```
-
-#### 8. Open Questions
-
-List any OPENQ-* items remaining. Mark blocking ones explicitly.
-
-**Example**:
-```markdown
-### Open Questions
-
-- OPENQ-001 [RESOLVED]: Cap scope lists at 10 items? → Yes
-- OPENQ-002 [RESOLVED]: Store approvals in frontmatter and section? → Yes
-- ⚠️ OPENQ-003 [BLOCKING]: Performance SLA not yet defined — MUST resolve before approval
-```
-
-If no open questions remain (all resolved/closed), state: "All open questions resolved."
-
-#### 9. Approval Prompt (MANDATORY)
-
-End with an explicit approval prompt:
-
-```markdown
----
-
-**The plan is ready for approval. Do you approve?**
-```
-
----
-
-## Output Constraints
-
-The executive summary MUST NOT:
-- **Copy the entire plan verbatim** — summarize, don't duplicate
-- **Introduce new requirements** — reflect only what's in the plan
-- **Hide USER-TASK-* items** — these MUST be prominent
-
----
-
-## Template
-
-Use this template when generating the executive summary:
-
-````markdown
-## Executive Summary: Plan [ID]
-
-| Field | Value |
-|-------|-------|
-| ID | [plan ID] |
-| Title | [plan title] |
-| Last Updated | [most recent changelog date] |
-| Status | [frontmatter Status] |
-
-### Scope
-
-[List REQ-*, SEC-*, CON-* items; cap at 10]
-
-### Phases
-
-| Phase | Goal | Status |
-|-------|------|--------|
-| [Phase name] | [GOAL-*] | [status] |
-
-[If any phase is in-progress, add task table for that phase]
-
-### ⚠️ User Action Required (USER-TASK)
-
-[List USER-TASK-* with justifications, OR "No USER-TASK items — this plan is fully automatable."]
-
-### Assumptions
-
-[List ASSUMPTION-* items; mark high-risk with ⚠️]
-
-### Alternatives Considered
-
-[List ALT-* with 1–3 sentence rationale, OR "No alternatives documented."]
-
-### Risks
-
-[List top RISK-* with ⚠️ markers]
-
-### Open Questions
-
-[List OPENQ-* with resolution status; mark blocking with ⚠️ BLOCKING]
-
----
-
-**The plan is ready for approval. Do you approve?**
-````
-
----
-
-## Validation Checklist
-
-Before emitting the summary, verify:
-
-- [ ] Plan identity (ID, title, last-updated, status) present
-- [ ] Scope snapshot includes REQ/SEC/CON items (capped at 10 if needed)
-- [ ] All phases listed with GOAL-* and status
-- [ ] In-progress phases show task details
-- [ ] USER-TASK items (if any) are prominently listed with justifications
-- [ ] Assumptions listed (high-risk marked)
-- [ ] Alternatives listed with rationale
-- [ ] Top risks listed with ⚠️
-- [ ] Open questions listed; blocking ones marked
-- [ ] Summary ends with explicit approval prompt
-- [ ] No verbatim plan copy
-- [ ] No new requirements introduced
-- [ ] USER-TASK items not hidden
+# Executive Summary
+
+The **executive summary** is the plan-status artifact rendered in chat (never a file) that gives the
+user everything needed to approve, or stay oriented on, a plan -- without re-reading the plan
+document. This skill is the single source of truth for **when** it fires, **what** it must contain,
+and **how firing is verified**. It exists as its own skill, mirroring `mini-retro`'s proven
+self-triggering pattern, so that trigger conditions are not buried inside an unrelated skill's
+description where they are never matched.
+
+## When to Use (Trigger Conditions)
+
+Load this skill, and produce an executive summary, whenever **any** of the following hold. None of
+these require the user to ask first -- see §Auto-Trigger below for the two that are MANDATORY.
+
+- **Auto-Trigger A -- Architect approval** (ARCH-REQUIRED plans only; snapshot, non-final)
+- **Auto-Trigger B -- Critic approval** (all plans; final, includes the approval prompt)
+- **Auto-Trigger C -- HARD BLOCK during orchestration** (snapshot of the current blocked plan, per `planner.agent.md`'s HARD BLOCK handling)
+- **Explicit ask** -- the user asks for an "executive summary", an "executive summary of plan `<ID>`", to "summarize plan `<ID>`", or an equivalent direct request naming a plan
+
+## Auto-Trigger (MANDATORY -- self-triggering, never ask)
+
+The executive summary is not an on-request-only artifact. Firings A and B below fire automatically
+at their `Review_State` transition; the orchestrating Planner MUST NOT wait for the user to ask, and
+MUST NOT ask permission before producing one -- this is the identical non-negotiable framing as the
+`mini-retro` MANDATORY trigger. Both firings render the same field schema (§Required Fields); only
+Firing B retains the closing approval prompt and the frontmatter write.
+
+| Firing | When | Registry Ask | Approval prompt | Frontmatter write |
+|--------|------|---------------|------------------|--------------------|
+| **A -- Architect approval** | `Review_State` advances toward `critic-review` (ARCH-REQUIRED plans only), before Critic review begins | No | No | No -- snapshot only |
+| **B -- Critic approval (final)** | Critic feedback fully addressed, plan ready for user approval | Yes, when applicable (see `planner.agent.md` P-0) | Yes -- ends with "The plan is ready for approval. Do you approve?" | Yes -- see §Enforcement |
+
+Firing A explicitly does **NOT**: include the Registry Ask; end with the approval-prompt sentence; or
+update `User_Approved`/`Critic_Approved`/`Executive_Summary_Fired` frontmatter. It is a status
+snapshot only, produced before Critic review starts so ARCH-REQUIRED plans get visibility one step
+earlier.
+
+Firing B is the final, canonical firing. On completion it updates plan frontmatter:
+`Executive_Summary_Fired: true`, `Executive_Summary_Fired_Date: [ISO-8601]` (see §Enforcement) --
+this happens whether or not the user approves in the same turn, because the artifact itself was
+produced; `User_Approved`/`User_Approved_Date` are set separately, only on actual user approval.
+
+**Also fires (non-`Review_State`-transition case):** per `planner.agent.md`'s HARD BLOCK handling,
+produce a snapshot executive summary of the currently blocked plan alongside the block details, so
+the user has full situational awareness. This firing does not touch `Executive_Summary_Fired`
+frontmatter (only Firing B does).
+
+## Glyph Convention (Convention 5 / Chosen)
+
+Every tagged section header pairs a `[TAG]` with its emoji, both together, in the heading itself:
+Risk ⚠️ `[RISK]` · Deferred ⏸️ `[DEFER]` · Blocking 🛑 `[BLOCK]` · Assumption 🧩 `[ASSUME]` ·
+Alternative 🔀 `[ALT]` · USER-TASK 🙋 `[USER]`. This is the sole canonical glyph set -- do not
+substitute ad-hoc emoji or invent new tags.
+
+## Required Fields
+
+Rendered per the user-approved design (analysis 029, Variation 3: Cross-Referenced, Always-Visible).
+Every field is always fully visible -- no `<details>`/`<summary>` or other collapsing HTML anywhere
+(confirmed non-functional, rendering as literal text, in the live target chat surface).
+
+| Field | Description |
+|-------|-------------|
+| Plan Identity | ID, title, last-updated, current Status |
+| Top Glance Line | One line of flat counts -- Deferred / top Risk / Blocking / high-risk Assumption / Alternative / USER-TASK -- each paired with its `[TAG]` + emoji |
+| ⏸️ [DEFER] Deferred Items | **Forced-visibility, same rigor as USER-TASK Highlight.** Own dedicated section, placed first right after the header -- never folded into Scope Snapshot or Alternatives. Full `DEFER-*` table (ID / Item / Why now / Revisit trigger / Owner). Each origin point (Scope Snapshot, Alternatives) carries only a short inline cross-reference back to the relevant `DEFER-*` ID |
+| Scope Snapshot | REQ/SEC/CON items -- no item cap. Any item narrowed or withdrawn by a Deferred Item carries an inline `⏸️ [DEFER]` cross-reference to it |
+| Phases Overview | For each phase: phase name + GOAL-* + phase status, with that phase's own TASK-* items nested directly as a sub-list under its line |
+| 🙋 [USER] USER-TASK Highlight | List prominently with justification summary; MUST be shown before approval prompt |
+| 🧩 [ASSUME] Assumptions | List ASSUMPTION-* (at least titles); highlight high-risk ones |
+| 🔀 [ALT] Alternatives | List ALT-* with 1–3 sentence rationale each; carries an inline `⏸️ [DEFER]` cross-reference where a rejected alternative relates to a Deferred Item |
+| ⚠️ [RISK] Risks | Include top RISK-* with the ⚠️ marker |
+| Open Questions | List any OPENQ-* remaining; mark blocking ones with 🛑 `[BLOCK]` BLOCKING |
+| Traceability Matrix | Condensed cross-reference table: `Requirement \| Tasks \| Risk \| Failure Mode \| Guarantee` (omits Tests, which stays in the plan's own Traceability Map section). A requirement fully withdrawn -- not merely deferred-in-place -- structurally has no row here; it surfaces only in Deferred Items |
+
+## Age-Triggered Mandatory Escalation
+
+An `OPENQ-*` whose origin document has aged past 10 days (per `document-lifecycle`'s OPENQ
+Staleness Sweep) MUST be marked `BLOCKING` the next time it is listed in an Executive Summary or
+Open Questions section, regardless of its original non-blocking disposition -- reusing the same
+mandatory-escalation channel already proven by `USER-TASK-*` highlighting above. This does not
+reopen the question's substance; it forces renewed visibility on the person who can resolve it
+before it erodes into unexamined settled fact.
+
+## Executive Summary MUST NOT
+
+- Copy the entire plan verbatim
+- Introduce new requirements
+- Hide USER-TASK-* items
+- Omit the Deferred Items field, or render it with less visibility than USER-TASK Highlight
+- Use `<details>`/`<summary>` or any other collapsing HTML
+- Wait to be asked for Firings A or B (see §Auto-Trigger)
+
+## Enforcement (HARD BLOCK Backstop)
+
+Mirroring `mini-retro`'s `Test-Path`/HARD BLOCK enforcement, Firing B's completion is tracked in
+plan frontmatter -- owned and defined in `structured-labeling`'s Approval Tracking Frontmatter
+Schema, semantics owned here:
+
+| Field | Type | Set by | When |
+|-------|------|--------|------|
+| `Executive_Summary_Fired` | boolean | Planner | Firing B (Critic-approval executive summary) has been produced |
+| `Executive_Summary_Fired_Date` | ISO-8601 / null | Planner | Same moment as above |
+
+**Hard gate (enforced in `agents/critic.agent.md`'s TEMPLATE VALIDATION step):** once `Critic_Approved`
+is `true`, `Executive_Summary_Fired` MUST also be `true`. If `Critic_Approved: true` and
+`Executive_Summary_Fired` is absent or `false`, this is a template-compliance finding -- the plan
+must not proceed to the user-approval prompt until the executive summary is actually produced and
+the field updated.
+
+## Related
+
+- `structured-labeling` -- owns label prefixes, plan template ordering, and the Approval Tracking
+  Frontmatter Schema (including the `Executive_Summary_Fired`/`_Date` field definitions this skill's
+  enforcement relies on). This skill owns the executive summary's content and trigger semantics;
+  `structured-labeling` owns where its completion is recorded.
+- `mini-retro` -- the sibling MANDATORY, self-triggering, never-ask pattern this skill's
+  §Auto-Trigger and §Enforcement directly mirror.
+- `plan-status-reporting` -- the multi-plan, cross-plan status report; distinct from this
+  skill's single-plan executive summary, and often produced alongside it during a HARD BLOCK
+  (see Auto-Trigger C).

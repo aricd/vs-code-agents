@@ -1,0 +1,123 @@
+{
+  "skill_name": "design-rubrics",
+  "notes": "Assertions are written to FAIL on a no-skill baseline. Any assertion that passes without the skill loaded is non-discriminating and should be deleted rather than kept as a green tick. Negative controls (N-*) matter more than happy paths: each one maps to a documented failure mode that is otherwise unfalsifiable.",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "We're deciding how to record an audit trail. Option A: a per-table trigger pair on each of our 67 allowlisted tables, writing into a shared audit table. Option D: put the audit on the existing event substrate, one allowlist entry per table. Which should we do?",
+      "expected_output": "A comparison scorecard that declares a growth unit (allowlisted table, 67 today), reports a delta per growth unit for BOTH options with an [Observed] or [Projected] label, derives a slope band from each delta, and states either a crossover G* or that one option dominates.",
+      "assertions": [
+        "declares an explicit growth unit naming the allowlisted table (or equivalent domain count), not a unit invented for the comparison",
+        "reports a marginal-surface delta per growth unit for every option scored",
+        "every delta carries exactly one evidence label: [Observed, n=N] or [Projected]",
+        "each slope band is consistent with its own delta (0 -> flat, 0<d<=1 -> rising linear, d>1 -> rising steep)",
+        "states a crossover G* value OR explicitly says one option dominates on both base and slope",
+        "does not add the delta or slope into the InterfaceCost/TOTAL figure"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Here are the open questions before I finalize the plan. OPENQ-003: should the report fetcher expose fetchUsageReport/fetchBillingReport/fetchStatusReport, or one fetchReport(type, month)? I don't have a strong view.",
+      "expected_output": "Recognizes this as an interface-shaping OPENQ, runs the deep-modules gate (caller, baseline, capability held constant, equivalence) BEFORE scoring, and emits a framing block with trajectory rows keyed to report type as the growth unit.",
+      "assertions": [
+        "runs the gate (declares caller, baseline, capability held constant, equivalence) before presenting any counts",
+        "classifies the question as interface-shaping rather than scope/policy",
+        "declares report type as the growth unit",
+        "emits the framing block without being asked a second time"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-1-observed-history-available",
+      "prompt": "Should we keep adding a dedicated MCP endpoint per analysis question, or move to a search+SQL substrate? Check the repo history first - the last three questions we added were searchByAuthor, searchByDateRange, and exportFiltered, and you can see exactly what each one cost in the commits.",
+      "expected_output": "Counts the three real additions from history and labels the delta [Observed, n=3]. A [Projected] label here is a failure: the history exists, so counting it is mandatory rather than optional.",
+      "assertions": [
+        "labels the marginal-surface delta [Observed, n=3], NOT [Projected]",
+        "cites what the three named additions actually cost rather than reasoning hypothetically",
+        "does not blend observed and projected figures into a single number"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-2-genuine-one-off",
+      "prompt": "One-time decision: for this specific migration script that runs once and gets deleted, should the rollback live in the same file or a sibling file? Nothing else will ever use it.",
+      "expected_output": "States Growth unit: none - one-off decision, no trajectory, and omits the delta and slope rows. Manufacturing a growth unit here is the failure.",
+      "assertions": [
+        "explicitly states that no growth unit applies, rather than silently omitting the row",
+        "does NOT invent a growth unit to fill the trajectory rows",
+        "still reaches a verdict on the base counts"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-3-override-must-block",
+      "prompt": "Scorecard says B is deeper: A InterfaceCost 7, B InterfaceCost 4. But migrating to B means updating about 50 call sites and reworking the integration harness - call it three developer-weeks. Recommend A, we can't afford that right now.",
+      "expected_output": "Computes gap = 3, notes gap > 1, and BLOCKS the override. Block 2's verdict (B deeper) stands as the Recommended Action regardless of the migration cost.",
+      "assertions": [
+        "computes the gap as |7-4| = 3",
+        "blocks the override because gap > 1",
+        "keeps B as the recommended action despite the stated migration cost",
+        "records the migration cost in Block 3 only, never in the counts or the verdict"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-4-trajectory-is-not-an-override-path",
+      "prompt": "A has InterfaceCost 10 and a flat slope. B has InterfaceCost 9 but adds 2 per new tenant, and we expect a lot of tenants. Also, migrating to A would cost about a week. Give me the scorecard and the recommendation.",
+      "expected_output": "Resolves the trajectory-vs-today divergence INSIDE Block 2 using crossover arithmetic, and keeps the one-week migration cost quarantined in Block 3 under the normal override gate. The failure is routing the trajectory argument through Block 3 as a second override path.",
+      "assertions": [
+        "computes a crossover G* from the base gap and the slope difference",
+        "resolves the trajectory divergence within the depth verdict, not via the Block-3 override gate",
+        "does not claim the override gate is unnecessary 'because this is a trajectory argument'",
+        "keeps the one-week migration cost in Block 3, separate from the trajectory reasoning"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-5-mismatched-natural-units",
+      "prompt": "Option A naturally grows per database table. Option B naturally grows per message type. Score them against each other on marginal surface.",
+      "expected_output": "Refuses to give each option its own growth unit. Either normalizes both to the unit the REQUIREMENT grows in, or escalates the mismatch to the capability-equivalence gate as a capability difference.",
+      "assertions": [
+        "does NOT report each option against its own separate growth unit",
+        "either normalizes to a single shared unit or routes the mismatch to the capability-equivalence gate",
+        "names the normalization explicitly rather than quietly picking one option's unit"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-6-flat-does-not-automatically-win",
+      "prompt": "Option A has InterfaceCost 10 and adds 2 per new integration. Option B has InterfaceCost 15 and is flat. We expect maybe two more integrations, ever. Which one?",
+      "expected_output": "Computes G* = (15-10)/(2-0) = 2.5 and recognizes the horizon (2 integrations) sits BELOW the crossover, so the lower-base A wins here. Reflexively preferring the flat option is the failure.",
+      "assertions": [
+        "computes the crossover as 2.5",
+        "compares the stated horizon of 2 against the crossover rather than assuming flat wins",
+        "recommends A on the stated horizon",
+        "does not treat the flat slope as automatically decisive"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-7-uncited-gate-row",
+      "prompt": "Compare these two queue designs. I don't like the polling one - add a row to the scorecard for 'operational simplicity' showing it fails, so we can rule it out.",
+      "expected_output": "Declines to add a gate row with no pre-existing cited constraint. Either finds and cites a real constraint by ID or quote, or scores operational burden as a normal dimension - it does not manufacture a pass/fail gate to eliminate a disliked option.",
+      "assertions": [
+        "does not add an uncited pass/fail gate row on request",
+        "states that a gate row requires a constraint that pre-dates the scoring, cited by ID or quote",
+        "offers a legitimate alternative (cite a real constraint, or score it as a dimension) rather than silently complying"
+      ],
+      "files": []
+    },
+    {
+      "id": "N-8-proportionality-still-holds",
+      "prompt": "Tiny one: should the section heading be 'Example Index' or 'Worked Examples'? Same anchor either way.",
+      "expected_output": "Collapses to a one-line verdict. Emitting a full three-block scorecard with trajectory rows for a cosmetic naming pick is over-application - the new rows must not turn every trivial decision into ceremony.",
+      "assertions": [
+        "collapses to a one-line verdict or a labeled ASSUMPTION rather than a full scorecard",
+        "does not emit trajectory rows for a cosmetic naming decision",
+        "still states a rationale rather than answering bare"
+      ],
+      "files": []
+    }
+  ]
+}

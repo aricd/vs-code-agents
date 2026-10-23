@@ -1,0 +1,22 @@
+[
+  {"query": "i've got a dataframe with temp_max, wind and a weather category column - whats the most effective chart to show how temp relates to wind, broken down by weather? and can you justify the choice not just guess", "should_trigger": true},
+  {"query": "validate that this bar chart is perceptually sound before i ship it - the y axis doesn't start at zero and i want to know if that's a problem", "should_trigger": true},
+  {"query": "I want a deterministic mapping from data shape to chart type for my MCP server, not an LLM guessing each time. what's the right formal approach", "should_trigger": true},
+  {"query": "recommend the top 3 visualizations for a table with two continuous numeric columns and rank them by why one's better", "should_trigger": true},
+  {"query": "can you express this scatterplot as a formal spec i can validate and complete programmatically, then render it", "should_trigger": true},
+  {"query": "I have a partial chart idea - two fields i want encoded but no idea what mark to use. complete the spec for me using answer set programming style constraints", "should_trigger": true},
+  {"query": "convert my Draco spec into a Vega-Lite json so i can embed it", "should_trigger": true},
+  {"query": "which of these two chart designs is better and why - give me evidence based on perception rules not taste", "should_trigger": true},
+  {"query": "auto-pick a chart for each column of my SQL result set and give me something defensible", "should_trigger": true},
+  {"query": "render this draco dictionary spec to plotly, i'm on a dash stack", "should_trigger": true},
+  {"query": "make me an excel-like grid where i can filter and sort these 3000 order rows", "should_trigger": false},
+  {"query": "pivot this sales table by region and quarter with subtotals", "should_trigger": false},
+  {"query": "build a d3 sankey diagram showing user flow through my signup funnel", "should_trigger": false},
+  {"query": "clean up this messy csv and save it as a proper xlsx with formatted columns", "should_trigger": false},
+  {"query": "my matplotlib figure has overlapping labels, can you fix the layout code", "should_trigger": false},
+  {"query": "show me these query results in a browsable data table i can search", "should_trigger": false},
+  {"query": "design a dashboard layout with a KPI header and a couple panels", "should_trigger": false},
+  {"query": "geocode these addresses and drop them on an interactive leaflet map", "should_trigger": false},
+  {"query": "write a python function to compute the correlation matrix for my dataframe", "should_trigger": false},
+  {"query": "turn this dataframe into a treemap of nested product categories", "should_trigger": false}
+]

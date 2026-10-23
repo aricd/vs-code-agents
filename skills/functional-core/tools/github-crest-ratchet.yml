@@ -1,0 +1,54 @@
+name: crest-ratchet
+
+# Maintains the pure-function preference: fails the build only when a tracked
+# functional-core proxy REGRESSES against the committed baseline. Improvements
+# and no-change always pass. Re-baselining is a deliberate, reviewed commit.
+
+on:
+  pull_request:
+    paths:
+      # Adjust these globs to match your source layout
+      - "<your-src-dir>/**/*.py"
+      - "crest_metrics.py"
+      - "crest_baseline.json"
+      - "effect_policy.json"
+  push:
+    branches: [main]
+
+jobs:
+  ratchet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install "radon>=6.0"
+
+      # Exit codes: 0 = pass, 1 = ratchet regression, 2 = config/precondition
+      # error. Exit 2 includes "baseline effect_policy_version != current",
+      # which means detection semantics changed and the baseline must be
+      # re-frozen — deliberately NOT the same signal as a code regression.
+      - name: CREST ratchet (fail on regression only)
+        run: |
+          python crest_metrics.py \
+            --src <your-src-dir> \
+            --effect-policy effect_policy.json \
+            --json crest_current.json \
+            --check crest_baseline.json
+
+      - name: Upload current vector
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crest-vector
+          path: crest_current.json
+
+  # Optional companion job: verify a vendored copy of the engine has not been
+  # hand-edited. Drop this if you install CREST from source rather than vendoring.
+  # drift:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: bash scripts/check_crest_drift.sh

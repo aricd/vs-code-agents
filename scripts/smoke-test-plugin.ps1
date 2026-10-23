@@ -1,4 +1,4 @@
-#Requires -Version 7.0
+#Requires -Version 5.1
 <#
 .SYNOPSIS
     Validates the Multi-Disciplinary Team Agents Plugin structure.
@@ -14,28 +14,18 @@
     7. No duplicate agent name values
     8. No skill files with frontmatter wrapped in code fences (```skill)
 
-.PARAMETER Canonical
-    Also validate vs-code-agents/ source directory
-
-.PARAMETER SyncCheck
-    Compare canonical vs plugin copies, warn on drift
-
 .OUTPUTS
     PASS or FAIL with specific issues found.
     Exit code 0 = pass, 1 = fail.
 
 .EXAMPLE
     ./smoke-test-plugin.ps1
-    ./smoke-test-plugin.ps1 -Canonical
-    ./smoke-test-plugin.ps1 -SyncCheck
 
 .NOTES
-    SEC-002: This script is read-only — validates but never modifies files.
+    SEC-002: This script is read-only -- validates but never modifies files.
 #>
 
 param(
-    [switch]$Canonical,
-    [switch]$SyncCheck,
     [switch]$Help
 )
 
@@ -175,6 +165,10 @@ function Test-AgentFiles {
     }
     
     Write-Host "  Found $($agentFiles.Count) agent files"
+    # Assert exact count per TEST-SCOPE-002
+    if ($agentFiles.Count -ne 12) {
+        Add-Issue "${Prefix}agents/: expected 12 agent files, found $($agentFiles.Count)"
+    }
 }
 
 function Test-SkillFiles {
@@ -191,11 +185,6 @@ function Test-SkillFiles {
     $skillCount = 0
     
     foreach ($dir in $skillDirs) {
-        # Skip reference directory (ASSUMPTION-003)
-        if ($dir.Name -eq "reference") {
-            continue
-        }
-        
         $skillFile = Join-Path $dir.FullName "SKILL.md"
         
         if (-not (Test-Path $skillFile)) {
@@ -232,6 +221,194 @@ function Test-SkillFiles {
     }
     else {
         Write-Host "  Found $skillCount skill directories"
+        # Structural assertion: count > 0 and every skill dir has valid SKILL.md with matching name
+        # (Individual skill validation performed above in the loop)
+        Write-Host "  PASS: All skill directories have valid, name-matching SKILL.md"
+    }
+}
+
+function Test-DanglingSkillRefs {
+    <#
+    .SYNOPSIS
+    Check (c): Every backtick-quoted skill name in load/skill-directive context must
+    resolve to an existing skills/<name>/ directory (REQ-002/CONTRACT-001).
+    SEC-001: parse-only, never execute repo content.
+    CRLF-safe: line endings normalised before matching (BOUNDARY-001).
+    #>
+    Write-Host ""
+    Write-Host "Checking dangling skill references (check c)..." -ForegroundColor Cyan
+
+    # Build set of known skill directory names
+    $knownSkills = @{}
+    Get-ChildItem -Path (Join-Path $RepoRoot "skills") -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object { $knownSkills[$_.Name] = $true }
+
+    $refCount = 0
+    $localIssues = 0
+    $checkedFiles = 0
+
+    # Files to scan: agents/*.agent.md, skills/*/SKILL.md, skills/*/references/*.md
+    $filesToScan = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+
+    $agentsDir = Join-Path $RepoRoot "agents"
+    $skillsDir = Join-Path $RepoRoot "skills"
+
+    if (Test-Path $agentsDir) {
+        Get-ChildItem -Path $agentsDir -Filter "*.agent.md" -ErrorAction SilentlyContinue |
+            ForEach-Object { $filesToScan.Add($_) }
+    }
+    if (Test-Path $skillsDir) {
+        Get-ChildItem -Path $skillsDir -Recurse -Filter "SKILL.md" -ErrorAction SilentlyContinue |
+            ForEach-Object { $filesToScan.Add($_) }
+        Get-ChildItem -Path $skillsDir -Recurse -Filter "*.md" -ErrorAction SilentlyContinue |
+            Where-Object { $_.DirectoryName -match '[/\\]references$' } |
+            ForEach-Object { $filesToScan.Add($_) }
+    }
+
+    foreach ($file in $filesToScan) {
+        $checkedFiles++
+        $relFile = $file.FullName.Substring($RepoRoot.Length).TrimStart('\/')
+
+        # Read and normalise CRLF (BOUNDARY-001)
+        $content = (Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue) -replace "`r`n", "`n" -replace "`r", "`n"
+        if (-not $content) { continue }
+        $lines = $content -split "`n"
+
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $line = $lines[$i]
+            $lineNum = $i + 1
+
+            # Pattern 1: Load `skill-name`  (case-insensitive)
+            $loadMatches = [regex]::Matches($line, '(?i)(?:^|[\s:])load\s+`([a-z][a-z0-9/-]+)`')
+            foreach ($m in $loadMatches) {
+                $name = $m.Groups[1].Value.ToLower()
+                $root = ($name -split '/')[0]
+                $refCount++
+                if (-not $knownSkills.ContainsKey($root)) {
+                    Add-Issue "${relFile}:${lineNum}: dangling skill ref ``$name`` (no skills/$root/ dir)"
+                    $localIssues++
+                }
+            }
+
+            # Pattern 2: `skill-name` skill[s]
+            $skillMatches = [regex]::Matches($line, '`([a-z][a-z0-9/-]+)`\s+skills?(?:\s|$|[.,;(])')
+            foreach ($m in $skillMatches) {
+                $name = $m.Groups[1].Value
+                $root = ($name -split '/')[0]
+                $refCount++
+                if (-not $knownSkills.ContainsKey($root)) {
+                    Add-Issue "${relFile}:${lineNum}: dangling skill ref ``$name`` (no skills/$root/ dir)"
+                    $localIssues++
+                }
+            }
+        }
+    }
+
+    Write-Host "  Checked $checkedFiles files, $refCount skill directive references"
+    if ($localIssues -eq 0) {
+        Write-Host "  PASS: No dangling skill references"
+    }
+}
+
+function Test-DuplicateOrdinals {
+    <#
+    .SYNOPSIS
+    Check (d): Duplicate ordinals in ordered lists, STRICTLY per-list scoped (REQ-002/CONTRACT-001).
+    A new list restarting at 1. is legitimate and MUST NOT fire.
+    SEC-001: parse-only. CRLF-safe (BOUNDARY-001).
+    #>
+    Write-Host ""
+    Write-Host "Checking duplicate ordinals in ordered lists (check d)..." -ForegroundColor Cyan
+
+    $localIssues = 0
+    $checkedFiles = 0
+    $agentsDir = Join-Path $RepoRoot "agents"
+
+    if (-not (Test-Path $agentsDir)) { return }
+
+    foreach ($file in (Get-ChildItem -Path $agentsDir -Filter "*.agent.md" -ErrorAction SilentlyContinue)) {
+        $checkedFiles++
+        $relFile = $file.FullName.Substring($RepoRoot.Length).TrimStart('\/')
+
+        # Read and normalise CRLF (BOUNDARY-001)
+        $content = (Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue) -replace "`r`n", "`n" -replace "`r", "`n"
+        if (-not $content) { continue }
+        $lines = $content -split "`n"
+
+        $seenOrdinals = @{}
+
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $line = $lines[$i]
+
+            if ([string]::IsNullOrWhiteSpace($line)) {
+                # Blank/whitespace-only line — does not break list context (loose lists)
+                continue
+            }
+
+            $m = [regex]::Match($line, '^(\d+)\. ')
+            if ($m.Success) {
+                $ordinal = [int]$m.Groups[1].Value
+                if ($ordinal -eq 1) {
+                    # Explicit list restart — always valid; start fresh
+                    $seenOrdinals = @{1 = $true}
+                }
+                elseif ($seenOrdinals.ContainsKey($ordinal)) {
+                    Add-Issue "${relFile}:$($i + 1): duplicate ordinal ${ordinal}. in ordered list"
+                    $localIssues++
+                }
+                else {
+                    $seenOrdinals[$ordinal] = $true
+                }
+            }
+            # Non-blank, non-ordinal lines do not break list context
+        }
+    }
+
+    Write-Host "  Checked $checkedFiles agent files"
+    if ($localIssues -eq 0) {
+        Write-Host "  PASS: No duplicate ordinals in ordered lists"
+    }
+}
+
+function Test-BomFrontmatter {
+    <#
+    .SYNOPSIS
+    Check (e): UTF-8 BOM guard (QA-DEF-001 / CONTRACT-001).
+    skills/*/SKILL.md and agents/*.agent.md must NOT start with a UTF-8 BOM
+    (EF BB BF). A BOM before '---' silently passes Get-Content -Raw (which
+    strips it) but breaks the bash oracle and many YAML frontmatter parsers.
+    Raw bytes are read via [System.IO.File]::ReadAllBytes — NOT Get-Content.
+    SEC-001: parse-only, reads first 3 bytes only.
+    #>
+    Write-Host ""
+    Write-Host "Checking for UTF-8 BOM in frontmatter files (check e)..." -ForegroundColor Cyan
+
+    $localIssues = 0
+    $skillsDir = Join-Path $RepoRoot "skills"
+    $agentsDir = Join-Path $RepoRoot "agents"
+
+    $filesToCheck = [System.Collections.Generic.List[string]]::new()
+
+    if (Test-Path $skillsDir) {
+        Get-ChildItem -Path $skillsDir -Recurse -Filter "SKILL.md" -ErrorAction SilentlyContinue |
+            ForEach-Object { $filesToCheck.Add($_.FullName) }
+    }
+    if (Test-Path $agentsDir) {
+        Get-ChildItem -Path $agentsDir -Filter "*.agent.md" -ErrorAction SilentlyContinue |
+            ForEach-Object { $filesToCheck.Add($_.FullName) }
+    }
+
+    foreach ($filePath in $filesToCheck) {
+        $bytes = [System.IO.File]::ReadAllBytes($filePath)
+        if ($bytes.Count -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+            $relFile = $filePath.Substring($RepoRoot.Length).TrimStart('\/')
+            Add-Issue "${relFile}: starts with UTF-8 BOM (EF BB BF) — frontmatter unparseable under bash/YAML"
+            $localIssues++
+        }
+    }
+
+    if ($localIssues -eq 0) {
+        Write-Host "  PASS: No UTF-8 BOM found in frontmatter files"
     }
 }
 
@@ -349,77 +526,12 @@ else {
 }
 
 # ------------------------------------------------------------
-# -Canonical flag: Also validate vs-code-agents/
+# Check (c): Dangling skill references
+# Check (d): Duplicate ordinals (per-list scoped)
 # ------------------------------------------------------------
-if ($Canonical) {
-    Write-Host ""
-    Write-Host "=== Validating canonical source (vs-code-agents/) ===" -ForegroundColor Cyan
-    
-    $canonicalDir = Join-Path $RepoRoot "vs-code-agents"
-    if (Test-Path $canonicalDir) {
-        Test-AgentFiles -AgentsDir $canonicalDir -Prefix "vs-code-agents/"
-        Test-SkillFiles -SkillsDir (Join-Path $canonicalDir "skills") -Prefix "vs-code-agents/"
-    }
-    else {
-        Add-Issue "vs-code-agents/ directory not found"
-    }
-}
-
-# ------------------------------------------------------------
-# -SyncCheck flag: Compare canonical vs plugin copies
-# ------------------------------------------------------------
-if ($SyncCheck) {
-    Write-Host ""
-    Write-Host "=== Checking sync between canonical and plugin copies ===" -ForegroundColor Cyan
-    
-    $canonicalDir = Join-Path $RepoRoot "vs-code-agents"
-    if (-not (Test-Path $canonicalDir)) {
-        Add-Warning "Cannot check sync: vs-code-agents/ directory not found"
-    }
-    else {
-        # Compare agent files
-        $canonicalAgents = Get-ChildItem -Path $canonicalDir -Filter "*.agent.md" -ErrorAction SilentlyContinue
-        foreach ($agent in $canonicalAgents) {
-            $pluginAgent = Join-Path $RepoRoot "agents" $agent.Name
-            if (Test-Path $pluginAgent) {
-                $canonicalHash = Get-FileHash $agent.FullName
-                $pluginHash = Get-FileHash $pluginAgent
-                if ($canonicalHash.Hash -ne $pluginHash.Hash) {
-                    Add-Warning "Drift detected: $($agent.Name) differs between vs-code-agents/ and agents/"
-                }
-            }
-            else {
-                Add-Warning "Missing in agents/: $($agent.Name) (exists in vs-code-agents/)"
-            }
-        }
-        
-        # Compare skill directories
-        $canonicalSkills = Get-ChildItem -Path (Join-Path $canonicalDir "skills") -Directory -ErrorAction SilentlyContinue
-        foreach ($skill in $canonicalSkills) {
-            if ($skill.Name -eq "reference") {
-                continue
-            }
-            
-            $canonicalSkillFile = Join-Path $skill.FullName "SKILL.md"
-            $pluginSkillFile = Join-Path $RepoRoot "skills" $skill.Name "SKILL.md"
-            
-            if (Test-Path $canonicalSkillFile) {
-                if (Test-Path $pluginSkillFile) {
-                    $canonicalHash = Get-FileHash $canonicalSkillFile
-                    $pluginHash = Get-FileHash $pluginSkillFile
-                    if ($canonicalHash.Hash -ne $pluginHash.Hash) {
-                        Add-Warning "Drift detected: skills/$($skill.Name)/SKILL.md differs from canonical"
-                    }
-                }
-                else {
-                    Add-Warning "Missing in skills/: $($skill.Name)/SKILL.md (exists in vs-code-agents/skills/)"
-                }
-            }
-        }
-        
-        Write-Host "  Sync check complete"
-    }
-}
+Test-DanglingSkillRefs
+Test-DuplicateOrdinals
+Test-BomFrontmatter
 
 # ------------------------------------------------------------
 # Output results

@@ -1,0 +1,95 @@
+# =============================================================================
+# Mini-Retro Tier-2 Project Policy — WORKED EXAMPLES
+# Copy ONE of the blocks below to: .agent-output/mini-retro/policy.yaml
+# Tier 2 overrides the Tier-1 baseline question bank for THIS project only.
+# Omitting this file entirely is valid — the mini-retro then uses Tier-1 defaults.
+# Schema: ../references/project-policy.schema.md
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# EXAMPLE 1 — Small personal project (minimal friction)
+# Failure-mode analysis is irrelevant here, so suppress it: the mini-retro will
+# neither ask about it nor flag plans that skip it.
+# The gradient-scorecard is ON by default; if you also want to suppress it,
+# add: gradient-scorecard: disable
+# -----------------------------------------------------------------------------
+version: 1
+profile: personal
+final-gate: UAT
+
+dimensions:
+  failure-mode-analysis: suppress   # don't ask, don't flag absence
+  # gradient-scorecard is ON by default — omit this line to keep it, or add:
+  # gradient-scorecard: disable      # to opt out of the 20-question scorecard
+  # agents / skills / process / policy-fit / improvement keep Tier-1 defaults
+
+# (no project-questions, no practices — keep it light)
+
+
+# -----------------------------------------------------------------------------
+# EXAMPLE 2 — Regulated environment (failure-mode analysis mandatory)
+# Every plan must have failure modes + per-task risk determined, and the Planner
+# must delegate that determination to the Analyst. The mini-retro REQUIRES the
+# dimension and checks the execution evidence for the delegation; a missing
+# delegation becomes a high-confidence finding.
+#
+# To use this block, replace the EXAMPLE 1 content above with everything below.
+# -----------------------------------------------------------------------------
+# version: 1
+# profile: regulated
+# final-gate: UAT
+#
+# dimensions:
+#   failure-mode-analysis:
+#     override: require
+#     practice: per-task-fmea
+#     rationale: "Regulated device software; per-task failure-mode + risk is mandatory."
+#
+# project-questions:
+#   - id: PQ-1
+#     dimension: process
+#     requirement: required
+#     question: "Did the Planner delegate failure-mode + risk determination to the Analyst for every task?"
+#     default: a
+#     options:
+#       a: "Yes — Analyst produced per-task failure-mode + risk"
+#       b: "Partial — some tasks lacked failure-mode/risk coverage"
+#       c: "No — delegation did not happen (gap)"
+#
+# practices:
+#   per-task-fmea:
+#     description: >
+#       For every plan, the Planner MUST delegate to the Analyst to review the plan
+#       and determine the proper failure mode and the risk associated with each task.
+#       The resulting failure-mode + risk analysis must be referenced by the plan.
+#     evidence-hint: >
+#       Look in the execution-state delegation chain for a Planner -> Analyst delegation
+#       scoped to failure-mode/risk, and in the plan's Risks/Failure-Modes section for
+#       per-task FM-* entries.
+
+
+# -----------------------------------------------------------------------------
+# EXAMPLE 3 — Gradient scorecard required (with rubric evidence-hint)
+# The gradient scorecard is ON by default for all consumers; this example shows
+# how to REQUIRE it (gap = finding) and attach the rubric as an evidence-hint.
+# Use this block (or add its dimensions/practices keys to an existing policy).
+# -----------------------------------------------------------------------------
+# version: 1
+# profile: standard
+#
+# dimensions:
+#   gradient-scorecard:
+#     override: require
+#     practice: gradient-scorecard
+#
+# practices:
+#   gradient-scorecard:
+#     description: >
+#       Every plan wrap-up mini-retro must include a completed 20-question gradient
+#       scorecard. Any aspect scoring <= 6 or with delta <= -2 must produce a tagged
+#       finding.
+#     evidence-hint: >
+#       Look in the mini-retro artifact for a populated "Gradient Scorecard" section
+#       with all 20 rows (Q1..Q20) and a roll-up table. Confirm that any below-floor
+#       aspect has a corresponding tagged finding.
+#       Rubric: skills/mini-retro/references/gradient-scorecard.md

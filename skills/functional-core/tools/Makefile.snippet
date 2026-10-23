@@ -1,0 +1,35 @@
+# Append these targets to your existing Makefile.
+# Replace <your-src-dir> with your source tree root (e.g. src/mypackage).
+SRC ?= <your-src-dir>
+SNAPSHOTS_DIR ?= metrics/snapshots
+DASHBOARD_HTML ?= metrics/scorecard.html
+CREST_METRICS ?= path/to/crest_metrics.py
+CREST_SCORECARD ?= path/to/crest_scorecard.py
+EFFECT_POLICY ?= effect_policy.json
+
+.PHONY: crest-snapshot crest-dashboard crest-ratchet crest-baseline crest-metrics
+
+## crest-snapshot: write one new immutable snapshot into metrics/snapshots/
+crest-snapshot:
+	python $(CREST_METRICS) --src $(SRC) --effect-policy $(EFFECT_POLICY) --snapshot --snapshots-dir $(SNAPSHOTS_DIR)
+
+## crest-dashboard: rebuild the Code Health Dashboard from the snapshot directory
+crest-dashboard:
+	python $(CREST_SCORECARD) --snapshots-dir $(SNAPSHOTS_DIR) --out $(DASHBOARD_HTML)
+	@echo "Dashboard: $(DASHBOARD_HTML)"
+
+## crest-metrics: snapshot then rebuild the dashboard (the usual one-shot)
+crest-metrics: crest-snapshot crest-dashboard
+
+## crest-ratchet: fail if any tracked proxy regressed vs the baseline
+crest-ratchet:
+	python $(CREST_METRICS) --src $(SRC) --effect-policy $(EFFECT_POLICY) --check crest_baseline.json
+
+## crest-baseline: DELIBERATELY re-freeze the baseline (review the diff before committing)
+##
+## Also required after any EFFECT_POLICY_VERSION bump: the version guard rejects a
+## baseline measured under different effect-detection semantics rather than letting
+## the change surface as an unexplained regression.
+crest-baseline:
+	python $(CREST_METRICS) --src $(SRC) --effect-policy $(EFFECT_POLICY) --write-baseline crest_baseline.json
+	@echo "Review the diff to crest_baseline.json before committing — this resets the ratchet."

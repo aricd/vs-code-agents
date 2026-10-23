@@ -1,18 +1,17 @@
-# Multi-Disciplinary Team Agents Plugin
+# Multi-Disciplinary Team Agents
 
-> 13 specialized AI agents and 19 skills for structured, auditable software delivery in VS Code — installable as a single VS Code Agent Plugin.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+> Specialized AI agents and skills for structured, auditable software delivery in VS Code -- distributed via system-level linking.
 
 ## What This Is
 
-The **Multi-Disciplinary Team Agents Plugin** provides a complete set of **custom agent definitions** and **skills** for GitHub Copilot in VS Code.
+This repository provides a complete set of **custom agent definitions** and **skills** for GitHub Copilot in VS Code.
 
-The agents are intentionally specialized to support a structured workflow (planning, review, security, testing, release) with clear handoffs and constraints. Install as a VS Code Agent Plugin for one-action setup, or copy individual files for per-workspace customization.
+The agents are intentionally specialized to support a structured workflow (planning, review, security, testing, release) with clear handoffs and constraints. Distributed into VS Code via a one-time, system-level link setup -- see [LINKING.md](LINKING.md). This repo is separately also a Claude Code plugin in its own right (`plugin.json`, `hooks/`); that identity is unrelated to how it reaches VS Code and is unaffected by anything below -- see [ADR-017](docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md).
 
 ## The Problem
 
 AI coding assistants are powerful but chaotic:
+
 - They forget context between sessions
 - They try to do everything at once (plan, code, test, review)
 - They skip quality gates and security reviews
@@ -22,79 +21,93 @@ AI coding assistants are powerful but chaotic:
 
 This repository provides **specialized AI agents** that each own a specific part of your development workflow:
 
-| Agent | Role |
-|-------|------|
-| **Roadmap** | Product vision and epics |
-| **Planner** | Implementation-ready plans (WHAT, not HOW) |
-| **Analyst** | Deep technical research |
-| **Architect** | System design and patterns |
-| **Critic** | Plan quality review |
-| **Security** | Comprehensive security assessment |
-| **Implementer** | Code and tests |
-| **Code Reviewer** | Code quality gate before QA |
-| **QA** | Test strategy and verification |
-| **UAT** | Business value validation |
-| **DevOps** | Packaging and releases |
-| **Retrospective** | Lessons learned |
-| **ProcessImprovement** | Workflow evolution |
+| Agent                  | Role                                       |
+| ---------------------- | ------------------------------------------ |
+| **Roadmap**            | Product vision and epics                   |
+| **Planner**            | Implementation-ready plans (WHAT, not HOW) |
+| **Analyst**            | Deep technical research                    |
+| **Architect**          | System design and patterns                 |
+| **Critic**             | Plan quality review                        |
+| **Security**           | Comprehensive security assessment          |
+| **Implementer**        | Code and tests                             |
+| **Code Reviewer**      | Code quality gate before QA                |
+| **QA**                 | Test strategy and verification             |
+| **UAT**                | Business value validation                  |
+| **DevOps**             | Packaging and releases                     |
+| **ProcessImprovement** | Workflow evolution and lesson intake       |
 
 Each agent has **clear constraints** (Planner can't write code, Implementer can't redesign) and produces **structured documents** that create an audit trail.
 
 Use as many or as few as you need, in any order. They are designed to know their own role and work together with other agents in this repo. They are designed to work together to create a structured and auditable development process. They are also designed to challenge each other to ensure the best possible outcome.
 
+## Directory Structure
+
+This repository contains **shared agents and skills** used across multiple VS Code workspaces. A config-driven symlink system ensures consistent, repeatable setup:
+
+```
+/home/<user>/dev/mdt/vs-code-agents/
+├── README.md                      ← This file
+├── LINKING.md                     ← Symlinking guide (start here for setup)
+├── Makefile                       ← Convenience commands (make setup, make verify)
+├── scripts/
+│   ├── link-config.example.yaml    ← Committed template — copy to link-config.yaml and edit
+│   ├── link-config.yaml            ← Your local config (gitignored, never committed)
+│   ├── link-setup.sh               ← Script: links shared skills/agents into workspaces
+│   └── [other repo scripts...]
+├── skills/
+│   ├── system-integration-gate/   ← Prevent "built but not invoked" regressions
+│   │   ├── SKILL.md
+│   │   ├── README.md
+│   │   └── smoke-check.sh         ← OS-agnostic smoke oracle
+│   └── [other skills...]
+└── agents/                        ← Shared agent definitions (if used)
+    └── [agent definitions...]
+```
+
+The system-level `claude-user` target links this repo's skills into `~/.agents/skills`, which VS Code reads for every local workspace on that machine automatically -- no per-workspace copy to keep in sync. A per-workspace target (symlinking into that workspace's own `.github/skills`/`.github/agents`/`.github/prompts`) remains available as a documented fallback for the cases LINKING.md calls out, via the same `scripts/link_setup.py`.
+
+**[→ See LINKING.md for complete linking setup and configuration guide](LINKING.md)**
+
 ## Requirements
 
 | Requirement | Minimum |
-|-------------|---------|
-| **VS Code** | **1.110** or later (agent plugins introduced in [v1.110 — February 2026](https://code.visualstudio.com/updates/v1_110#_agent-plugins-experimental)) |
+| --- | --- |
+| **VS Code** | **1.107** or later (custom agents and skills support) |
 | **GitHub Copilot** | Active subscription with the GitHub Copilot Chat extension installed |
-| **Setting** | `chat.plugins.enabled` must be `true` (plugins are currently a Preview feature) |
 
-> [!TIP]
-> Option B (copy to workspace) works on any VS Code version that supports custom agents and skills (v1.107+). The v1.110 requirement applies only to the Plugin install method.
+> [!NOTE] This repo previously also documented installing itself as a VS Code Agent Plugin (`chat.plugins.enabled`, **Chat: Install Plugin From Source**). That path is retired: Agent Plugin registrations are cached on the local client machine and are not discovered once the workspace is reopened over Remote-SSH, which silently drops every agent/skill with no error shown. See [ADR-017](docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md).
 
 ## Quick Start
 
-### Option A: Install as a Plugin (Recommended)
-
-1. Open VS Code **1.110+** and ensure `chat.plugins.enabled` is `true` in your settings
-2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-3. Run **Chat: Install Plugin From Source**
-4. Enter the Git URL: `https://github.com/groupzer0/agents.git`
-5. All 13 agents and 19 skills are immediately available in Copilot Chat
-
-> [!NOTE]
-> Agent Plugins are currently a Preview feature in VS Code 1.110+. You must enable `chat.plugins.enabled` in VS Code settings.
-
-### Option B: Copy to Your Project (Per-Workspace)
+**The one supported install path is system-level linking**, via this repo's own `scripts/link_setup.py` (full detail in [LINKING.md](LINKING.md)).
 
 ### 1. Get the Agents
 
 ```bash
-git clone https://github.com/groupzer0/agents.git
+git clone https://git.example.com/acme/vs-code-agents.git
 ```
 
-### 2. Add to Your Project
+### 2. Link Skills System-Wide
 
-Copy agents to your workspace (per-repo, recommended):
-```text
-your-project/
-└── .github/
-    └── agents/
-        ├── planner.agent.md
-        ├── implementer.agent.md
-        └── ... (others you need)
+**One whole-directory link, made once per machine.** `link_setup.py` does not manage it -- see [LINKING.md](LINKING.md) for why, and for the warning about pointing the linker at it.
+
+Windows (junction -- needs neither Developer Mode nor an elevated shell):
+
+```
+mklink /J "%USERPROFILE%\.agents\skills" "C:\path\to\vs-code-agents\skills"
 ```
 
-Or install them at the **user level** so they are available across all VS Code workspaces. User-level agents are stored in your [VS Code profile folder](https://code.visualstudio.com/docs/configure/profiles):
+POSIX:
 
-- **Linux**: `~/.config/Code/User/`
-- **macOS**: `~/Library/Application Support/Code/User/`
-- **Windows**: `%APPDATA%\Code\User\`
+```bash
+ln -s /path/to/vs-code-agents/skills ~/.agents/skills
+```
 
-> [!TIP]
-> The easiest way to create a user-level agent is via the Command Palette: **Chat: New Custom Agent** → select **User profile**. VS Code will place it in the correct location automatically.
+Every skill in this repo is then visible to every local VS Code session on that machine, and a newly committed skill appears with no re-run. Repeat once on each machine you use, including each Remote-SSH host (clone the repo there and make the same link from that host's own shell), since `~/.agents` is scoped to whichever machine it lives on.
 
+`make setup` / `make setup-dry-run` drive `scripts/link_setup.py`, which exists for the **per-workspace fallback** in LINKING.md -- not for the home-level link above.
+
+> [!NOTE] Agents and prompts do not have a confirmed system-level VS Code discovery location yet (see [ADR-017](docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md)) -- `link_skills` is the only flag this target enables by default. A workspace that needs synced agents/prompts can add a per-workspace target for those two primitives in `scripts/link-config.yaml` (LINKING.md's Per-Workspace Fallback section); that reintroduces a small double-registration risk for anything also covered by a future system-level location, so keep it scoped to the workspaces that actually need it.
 
 ### 3. Use in Copilot Chat
 
@@ -104,50 +117,48 @@ In VS Code, select your agent from the **agents dropdown** at the top of the Cha
 Create a plan for adding user authentication
 ```
 
-> [!NOTE]
-> Unlike built-in participants (e.g., `@workspace`), custom agents are **not** invoked with the `@` symbol. You must select them from the dropdown or use the Command Palette.
+> [!NOTE] Unlike built-in participants (e.g., `@workspace`), custom agents are **not** invoked with the `@` symbol. You must select them from the dropdown or use the Command Palette.
 
 ### VS Code Settings (Recommended)
 
-> [!NOTE]
-> Review the `chat.tools.*.autoApprove` entries below before enabling. These settings allow certain actions to proceed without per-action confirmation.
+> [!NOTE] Review the `chat.tools.*.autoApprove` entries below before enabling. These settings allow certain actions to proceed without per-action confirmation.
 
 ```json
 {
-    "accessibility.hideAccessibleView": true,
-    "chat.agent.maxRequests": 256,
-    "chat.checkpoints.showFileChanges": true,
-    "chat.customAgentInSubagent.enabled": true,
-    "chat.instructionsFilesLocations": {
-        ".github/instructions": true
+  "accessibility.hideAccessibleView": true,
+  "chat.agent.maxRequests": 256,
+  "chat.checkpoints.showFileChanges": true,
+  "chat.customAgentInSubagent.enabled": true,
+  "chat.instructionsFilesLocations": {
+    ".github/instructions": true
+  },
+  "chat.mcp.autostart": "newAndOutdated",
+  "chat.mcp.gallery.enabled": true,
+  "chat.tools.terminal.autoApprove": {
+    "cd": true,
+    "git": true,
+    "npm": true,
+    "python": true
+  },
+  "chat.tools.urls.autoApprove": {
+    "https://duckduckgo.com": {
+      "approveRequest": false,
+      "approveResponse": true
     },
-    "chat.mcp.autostart": "newAndOutdated",
-    "chat.mcp.gallery.enabled": true,
-    "chat.tools.terminal.autoApprove": {
-        "cd": true,
-        "git": true,
-        "npm": true,
-        "python": true
+    "https://github.com": {
+      "approveRequest": false,
+      "approveResponse": true
     },
-    "chat.tools.urls.autoApprove": {
-        "https://duckduckgo.com": {
-            "approveRequest": false,
-            "approveResponse": true
-        },
-        "https://github.com": {
-            "approveRequest": false,
-            "approveResponse": true
-        },
-        "https://vtk.org": true,
-        "https://www.google.com": {
-            "approveRequest": false,
-            "approveResponse": true
-        }
-    },
-    "chat.useAgentSkills": true,
-    "editor.accessibilitySupport": "off",
-    "github.copilot.nextEditSuggestions.enabled": true,
-    "terminal.integrated.accessibleViewFocusOnCommandExecution": false
+    "https://vtk.org": true,
+    "https://www.google.com": {
+      "approveRequest": false,
+      "approveResponse": true
+    }
+  },
+  "chat.useAgentSkills": true,
+  "editor.accessibilitySupport": "off",
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "terminal.integrated.accessibleViewFocusOnCommandExecution": false
 }
 ```
 
@@ -161,21 +172,20 @@ copilot --agent planner --prompt "Create a plan for adding user authentication"
 
 **Known limitation (user-level agents):** The Copilot CLI currently has an upstream bug where user-level agents in `~/.copilot/agents/` are not loaded, even though they are documented ([github/copilot-cli#452](https://github.com/github/copilot-cli/issues/452)). This behavior and the recommended per-repository workaround were identified and documented by @rjmurillo. Until the bug is fixed, prefer `.github/agents/` in each repo.
 
-
 ## Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [USING-AGENTS.md](USING-AGENTS.md) | Quick start guide (5 min read) |
-| [AGENTS-DEEP-DIVE.md](AGENTS-DEEP-DIVE.md) | Comprehensive documentation |
-| [CHANGELOG.md](CHANGELOG.md) | Notable repository changes |
+| Document                                   | Purpose                        |
+| ------------------------------------------ | ------------------------------ |
+| [USING-AGENTS.md](USING-AGENTS.md)         | Quick start guide (5 min read) |
+| [AGENTS-DEEP-DIVE.md](AGENTS-DEEP-DIVE.md) | Comprehensive documentation    |
+| [CHANGELOG.md](CHANGELOG.md)               | Notable repository changes     |
 
 ---
 
 ### Typical Workflow
 
 ```text
-Roadmap → Planner → Analyst/Architect/Security/Critic → Implementer → Code Reviewer → QA → UAT → DevOps
+Roadmap -> Planner -> Analyst/Architect/Security/Critic -> Implementer -> Code Reviewer -> QA -> UAT -> Planner mini-retro -> DevOps
 ```
 
 1. **Roadmap** defines what to build and why
@@ -188,27 +198,42 @@ Roadmap → Planner → Analyst/Architect/Security/Critic → Implementer → Co
 8. **Code Reviewer** verifies code quality
 9. **QA** verifies tests. Ensures robust test coverage
 10. **UAT** confirms business value was delivered
-11. **DevOps** releases (with user approval)
+11. **Planner** runs the mandatory `mini-retro` before the DevOps handoff; **ProcessImprovement** routes lessons into the next cycle
+12. **DevOps** releases (with user approval)
 
 ---
 
 ## Key Features
 
 ### 🎯 Separation of Concerns
+
 Each agent has one job. Planner plans. Implementer implements. No scope creep.
 
 ### 📝 Document-Driven
+
 Agents produce Markdown documents in `.agent-output/`. Every decision is recorded.
 
 ### 🔒 Quality Gates
+
 Critic reviews plans. Security audits code. QA verifies tests. Nothing ships without checks.
 
+### 🎯 Literal Intent Fidelity
+
+When you state a criterion -- _"all Python files that may be executed when interpreting specs"_ -- agents must test **those words**, not a narrower paraphrase of them. The `literal-intent-fidelity` skill requires the criterion to be quoted verbatim, the candidate list to be enumerated from the repository, and **every** verdict (inclusions and exclusions alike) to carry a citation. Role arguments ("it's just plumbing", "it's a test harness") are not valid exclusion reasons, and budget pressure is surfaced as an explicit cost decision instead of a quiet scope reduction.
+
+It also pins the **target** a criterion is applied to -- working tree, remote, branch, canonical source vs. generated copy. A target inherited from the session or a prior task is disclosed in one line before the first edit, and an ambiguous one is asked about, because a flawless answer about the wrong repository is still the wrong answer.
+
+A `UserPromptSubmit` hook detects stated criteria and scope pushback in your prompt and injects a `[Literal-Criterion Check]` reminder, so the guardrail applies even when the agent would not have thought to load the skill.
+
 ### 🔄 Handoffs
+
 Agents hand off to each other with context. No lost information between phases.
 
 ### 📌 Execution Orchestration (Optional)
-For larger changes, you can use the execution orchestration skills to coordinate subagent work with strict quality gates and a single authoritative execution-state file:
-- Skills: `execution-orchestration`, `planner-execution-orchestration`
+
+For larger changes, you can use the `execution-orchestration` skill to coordinate subagent work with strict quality gates and a single authoritative execution-state file:
+
+- Skill: `execution-orchestration`
 - State file location: `.agent-output/planning/<ID>-execution-state.yaml`
 
 ### 🎛️ Planner as Orchestrator
@@ -217,124 +242,89 @@ The **Planner** agent serves as the primary orchestrator for structured multi-ag
 
 - **Delegate execution** to any other agent (Implementer, Critic, QA, etc.) as subagents
 - **Coordinate multiple plans concurrently**, tracking each through its own execution-state file
-- **Enforce workflow gates** — ensuring plans progress through the correct sequence (Critic → Implementer → Code Reviewer → QA → UAT → DevOps)
+- **Enforce workflow gates** -- ensuring plans progress through the correct sequence (Critic -> Implementer -> Code Reviewer -> QA -> UAT -> DevOps)
 - **Monitor progress** via the execution-state YAML, surfacing blockers and completion status
 
-This is the recommended workflow for any structured, multi-step delivery effort. See the `planner-execution-orchestration` skill and [USING-AGENTS.md](USING-AGENTS.md#planner-as-orchestrator) for details.
+This is the recommended workflow for any structured, multi-step delivery effort. See the `execution-orchestration` skill and [USING-AGENTS.md](USING-AGENTS.md#planner-as-orchestrator) for details.
 
 ---
 
-## Plugin Testing
+## Repository Structure Validation
 
-Scripts for validating plugin structure and verifying VS Code integration.
-
-### Level 1: Smoke Tests (Structural Validation)
-
-Validates plugin files without launching VS Code:
+`scripts/smoke-test-plugin.{sh,ps1}` validates this repo's own structure: agent/skill frontmatter, `hooks/hooks.json` (this repo's Claude Code plugin manifest -- unrelated to the retired VS Code Agent Plugin install path, see [ADR-017](docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md)), duplicate agent names, dangling skill references, and a few other structural invariants listed at the top of the script. It is not a VS Code integration test; nothing here installs or probes a VS Code instance.
 
 ```bash
-# Basic validation (agents/, skills/, hooks, plugin.json)
 ./scripts/smoke-test-plugin.sh
-
-# Also validate canonical source directory
-./scripts/smoke-test-plugin.sh --canonical
-
-# Check for drift between canonical and plugin copies
-./scripts/smoke-test-plugin.sh --sync-check
 ```
 
 PowerShell equivalent:
+
 ```powershell
 ./scripts/smoke-test-plugin.ps1
-./scripts/smoke-test-plugin.ps1 -Canonical
-./scripts/smoke-test-plugin.ps1 -SyncCheck
 ```
-
-### Level 2: Install Probe (VS Code Integration)
-
-Creates a temporary VS Code profile with the plugin registered for manual verification:
-
-```bash
-# Generate instructions for manual verification
-./scripts/install-probe.sh
-
-# Launch VS Code with the temporary profile
-./scripts/install-probe.sh --launch
-```
-
-After VS Code opens:
-1. Open Copilot Chat (`Ctrl+Shift+I`)
-2. Open Chat Diagnostics: Command Palette → `Chat: Show Chat Diagnostics`
-3. Verify all 13 agents and 19 skills appear in the diagnostics view
-
-### Level 3: Post-Install Discovery (Future)
-
-Automated verification that VS Code discovered the plugin is not yet available. VS Code does not currently provide a headless API to query loaded plugins programmatically.
-
-**Recommended future approach**: A custom VS Code test extension that queries the `chat.plugins` API and runs in CI via `@vscode/test-electron`.
-
-### Chat Diagnostics Reference
-
-To manually verify plugin loading at any time:
-1. Open Command Palette (`Ctrl+Shift+P`)
-2. Run `Chat: Show Chat Diagnostics`
-3. Expand the "Plugins" section to see registered plugins and their agents/skills
 
 ---
 
-## Migrating from Workspace-Level Agents to Plugin
+## Migrating Off the VS Code Agent Plugin Install
 
-If you previously copied agent files into `.github/agents/` or `~/.config/Code/User/`, you may see duplicate agents after installing the plugin. To resolve:
+If you previously used **Chat: Install Plugin From Source** (the now-retired install path -- see [ADR-017](docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md)), switch to system-level linking:
 
-1. **Check for duplicates**: Open Copilot Chat and look for agents with the same name but different sources (plugin vs. workspace)
-2. **Remove workspace copies**: Delete the manually-copied `.agent.md` files from your `.github/agents/` directory
-3. **Remove workspace skills**: Delete any manually-copied skill directories from `.github/skills/` or `.claude/skills/`
-4. **Verify**: Confirm only the plugin-provided agents appear in the agents dropdown
+1. **Remove the plugin registration**: Command Palette -> `Chat: Show Chat Diagnostics` -> find this repo under "Plugins" -> remove it from that VS Code installation.
+2. **Remove any workspace-level copies** you may also have, to avoid duplicate agents:
+   ```bash
+   rm -f .github/agents/*.agent.md
+   rm -rf .github/skills/architecture-patterns .github/skills/testing-patterns  # etc.
+   ```
+3. **Set up system-level linking** per Quick Start above.
+4. **Verify**: reload the window and confirm each agent/skill appears exactly once.
 
-```bash
-# Quick cleanup — remove workspace-level copies if using the plugin
-rm -f .github/agents/*.agent.md
-rm -rf .github/skills/analysis-methodology .github/skills/architecture-patterns  # etc.
-```
-
-> [!NOTE]
-> The `.agent-output/` directory (renamed from `agent-output/`) is a workspace runtime artifact and is NOT part of the plugin. If you have an existing `agent-output/` directory, rename it:
-> ```bash
-> mv agent-output .agent-output
-> ```
+> [!NOTE] The `.agent-output/` directory is a workspace runtime artifact and is not distributed by either install path.
 
 ---
 
 ## Repository Structure
 
 ```text
-├── plugin.json                  # Plugin manifest
-├── agents/                      # Plugin-discoverable agents (13 files)
+├── plugin.json                  # Claude Code plugin manifest (see ADR-017 -- unrelated to how VS Code gets these agents/skills)
+├── agents/                      # Agent definitions (12 files)
 │   ├── planner.agent.md
 │   ├── implementer.agent.md
 │   └── ... (11 more)
-├── skills/                      # Plugin-discoverable skills (19 directories)
+├── skills/                      # Skill definitions
 │   ├── execution-orchestration/
 │   ├── testing-patterns/
-│   ├── reference/               # Shared reference docs
-│   └── ... (16 more)
-├── hooks/                       # Plugin hooks
+│   ├── agent-authoring/
+│   ├── skill-authoring/
+│   ├── hook-authoring/
+│   ├── mini-retro/
+│   │   ├── SKILL.md
+│   │   ├── references/
+│   │   │   ├── question-bank.md        # Tier-1 baseline (incl. gradient-scorecard)
+│   │   │   ├── memory-model.md
+│   │   │   ├── project-policy.schema.md
+│   │   │   └── gradient-scorecard.md  # 20-question 1-10 rubric (single owner)
+│   │   └── assets/
+│   │       ├── mini-retro-template.md
+│   │       ├── gradient-scorecard-blank.md  # standalone blank fill-in form
+│   │       ├── gradient-scorecard-example.md # walk-through example (ILLUSTRATIVE)
+│   │       └── project-policy.example.yaml
+│   └── ...
+├── hooks/                       # Claude Code plugin hooks
 │   ├── hooks.json
 │   ├── user-prompt-submit.sh
 │   └── user-prompt-submit.ps1
-├── scripts/                     # Validation and sync scripts
+├── scripts/                     # Validation + linking scripts
 │   ├── validate-plan-template.sh
 │   ├── validate-plan-template.ps1
-│   └── sync-plugin.sh
-├── vs-code-agents/              # Canonical source (agents + skills)
-│   ├── *.agent.md
-│   ├── skills/
-│   └── reference/
+│   ├── smoke-test-plugin.sh
+│   ├── smoke-test-plugin.ps1
+│   ├── link_setup.py            # Canonical linking implementation (see LINKING.md)
+│   ├── link-setup.sh
+│   └── link-setup.ps1
 ├── README.md
 ├── USING-AGENTS.md
 ├── AGENTS-DEEP-DIVE.md
-├── CHANGELOG.md
-└── LICENSE
+└── CHANGELOG.md
 ```
 
 ---
@@ -344,6 +334,7 @@ rm -rf .github/skills/analysis-methodology .github/skills/architecture-patterns 
 The **Security Agent** has been enhanced to provide truly comprehensive security reviews:
 
 ### Five-Phase Framework
+
 1. **Architectural Security**: Trust boundaries, STRIDE threat modeling, attack surface mapping
 2. **Code Security**: OWASP Top 10, language-specific vulnerability patterns
 3. **Dependency Security**: CVE scanning, supply chain risk assessment
@@ -353,14 +344,15 @@ The **Security Agent** has been enhanced to provide truly comprehensive security
 ### Why This Matters
 
 Most developers don't know how to conduct thorough security reviews. They miss:
+
 - Architectural weaknesses (implicit trust, flat networks)
 - Language-specific vulnerabilities (prototype pollution, pickle deserialization)
 - Supply chain risks (abandoned packages, dependency confusion)
 - Compliance gaps (missing security headers, weak TLS)
 
-The Security Agent systematically checks all of these, producing actionable findings with severity ratings and remediation guidance.You can then hand this off to the Planner agent and the Implementer to address. 
+The Security Agent systematically checks all of these, producing actionable findings with severity ratings and remediation guidance.
 
-See [security.agent.md](vs-code-agents/security.agent.md) for the full specification.
+See [security.agent.md](agents/security.agent.md) for the full specification.
 
 ---
 
@@ -369,8 +361,9 @@ See [security.agent.md](vs-code-agents/security.agent.md) for the full specifica
 ### Modify Existing Agents
 
 Edit `.agent.md` files to adjust:
+
 - `description`: What shows in Copilot
-- `tools`: Which VS Code tools the agent can use
+- `tools`: Which VS Code tools the agent can use (either a coarse group-level array, e.g. `[execute, read, agent, edit, search, todo]`, or a granular per-capability array, e.g. `['execute/runInTerminal', 'read/readFile', ...]` -- both forms are valid; an agent uses whichever grain its constraints require)
 - `handoffs`: Other agents it can hand off to
 - Responsibilities and constraints
 
@@ -393,31 +386,28 @@ Agents now explicitly avoid forced root-cause narratives when evidence is missin
 - **Analyst**: Uses an objective hard pivot trigger (timebox/evidence gate) to switch from RCA attempts to system hardening + telemetry requirements.
 - **Architect**: Treats insufficient observability as an architectural risk; defines normal vs debug logging guidance and a minimum viable incident telemetry baseline.
 - **QA**: Validates diagnosability improvements; prefers asserting structured telemetry fields/events over brittle log string matching.
-- **Template**: `vs-code-agents/reference/uncertainty-review-template.md` provides a repeatable output format.
+- **Template**: `agents/analyst.references/uncertainty-review-template.md` provides a repeatable output format.
 
 ### Skills System (2025-12-19)
 
-Agents now use **Claude Skills**—modular, reusable instruction sets that load on-demand:
+Agents now use **Claude Skills**--modular, reusable instruction sets that load on-demand:
 
 | Skill | Purpose |
-|-------|---------|
-| `analysis-methodology` | Confidence levels, gap tracking, investigation techniques |
-| `architecture-patterns` | ADR templates, patterns, anti-pattern detection |
-| `code-review-checklist` | Pre/post-implementation review criteria |
-| `code-review-standards` | Code review checklist, severity definitions, document templates |
+| --- | --- |
+| `code-review` | Unified pre/post-implementation review criteria, severity definitions, document templates |
 | `cross-repo-contract` | Multi-repo API type safety and contract coordination |
 | `document-lifecycle` | Unified numbering, automated closure, orphan detection |
-| `engineering-standards` | SOLID, DRY, YAGNI, KISS with detection patterns |
+| `implementation-principles` | DRY, YAGNI, Rule of Three, composition, SoC, POLA, Boy Scout Rule, defensive programming |
 | `release-procedures` | Two-stage release workflow, semver, platform constraints |
 | `security-patterns` | OWASP Top 10, language-specific vulnerabilities |
 | `testing-patterns` | TDD workflow, test pyramid, coverage strategies |
 
 **Skill Placement:**
-- **VS Code Stable (1.107.1)**: Place in `.claude/skills/`
+
+- **VS Code Stable (1.107+)**: Place in `.claude/skills/`
 - **VS Code Insiders**: Place in `.github/skills/`
 
-> [!NOTE]
-> These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. See the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
+> [!NOTE] These locations are changing with upcoming VS Code releases. The `.github/skills/` location is becoming the standard. See the [VS Code Agent Skills documentation](https://code.visualstudio.com/docs/copilot/customization/agent-skills) for the latest guidance.
 
 ### Key Agent Flow Improvements
 
@@ -442,13 +432,14 @@ Integrated into Architect, Planner, Implementer, and Critic agents.
 
 New `document-lifecycle` skill implementing:
 
-- **Unified numbering**: All documents in a work chain share the same ID (analysis 080 → plan 080 → qa 080 → uat 080)
+- **Unified numbering**: All documents in a work chain share the same ID (analysis 080 -> plan 080 -> qa 080 -> uat 080)
 - **Automated closure**: Documents move to `closed/` subfolders after commit
 - **Orphan detection**: Agents self-check + Roadmap periodic sweep
 
 This keeps active plans visible while archiving completed work for traceability.
 
 ### Previous Updates
+
 - **Aligned agent tool names with VS Code APIs (2025-12-16)**: Agent `tools` definitions now use official VS Code agent tool identifiers.
 - **Added subagent usage patterns (2025-12-15)**: Planner, Implementer, QA, Analyst, and Security document how to invoke each other as scoped subagents.
 - **Background Implementer mode (2025-12-15)**: Implementation can run as local chat or background agent in isolated Git worktree.
@@ -468,12 +459,6 @@ This repository also runs an automatic **Markdown lint** check in GitHub Actions
 ## Requirements
 
 - VS Code with GitHub Copilot
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE)
 
 ---
 

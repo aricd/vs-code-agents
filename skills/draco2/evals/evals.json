@@ -1,0 +1,23 @@
+{
+  "skill_name": "draco2",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I have a CSV of e-commerce orders with columns order_total (number), category (string), and order_date (datetime). Which chart best shows how order totals are distributed within each category? Express your answer as a formal Draco 2 spec, validate it, and render it with Plotly.",
+      "expected_output": "A valid Draco dict spec (e.g. faceted binned histogram or tick/boxplot-like design), check_spec passing, and a Plotly figure produced via draco_to_plotly.py.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Here's a partial idea: I want to visualize the relationship between marketing_spend and revenue from my quarterly table, but I don't know what mark to use. Use Draco to recommend the top 3 designs and explain their cost ranking.",
+      "expected_output": "Uses complete_spec on a partial spec with two number fields; reports top models with costs; scatterplot (point mark) expected as top recommendation.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Is a pie chart a sound way to show my 12-category budget breakdown? Check it formally and show me what the solver says, then give me a better alternative if it's problematic.",
+      "expected_output": "Authors the polar stacked-bar pie spec, runs check_spec/count_preferences, discusses violations/preference costs, proposes a bar chart alternative with comparison.",
+      "files": []
+    }
+  ]
+}

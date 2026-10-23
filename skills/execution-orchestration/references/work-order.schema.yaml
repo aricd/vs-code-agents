@@ -1,0 +1,308 @@
+# work-order.schema.yaml
+#
+# Canonical schema for the work-order artifact exchanged between the
+# orchestrating owner and the executor on any delegation that has
+# two or more tasks OR at least one Demonstrated acceptance criterion.
+#
+# Cross-reference: skills/execution-orchestration/SKILL.md — "Work-Order Contract"
+# Gate script:     scripts/run-work-order-gates.ps1 / .sh
+#
+# ─────────────────────────────────────────────────────────────────
+# TOP-LEVEL KEYS  (currently these seven at the root level: meta, scope,
+# environment, checklist, gates, blockers, carried_forward_context)
+#
+# This is not a closed set forever: `meta` itself has gained a REQUIRED field
+# (`base_commit`) since this file was first written, and the additive, OPTIONAL
+# root-level `carried_forward_context` key described below was added in that same
+# spirit. Read "exactly these seven" as describing the CURRENT root shape, not a
+# promise nothing will ever be added -- unknown root keys are already
+# forward-compatibly ignored by both gate scripts.
+# ─────────────────────────────────────────────────────────────────
+
+# ── meta ──────────────────────────────────────────────────────────
+meta:
+  # plan_id — string — REQUIRED
+  #   Identifier of the originating plan (matches the plan document ID). Canonical spelling,
+  #   type and padding for NEWLY AUTHORED work-orders: key `plan_id`, a quoted string,
+  #   zero-padded to three digits (e.g. `"027"`). Existing work-orders using the legacy key
+  #   `id`, a bare (unquoted) value, or a different padding remain valid; normalizing them
+  #   retroactively is out of scope for this declaration.
+  plan_id: "<string>"
+
+  # uuid — string (8 hex characters) — REQUIRED
+  #   The chain UUID, inherited verbatim from the originating plan's frontmatter `UUID:`
+  #   field. This is the authoritative join key for the chain: every artifact of a work
+  #   chain -- markdown or YAML -- carries this same value. `plan_id` is a human-facing
+  #   label with no uniqueness guarantee (a single numeric prefix can span more than one
+  #   chain); never join chain membership on it. See `scripts/check-chain-closure.{ps1,sh}`
+  #   and `execution-state.schema.md`'s matching `uuid` field for the same definition
+  #   (owning statement lives here and there is cited, not restated, by
+  #   `execution-orchestration/SKILL.md` and `agents/planner.agent.md`).
+  uuid: "<8-hex-chars>"
+
+  # plan_name — string — REQUIRED
+  #   Human-readable plan name (slug form, no spaces).
+  plan_name: "<string>"
+
+  # phase — integer — REQUIRED
+  #   Phase number within the plan (1-based).
+  phase: 1
+
+  # phase_name — string — REQUIRED
+  #   Short descriptive label for this phase.
+  phase_name: "<string>"
+
+  # issued_by — string — REQUIRED
+  #   Role that authored this work-order (e.g. "Planner", "DevOps").
+  issued_by: "<string>"
+
+  # base_commit — string (git commit-ish: full/abbreviated SHA, tag, or ref) — REQUIRED.
+  #   The commit the file-scope gate anchors to: `git diff --name-only base_commit`.
+  #   Captured at work-order issue time (e.g. `git rev-parse HEAD`), NOT re-derived at
+  #   gate-run time — a moving HEAD anchor would make anything committed mid-delegation
+  #   invisible to the diff and the scope check would pass vacuously. Absent (older
+  #   work-orders): the gate scripts fall back to HEAD and print an explicit
+  #   `[WARN] meta.base_commit is absent; falling back to HEAD ...` naming the
+  #   degradation — never a silent fallback.
+  base_commit: "<git-commit-ish>"
+
+  # issued_date — string (ISO 8601 date) — DEPRECATED, superseded by `created`.
+  #   Retained so existing work-orders keep validating. New work-orders set
+  #   `created` instead; setting both is an error (two fields, one meaning).
+  issued_date: "YYYY-MM-DD"
+
+  # created — string (ISO 8601 date-time with explicit offset) — REQUIRED
+  #   When this work-order was created. Obtain it by running a clock, never by
+  #   composing the string:
+  #     Get-Date -Format "yyyy-MM-ddTHH:mm:sszzz"    # PowerShell
+  #     date +%Y-%m-%dT%H:%M:%S%:z                    # bash
+  #   Immutable once set — it records authorship, not modification. See
+  #   skills/document-lifecycle/SKILL.md (Document Header Format) for the
+  #   owning definition; this is a restatement of it, not a second contract.
+  created: "YYYY-MM-DDTHH:MM:SS+HH:MM"
+
+  # created_derived — boolean — OPTIONAL
+  #   true when `created` was reconstructed rather than observed (e.g. widened
+  #   from a legacy `issued_date`, which supplies no time of day). Required
+  #   whenever `created` falls on a whole hour, which is the shape of an
+  #   invented timestamp.
+  created_derived: false
+
+  # target_agent — string — REQUIRED
+  #   Role that must consume this work-order (e.g. "Implementer").
+  target_agent: "<string>"
+
+  # status — string — REQUIRED
+  #   Lifecycle status of this work-order.
+  #   Allowed values:
+  #     pending      — issued; executor has not yet started
+  #     in-progress  — executor is actively working
+  #     complete     — executor has satisfied all checklist items and gates
+  #     blocked      — executor wrote one or more open blockers[]
+  status: pending  # enum: pending | in-progress | complete | blocked
+
+# ── scope ─────────────────────────────────────────────────────────
+scope:
+  # allowed_files — list of strings — REQUIRED
+  #   Paths the executor is permitted to create or modify, in the CANONICAL PATH
+  #   FRAME: interpreted relative to the git repository root
+  #   (`git rev-parse --show-toplevel`), never the script's own location. An entry
+  #   carrying a workspace-root prefix ABOVE the repo root (nested-repo layout) is
+  #   accepted iff it resolves to the same repo-root-relative path once that prefix
+  #   is stripped; anything that cannot resolve under the repo root at all is a hard
+  #   error naming the entry, never a silent skip. The gate script's change source is
+  #   `git diff --name-only base_commit` PLUS an untracked/status query (never
+  #   `--stat`, which abbreviates paths for human display) and exits non-zero if any
+  #   touched file is absent from this list.
+  allowed_files:
+    - "<repo-root-relative-path>"
+
+  # blocked_files — list of strings — REQUIRED
+  #   Paths the executor MUST NOT touch (e.g. .agent-output/.next-id,
+  #   agent definition files managed by another phase). Same canonical path frame
+  #   as allowed_files.
+  #
+  #   ENFORCED, evaluated BEFORE the allowed_files check, so a path listed
+  #   in both fails as blocked rather than passing as allowed: `ERROR: blocked file:
+  #   <path>`. Checked regardless of gitignore status — a gitignored
+  #   blocked path is compared directly against its content at `base_commit` via
+  #   `git show`, not inferred from `git status`, which silently omits ignored
+  #   paths. A named infrastructure-exemption set (starting with
+  #   `.agent-output/.next-id`) is consulted BEFORE this check, so a
+  #   delegation's own record-keeping counter bump does not self-block.
+  blocked_files:
+    - "<repo-root-relative-path>"
+
+# ── environment ───────────────────────────────────────────────────
+# environment — mapping | null — OPTIONAL
+#   Provides non-obvious runtime facts the executor needs to run gates
+#   or validate work (canonical test invocation, venv bootstrap, etc.).
+#   Set to null (or omit the sub-keys) when defaults suffice.
+environment:
+  # Any free-form string fields are permitted here.
+  # Common fields:
+  #   test_invocation_ps1 — canonical PowerShell test command
+  #   test_invocation_sh  — canonical bash test command
+  #   notes               — free text
+  notes: null
+
+# ── checklist ─────────────────────────────────────────────────────
+checklist:
+    # Each item describes one acceptance criterion tied to a plan task.
+
+  - id: "<AC-NNN>"
+    # id — string — REQUIRED
+    #   Unique identifier for this criterion (e.g. "AC-001").
+
+    task_ref: "<plan-task-identifier>"
+    # task_ref — string — OPTIONAL
+    #   The plan task this criterion belongs to (e.g. a task ID from the active plan).
+
+    criterion: "<human-readable description>"
+    # criterion — string — REQUIRED
+    #   What "satisfied" means for this item.
+
+    kind: Asserted
+    # kind — string — REQUIRED
+    #   Allowed values:
+    #     Asserted     — may be discharged by reasoning or static evidence.
+    #     Demonstrated — REQUIRES runtime evidence produced in the executor's
+    #                    environment; entry_point and disconfirm MUST be non-null.
+
+    entry_point: null
+    # entry_point — string | null — REQUIRED when kind == Demonstrated
+    #   The wired production call-chain that produces the observable evidence
+    #   (e.g. the exact command to run). MUST be non-null for Demonstrated items;
+    #   the gate script exits non-zero when this is null on a Demonstrated item.
+
+    disconfirm: null
+    # disconfirm — string | null — REQUIRED when kind == Demonstrated
+    #   The rule that proves the test FAILS when the wiring is removed.
+    #   Distinguishes a real demonstration from a tautological assertion. MUST be
+    #   non-null (and non-empty) for Demonstrated items; the gate script exits
+    #   non-zero when this is null, absent, or empty on a Demonstrated item —
+    #   checked AFTER entry_point, with its own distinct message.
+    #   Plain scalars and `>`/`|` block scalars are both accepted; the check is
+    #   non-emptiness only — disconfirm content is never evaluated or executed.
+
+    status: not-started
+    # status — string — REQUIRED
+    #   Lifecycle of this criterion.
+    #   Allowed values:
+    #     not-started — executor has not yet attempted this criterion
+    #     satisfied   — criterion has been met (evidence recorded below)
+    #     blocked     — executor cannot satisfy this; a blockers[] entry MUST exist
+    #     waived      — criterion was formally deferred with owner sign-off
+
+    evidence: null
+    # evidence — string | null — OPTIONAL
+    #   Runtime output or artifact path the executor records when satisfied.
+
+# ── gates ─────────────────────────────────────────────────────────
+gates:
+    # Each gate is a mechanical check the gate script runs before
+    # the executor may declare COMPLETE.
+
+  - id: "<GATE-NNN>"
+    # id — string — REQUIRED
+
+    name: "<gate_name>"
+    # name — string — REQUIRED
+    #   Logical name used by the gate script to select special handling:
+    #     file_scope_check — reserved; triggers must_match_only logic
+    #     label_audit*     — reserved prefix; triggers label-audit logic
+    #     Any other name   — the command field is executed directly.
+
+    description: "<human-readable description>"
+    # description — string — OPTIONAL
+
+    command: null
+    # command — string | null — CONDITIONAL
+    #   Shell command to execute for this gate (PS1 or bash).
+    #   SECURITY CONSTRAINT: The first token of command MUST match one of
+    #   the declared allowlist prefixes. The gate script exits non-zero
+    #   for any command whose first token is not in the allowlist.
+    #   Allowlist: make, git, grep, python, pytest, pwsh,
+    #              powershell, bash
+    #   This is a typo/mistake guard, NOT a trust boundary: it validates only the
+    #   first token, so an allowlisted prefix followed by `;` still executes
+    #   arbitrary code. Work-order authors are trusted at repo-write level by
+    #   construction; the accompanying ADR states this posture explicitly rather
+    #   than describing a boundary that does not exist.
+    #
+    #   Set to null for gates handled entirely by built-in logic
+    #   (file_scope_check, label_audit when paths field is provided).
+
+    must_match_only: null
+    # must_match_only — boolean | null — OPTIONAL
+    #   When truthy, the gate script runs the file-scope check:
+    #     1. Resolves the repo root (`git rev-parse --show-toplevel`) and the
+    #        change-set: `git diff --name-only base_commit` plus a status/untracked
+    #        query — never `--stat`.
+    #     2. Checks scope.blocked_files FIRST (minus the infrastructure exemption
+    #        set), regardless of gitignore status; exits non-zero with
+    #        "ERROR: blocked file: <path>" on a hit.
+    #     3. Checks every touched path against scope.allowed_files; exits non-zero
+    #        with "ERROR: out-of-scope file: <name>" on a miss.
+    #   Only meaningful for file_scope_check gates.
+
+    paths:
+      # paths — list of strings | empty — OPTIONAL
+      #   For label_audit gates: workspace-relative paths of files to search
+      #   for forbidden planning-label patterns. REQUIRED for label_audit gates —
+      #   there is no command-parsing fallback; the gate hard-errors if this list
+      #   is empty.
+      - "<workspace-relative-path>"
+
+    status: not-run
+    # status — string — REQUIRED
+    #   Allowed values:
+    #     not-run — gate has not been executed yet
+    #     passed  — gate ran and produced exit 0
+    #     failed  — gate ran and produced non-zero exit
+
+    result: null
+    # result — string | null — OPTIONAL
+    #   Human-readable output or exit code captured when the gate ran. For
+    #   file_scope_check, the gate scripts hold (in-memory, for the -Explain/--explain
+    #   report and the pass/fail message) the literal exit code, the literal git
+    #   command(s) run, and the resolved repo root — this field documents
+    #   the shape that capture takes; the scripts do not rewrite this YAML file.
+
+# ── blockers ──────────────────────────────────────────────────────
+blockers:
+    # The executor writes entries here instead of returning an inline
+    # HARD BLOCK prose message. The owner reads this list at re-run time.
+
+  - id: "<BLK-NNN>"
+    # id — string — REQUIRED
+
+    description: "<what is blocking>"
+    # description — string — REQUIRED
+
+    raised_by: "<role>"
+    # raised_by — string — OPTIONAL — e.g. "Implementer"
+
+    raised_date: "YYYY-MM-DD"
+    # raised_date — string — OPTIONAL
+
+    status: open
+    # status — string — REQUIRED
+    #   Allowed values:
+    #     open       — unresolved; the gate script exits non-zero when any entry is open
+    #     resolved   — owner or executor resolved the block
+    #     escalated  — forwarded to a higher-level decision maker
+
+    resolution: null
+    # resolution — string | null — OPTIONAL
+    #   How the block was resolved (populated when status changes to resolved).
+
+# ── carried_forward_context ──────────────────────────────────────
+# carried_forward_context — mapping | string | null — OPTIONAL
+#   Free-form context an owner carries forward from a prior phase's execution-state
+#   or work-order into this one (e.g. decisions made mid-session, unresolved items
+#   deferred to this phase, prior-phase artifact paths) so the executor does not have
+#   to re-derive them from the plan or a chat transcript. Additive; unknown keys under
+#   this field are already ignored by both gate scripts, per BACKCOMPAT-001. Omit or
+#   set to null when there is nothing to carry forward.
+carried_forward_context: null

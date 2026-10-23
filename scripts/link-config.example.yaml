@@ -1,0 +1,71 @@
+# link-config.yaml - Agent/Skill Linking Configuration
+#
+# This is the EXAMPLE / TEMPLATE file. Copy it to link-config.yaml and adjust if needed:
+#
+#   cp scripts/link-config.example.yaml scripts/link-config.yaml
+#
+# link-config.yaml is gitignored — every developer keeps their own copy.
+# link-config.example.yaml is the committed template.
+#
+# See LINKING.md and docs/adr/ADR-017-single-install-path-retire-plugin-remote-ssh.md for why
+# the "claude-user" target below is the default, recommended, single supported install path,
+# and when (if ever) you should also add a per-workspace target.
+#
+# DIRECTION: the SHARED repo (this directory) is linked INTO each target. For every target
+# below, the script creates one link per skill / agent / prompt / script:
+#
+#   <target_root>/skills/<skill>    ->  <shared_root>/skills/<skill>
+#   <target_root>/agents/<agent>    ->  <shared_root>/agents/<agent>
+#   <target_root>/prompts/<prompt>  ->  <shared_root>/prompts/<prompt>
+#
+# Per-item links let a target keep sibling content (e.g. an `old/` archive) alongside them.
+
+# Root of the shared skills/agents repo, interpreted relative to this script's directory
+# (scripts/) unless absolute. Default ".." = the repo root, where skills/ and agents/ live.
+shared_root: ".."
+
+# Names never touched in a target directory (archives, workspace-only items).
+preserve: "old"
+
+# Backup behavior for pre-existing real files/dirs that collide with a link.
+backup_replaced: true
+backup_ext: ".bak"
+
+# link_skills / link_agents / link_prompts / link_scripts each default to true, EXCEPT
+# link_scripts, which defaults to false because it distributes EXECUTABLE content, not
+# markdown — enable it deliberately, per target (see ADR-016).
+#
+# A target whose parent directory does not exist is skipped with a warning rather than
+# created, so a config entry for a machine you are not currently on cannot silently
+# manufacture a bogus tree on this one.
+
+# NEVER declare a target for ~/.agents here.
+#
+# The home-level skills link is ONE whole-directory link (~/.agents/skills -> <repo>/skills),
+# made once by hand -- see LINKING.md. Once it exists, ~/.agents/skills/<name> resolves THROUGH
+# it back to <repo>/skills/<name>, i.e. the source. A target declared here would then treat each
+# source directory as its own replaceable destination and move all of them aside, emptying the
+# repo. link_setup.py refuses this now (self-reference guard), but the correct configuration is
+# not to declare it: an empty list is the right content for a machine that only needs the
+# home-level link.
+
+targets: []
+
+  # Claude Code -- GENERATED, not linked. Converts agents/*.agent.md -> ~/.claude/agents/<name>.md
+  # and prompts/*.prompt.md -> ~/.claude/commands/<name>.md (Claude Code frontmatter, mapped
+  # tools, absolute repo paths). link_agents / link_prompts toggle each half. Skills are not
+  # touched: make ~/.claude/skills ONE whole-directory link by hand, as for ~/.agents/skills.
+  # Re-run after editing an agent or prompt. See LINKING.md's "Claude Code".
+  # - name: "claude-code"
+  #   target_root: "~/.claude"
+  #   format: "claude-code"
+
+  # Per-workspace fallback -- add a target ONLY for a workspace that specifically needs synced
+  # agents/prompts (there is no confirmed system-level location for those two -- see ADR-017),
+  # or that should not inherit the shared set at all. See LINKING.md's "Per-Workspace Fallback".
+  # - name: "my-project"
+  #   target_root: "/home/<user>/dev/<org>/<repo>/.github"
+  #   link_skills: "true"
+  #   link_agents: "true"
+  #   link_prompts: "true"
+  #   link_scripts: "false"

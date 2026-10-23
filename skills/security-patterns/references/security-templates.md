@@ -9,10 +9,10 @@ Templates for security assessment documentation.
 `.agent-output/security/NNN-[topic]-security-[type].md`
 
 Types:
-- `architecture-security` — Architectural security review
-- `code-audit` — Code security review
-- `dependency-audit` — Dependency/supply chain review
-- `pre-production-gate` — Pre-release security gate
+- `architecture-security` -- Architectural security review
+- `code-audit` -- Code security review
+- `dependency-audit` -- Dependency/supply chain review
+- `pre-production-gate` -- Pre-release security gate
 
 ---
 

@@ -1,0 +1,56 @@
+# invalid-work-order-missing-entry-point.yaml
+# Gate script fixture — DEMONSTRATED ITEM WITH NULL entry_point
+# Expected: run-work-order-gates[.ps1|.sh] exits 1
+# Error must contain: "Demonstrated item" and the item ID, with the entry_point
+# message SPECIFICALLY (not the disconfirm one) — REQ-030 repair. disconfirm is
+# deliberately non-null here so this fixture asserts exactly one rule: before the
+# repair this item also had disconfirm: null, so once REQ-028 shipped it would fail
+# for BOTH reasons and this fixture's oracle would become dependent on check order
+# (RISK-011). Now it exercises only entry_point.
+#
+# Validates: the gate script rejects work-orders where a Demonstrated
+# checklist item has a null (or absent) entry_point. A Demonstrated
+# criterion without a wired entry_point is tautological — the check
+# cannot produce runtime evidence.
+
+meta:
+  plan_id: "024"
+  plan_name: "work-order-handoff-mechanism"
+  phase: 1
+  phase_name: "Schema, Scripts, Skill Section"
+  issued_by: Planner
+  issued_date: "2026-07-07"
+  target_agent: Implementer
+  status: pending
+  base_commit: "HEAD"
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Gate script validates Demonstrated items have entry_point"
+    kind: Demonstrated
+    entry_point: null
+    disconfirm: "If entry_point is removed, this item cannot produce runtime evidence."
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []

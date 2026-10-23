@@ -1,0 +1,50 @@
+# invalid-work-order-missing-disconfirm.yaml
+# Gate script fixture — DEMONSTRATED ITEM WITH NULL disconfirm (entry_point IS set)
+# Expected: run-work-order-gates[.ps1|.sh] exits 1
+# Error must contain: "Demonstrated item" and "missing disconfirm" (NOT "missing entry_point")
+#
+# Validates REQ-028/REQ-030: a Demonstrated item with a non-null entry_point but an
+# explicit `disconfirm: null` must fail for the disconfirm rule specifically, never
+# silently pass because entry_point alone was checked.
+
+meta:
+  plan_id: "033"
+  plan_name: "verification-discipline-hardening"
+  phase: 1
+  phase_name: "gate-correctness-resolution-observability"
+  issued_by: Planner
+  issued_date: "2026-09-08"
+  target_agent: Implementer
+  status: pending
+  base_commit: "HEAD"
+
+scope:
+  allowed_files:
+    - scripts/run-work-order-gates.ps1
+  blocked_files:
+    - .agent-output/.next-id
+
+environment:
+  notes: null
+
+checklist:
+  - id: AC-001
+    task_ref: null
+    criterion: "Gate script validates Demonstrated items have disconfirm"
+    kind: Demonstrated
+    entry_point: "scripts/run-work-order-gates.ps1"
+    disconfirm: null
+    status: not-started
+    evidence: null
+
+gates:
+  - id: GATE-001
+    name: git_version_check
+    description: "Verify git is available"
+    command: "git --version"
+    must_match_only: null
+    paths: []
+    status: not-run
+    result: null
+
+blockers: []
